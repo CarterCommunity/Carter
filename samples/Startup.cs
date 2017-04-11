@@ -7,7 +7,7 @@ namespace Botwin.Samples
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IPersonProvider, PersonProvider>();
+            services.AddSingleton<IActorProvider, ActorProvider>();
             services.AddBotwin();
         }
 

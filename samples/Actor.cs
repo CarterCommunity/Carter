@@ -1,6 +1,6 @@
 namespace Botwin.Samples
 {
-    public class Person
+    public class Actor
     {
         public string Name { get; set; }
         public int Id { get; set; }
