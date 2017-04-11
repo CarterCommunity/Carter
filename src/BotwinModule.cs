@@ -33,5 +33,9 @@ namespace Botwin
             path = path.StartsWith("/") ? path.Substring(1) : path;
             this.Routes.Add(Tuple.Create("PUT", path, handler));
         }
+
+        public Func<HttpRequest, HttpResponse, RouteData, Task> Before { get; set; }
+
+        public Func<HttpRequest, HttpResponse, RouteData, Task> After { get; set; }
     }
 }

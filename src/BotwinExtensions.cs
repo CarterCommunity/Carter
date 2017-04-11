@@ -29,7 +29,22 @@ namespace Botwin
             {
                 foreach (var route in module.Routes)
                 {
-                    routeBuilder.MapVerb(route.Item1, route.Item2, route.Item3);
+                    Func<HttpRequest, HttpResponse, RouteData, Task> handler;
+                    if (module.Before != null)
+                    {
+                        handler = module.Before += route.Item3;
+                    }
+                    else
+                    {
+                        handler = route.Item3;
+                    }
+
+                    if (module.After != null)
+                    {
+                        handler = handler += module.After;
+                    }
+
+                    routeBuilder.MapVerb(route.Item1, route.Item2, handler);
                 }
             }
             return builder.UseRouter(routeBuilder.Build());
