@@ -7,6 +7,8 @@ namespace Botwin.Samples
         public ActorValidator()
         {
             this.RuleFor(x => x.Name).NotEmpty();
+
+            this.RuleFor(x => x.Age).GreaterThan(0);
         }
     }
 }
