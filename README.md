@@ -7,6 +7,14 @@ This is not a framework, it simply builds on top of [Microsoft.AspNetCore.Routin
 For a better understanding take a look at the [samples](https://github.com/jchannon/Botwin/tree/master/samples) inside this repo.  The samples also provide elegant extensions around common ASP.Net Core types as shown below.  Also included are extensions that use [FluentValidation](https://github.com/JeremySkinner/FluentValidation) to validate incoming HTTP requests.
 
 
+### Where does the name "Botwin" come from?
+
+I have been a huge fan of [Nancy](http://nancyfx.org), the best .Net web framework, for many years and the name "Nancy" came about due to it being inspired from Sinatra the Ruby web framework.  Frank Sinatra had a daughter called Nancy and so that's where it came from.
+
+I was also trying to think of a derivative name and I had recently been watching [Weeds](http://www.imdb.com/title/tt0439100/) and the lead character was called Nancy Botwin so this is where I got the name from! 
+
+### Sample
+
 ```
 public class ActorsModule : BotwinModule
 {
