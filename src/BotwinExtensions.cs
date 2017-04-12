@@ -32,7 +32,16 @@ namespace Botwin
                     Func<HttpRequest, HttpResponse, RouteData, Task> handler;
                     if (module.Before != null)
                     {
-                        handler = module.Before += route.Item3;
+                        Func<HttpRequest, HttpResponse, RouteData, Task> newhandler = async (req, res, routeData) =>
+                        {
+                            var beforeResult = await module.Before(req, res, routeData);
+                            if (beforeResult == null)
+                            {
+                                return;
+                            }
+                            await route.Item3(req, res, routeData);
+                        };
+                        handler = newhandler;
                     }
                     else
                     {

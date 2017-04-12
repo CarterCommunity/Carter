@@ -4,7 +4,7 @@ Botwin is a library that allows [Nancy-esque](http://nancyfx.org) routing for us
 
 This is not a framework, it simply builds on top of [Microsoft.AspNetCore.Routing](https://github.com/aspnet/Routing) allowing you to have more elegant routing rather than have attribute routing, convention routing, ASP.Net Controllers or IRouteBuilder extensions. 
 
-For a better understanding take a look at the [samples](https://github.com/jchannon/Botwin/tree/master/samples) inside this repo.  The samples also provide elegant extensions around common ASP.Net Core types as shown below.  Also included are extensions that use [FluentValidation](https://github.com/JeremySkinner/FluentValidation) to validate incoming HTTP requests.
+For a better understanding take a look at the [samples](https://github.com/jchannon/Botwin/tree/master/samples) inside this repo.  The samples also provide elegant extensions around common ASP.Net Core types as shown below.  Also included are extensions that use [FluentValidation](https://github.com/JeremySkinner/FluentValidation) to validate incoming HTTP requests.  Along with all the HTTP verbs you can also execute Before and After hooks to the routes defined in a Botwin module.
 
 
 ### Where does the name "Botwin" come from?

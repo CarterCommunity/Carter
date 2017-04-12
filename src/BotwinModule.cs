@@ -34,7 +34,7 @@ namespace Botwin
             this.Routes.Add(Tuple.Create("PUT", path, handler));
         }
 
-        public Func<HttpRequest, HttpResponse, RouteData, Task> Before { get; set; }
+        public Func<HttpRequest, HttpResponse, RouteData, Task<HttpResponse>> Before { get; set; }
 
         public Func<HttpRequest, HttpResponse, RouteData, Task> After { get; set; }
     }

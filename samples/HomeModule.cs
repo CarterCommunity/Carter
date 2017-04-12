@@ -8,12 +8,6 @@ namespace Botwin.Samples
     {
         public HomeModule()
         {
-            this.Before = (req, res, routeData) =>
-            {
-                Console.WriteLine("inb4 yo!");
-                return Task.CompletedTask;
-            };
-
             this.Get("/", async (req, res, routeData) =>
             {
                 await res.WriteAsync("There's no place like 127.0.0.1");
