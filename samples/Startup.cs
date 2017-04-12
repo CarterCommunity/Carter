@@ -1,8 +1,6 @@
 namespace Botwin.Samples
 {
-    using System;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Startup
@@ -15,17 +13,8 @@ namespace Botwin.Samples
 
         public void Configure(IApplicationBuilder app)
         {
-            app.Use(async (ctx, next) =>
-            {
-                try
-                {
-                    await next();
-                }
-                catch (Exception ex)
-                {
-                    await ctx.Response.WriteAsync($"There's been a whoopsy!{Environment.NewLine}{ex.ToString()}");
-                }
-            });
+            app.UseExceptionHandler("/errorhandler");
+
             app.UseBotwin();
         }
     }
