@@ -9,7 +9,7 @@ For a better understanding take a good look at the [samples](https://github.com/
 
 ### Where does the name "Botwin" come from?
 
-I have been a huge fan of [Nancy](http://nancyfx.org), the best .Net web framework, for many years and the name "Nancy" came about due to it being inspired from Sinatra the Ruby web framework.  Frank Sinatra had a daughter called Nancy and so that's where it came from.
+I have been a huge fan of and core contributor to [Nancy](http://nancyfx.org), the best .Net web framework, for many years and the name "Nancy" came about due to it being inspired from Sinatra the Ruby web framework.  Frank Sinatra had a daughter called Nancy and so that's where it came from.
 
 I was also trying to think of a derivative name and I had recently been watching [Weeds](http://www.imdb.com/title/tt0439100/) and the lead character was called Nancy Botwin so this is where I got the name from! 
 
