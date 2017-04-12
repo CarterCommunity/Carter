@@ -1,6 +1,6 @@
 namespace Botwin.Samples
 {
-    using System.Threading.Tasks;
+    using System;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
@@ -15,19 +15,17 @@ namespace Botwin.Samples
 
         public void Configure(IApplicationBuilder app)
         {
-            // RequestDelegate a = async (ctx) =>
-            // {
-            //     if (1 == 1)
-            //     {
-            //         ctx.Response.StatusCode = 500;
-            //         await ctx.Response.WriteAsync("I'm done");
-            //         ctx.Abort();
-            //         return;
-            //     }
-            // };
-            // RequestDelegate b = async (ctx) => await ctx.Response.WriteAsync("Please don't hit this"); ;
-            // RequestDelegate c = a += b;
-            // app.Run(c);
+            app.Use(async (ctx, next) =>
+            {
+                try
+                {
+                    await next();
+                }
+                catch (Exception ex)
+                {
+                    await ctx.Response.WriteAsync($"There's been a whoopsy!{Environment.NewLine}{ex.ToString()}");
+                }
+            });
             app.UseBotwin();
         }
     }

@@ -13,6 +13,11 @@ namespace Botwin.Samples
                 await res.WriteAsync("There's no place like 127.0.0.1");
             });
 
+            this.Get("/error", (req, res, routeData) =>
+            {
+                throw new Exception("oops");
+            });
+
             this.After = (req, res, routeData) =>
             {
                 Console.WriteLine("Catch you later!");
