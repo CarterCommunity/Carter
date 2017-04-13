@@ -10,6 +10,7 @@ namespace Botwin.Samples
         {
             this.Get("/", async (req, res, routeData) =>
             {
+                res.StatusCode = 409;
                 await res.WriteAsync("There's no place like 127.0.0.1");
             });
 

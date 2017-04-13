@@ -18,6 +18,7 @@ namespace Botwin
     public static class BotwinExtensions
     {
         private static readonly JsonSerializer JsonSerializer = new JsonSerializer();
+
         public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder)
         {
             var routeBuilder = new RouteBuilder(builder);
@@ -25,14 +26,18 @@ namespace Botwin
             //Invoke so ctors are called that adds routes to IRouter
             var srvs = builder.ApplicationServices.GetServices<BotwinModule>();
 
+            //Cache status code handlers
+            var schandlers = builder.ApplicationServices.GetServices<IStatusCodeHandler>();
+
             foreach (var module in srvs)
             {
                 foreach (var route in module.Routes)
                 {
                     Func<HttpRequest, HttpResponse, RouteData, Task> handler;
+
                     if (module.Before != null)
                     {
-                        Func<HttpRequest, HttpResponse, RouteData, Task> newhandler = async (req, res, routeData) =>
+                        Func<HttpRequest, HttpResponse, RouteData, Task> beforeHandler = async (req, res, routeData) =>
                         {
                             var beforeResult = await module.Before(req, res, routeData);
                             if (beforeResult == null)
@@ -41,7 +46,8 @@ namespace Botwin
                             }
                             await route.Item3(req, res, routeData);
                         };
-                        handler = newhandler;
+
+                        handler = beforeHandler;
                     }
                     else
                     {
@@ -50,12 +56,24 @@ namespace Botwin
 
                     if (module.After != null)
                     {
-                        handler = handler += module.After;
+                        handler += module.After;
                     }
 
-                    routeBuilder.MapVerb(route.Item1, route.Item2, handler);
+                    Func<HttpRequest, HttpResponse, RouteData, Task> statusCodeHandler = async (req, res, routeData) =>
+                    {
+                        await handler(req, res, routeData);
+
+                        var scHandler = schandlers.FirstOrDefault(x => x.CanHandle(res.StatusCode));
+                        if (scHandler != null)
+                        {
+                            await scHandler.Handle(req.HttpContext);
+                        }
+                    };
+
+                    routeBuilder.MapVerb(route.Item1, route.Item2, statusCodeHandler);
                 }
             }
+
             return builder.UseRouter(routeBuilder.Build());
         }
 
@@ -67,6 +85,12 @@ namespace Botwin
             foreach (var module in modules)
             {
                 services.AddTransient(typeof(BotwinModule), module);
+            }
+
+            var schs = Assembly.GetEntryAssembly().GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler));
+            foreach (var sch in schs)
+            {
+                services.AddTransient(typeof(IStatusCodeHandler), sch);
             }
         }
 
@@ -85,6 +109,8 @@ namespace Botwin
             {
                 //I don't know I didn't go to Burger King
             }
+
+            //Default to JSON
             await response.WriteAsync(JsonConvert.SerializeObject(obj));
         }
 
@@ -95,12 +121,14 @@ namespace Botwin
             {
                 data = Activator.CreateInstance<T>();
             }
-            var validatorType = Assembly.GetEntryAssembly().GetTypes().FirstOrDefault(t => t.GetTypeInfo().BaseType != null &&
-                                                                                t.GetTypeInfo().BaseType.GetTypeInfo().IsGenericType &&
-                                                                                t.GetTypeInfo().BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>) &&
-                                                                                t.Name.Equals(typeof(T).Name + "Validator", StringComparison.OrdinalIgnoreCase));
+            var validatorType = Assembly.GetEntryAssembly()
+                .GetTypes()
+                .FirstOrDefault(t => t.GetTypeInfo().BaseType != null &&
+                                     t.GetTypeInfo().BaseType.GetTypeInfo().IsGenericType &&
+                                     t.GetTypeInfo().BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>) &&
+                                     t.Name.Equals(typeof(T).Name + "Validator", StringComparison.OrdinalIgnoreCase));
 
-            IValidator validator = (IValidator)Activator.CreateInstance(validatorType);
+            IValidator validator = (IValidator) Activator.CreateInstance(validatorType);
             var result = validator.Validate(data);
             return (result, data);
         }
@@ -116,7 +144,7 @@ namespace Botwin
 
         public static IEnumerable<dynamic> GetFormattedErrors(this ValidationResult result)
         {
-            return result.Errors.Select(x => new { x.PropertyName, x.ErrorMessage });
+            return result.Errors.Select(x => new {x.PropertyName, x.ErrorMessage});
         }
     }
 }
