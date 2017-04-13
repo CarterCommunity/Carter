@@ -10,6 +10,10 @@ namespace Botwin
     {
         public List<Tuple<string, string, Func<HttpRequest, HttpResponse, RouteData, Task>>> Routes { get; } = new List<Tuple<string, string, Func<HttpRequest, HttpResponse, RouteData, Task>>>();
 
+        public Func<HttpRequest, HttpResponse, RouteData, Task<HttpResponse>> Before { get; set; }
+
+        public Func<HttpRequest, HttpResponse, RouteData, Task> After { get; set; }
+
         public void Get(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
             path = path.StartsWith("/") ? path.Substring(1) : path;
@@ -33,9 +37,5 @@ namespace Botwin
             path = path.StartsWith("/") ? path.Substring(1) : path;
             this.Routes.Add(Tuple.Create("PUT", path, handler));
         }
-
-        public Func<HttpRequest, HttpResponse, RouteData, Task<HttpResponse>> Before { get; set; }
-
-        public Func<HttpRequest, HttpResponse, RouteData, Task> After { get; set; }
     }
 }
