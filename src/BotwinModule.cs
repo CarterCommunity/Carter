@@ -18,6 +18,7 @@ namespace Botwin
         {
             path = path.StartsWith("/") ? path.Substring(1) : path;
             this.Routes.Add(Tuple.Create("GET", path, handler));
+            this.Routes.Add(Tuple.Create("HEAD", path, handler));
         }
 
         public void Post(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
@@ -36,6 +37,12 @@ namespace Botwin
         {
             path = path.StartsWith("/") ? path.Substring(1) : path;
             this.Routes.Add(Tuple.Create("PUT", path, handler));
+        }
+
+        public void Head(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        {
+            path = path.StartsWith("/") ? path.Substring(1) : path;
+            this.Routes.Add(Tuple.Create("HEAD", path, handler));
         }
     }
 }

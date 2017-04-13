@@ -61,12 +61,25 @@ namespace Botwin
 
                     Func<HttpRequest, HttpResponse, RouteData, Task> statusCodeHandler = async (req, res, routeData) =>
                     {
+                        if (req.Method == "HEAD")
+                        {
+                            //Cannot read the default stream once WriteAsync has been called on it
+                            res.Body = new MemoryStream();
+                        }
+
                         await handler(req, res, routeData);
 
                         var scHandler = schandlers.FirstOrDefault(x => x.CanHandle(res.StatusCode));
                         if (scHandler != null)
                         {
                             await scHandler.Handle(req.HttpContext);
+                        }
+
+                        if (req.Method == "HEAD")
+                        {
+                            var length = res.Body.Length;
+                            res.Body.SetLength(0);
+                            res.ContentLength = length;
                         }
                     };
 
@@ -128,7 +141,7 @@ namespace Botwin
                                      t.GetTypeInfo().BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>) &&
                                      t.Name.Equals(typeof(T).Name + "Validator", StringComparison.OrdinalIgnoreCase));
 
-            IValidator validator = (IValidator) Activator.CreateInstance(validatorType);
+            IValidator validator = (IValidator)Activator.CreateInstance(validatorType);
             var result = validator.Validate(data);
             return (result, data);
         }
@@ -144,7 +157,7 @@ namespace Botwin
 
         public static IEnumerable<dynamic> GetFormattedErrors(this ValidationResult result)
         {
-            return result.Errors.Select(x => new {x.PropertyName, x.ErrorMessage});
+            return result.Errors.Select(x => new { x.PropertyName, x.ErrorMessage });
         }
     }
 }
