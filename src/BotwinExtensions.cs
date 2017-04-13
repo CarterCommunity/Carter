@@ -59,7 +59,7 @@ namespace Botwin
                         handler += module.After;
                     }
 
-                    Func<HttpRequest, HttpResponse, RouteData, Task> statusCodeHandler = async (req, res, routeData) =>
+                    Func<HttpRequest, HttpResponse, RouteData, Task> finalHandler = async (req, res, routeData) =>
                     {
                         if (req.Method == "HEAD")
                         {
@@ -83,7 +83,7 @@ namespace Botwin
                         }
                     };
 
-                    routeBuilder.MapVerb(route.Item1, route.Item2, statusCodeHandler);
+                    routeBuilder.MapVerb(route.Item1, route.Item2, finalHandler);
                 }
             }
 
