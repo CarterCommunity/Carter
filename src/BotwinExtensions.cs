@@ -36,7 +36,7 @@ namespace Botwin
             var srvs = builder.ApplicationServices.GetServices<BotwinModule>();
 
             //Cache status code handlers
-            var schandlers = builder.ApplicationServices.GetServices<IStatusCodeHandler>();
+            var statusCodeHandlers = builder.ApplicationServices.GetServices<IStatusCodeHandler>();
 
             foreach (var module in srvs)
             {
@@ -44,59 +44,63 @@ namespace Botwin
                 {
                     Func<HttpRequest, HttpResponse, RouteData, Task> handler;
 
-                    if (module.Before != null)
-                    {
-                        Func<HttpRequest, HttpResponse, RouteData, Task> beforeHandler = async (req, res, routeData) =>
-                        {
-                            var beforeResult = await module.Before(req, res, routeData);
-                            if (beforeResult == null)
-                            {
-                                return;
-                            }
-                            await route.Item3(req, res, routeData);
-                        };
-
-                        handler = beforeHandler;
-                    }
-                    else
-                    {
-                        handler = route.Item3;
-                    }
+                    handler = module.Before != null ? CreateModuleBeforeHandler(module, route) : route.Item3;
 
                     if (module.After != null)
                     {
                         handler += module.After;
                     }
 
-                    Func<HttpRequest, HttpResponse, RouteData, Task> finalHandler = async (req, res, routeData) =>
-                    {
-                        if (req.Method == "HEAD")
-                        {
-                            //Cannot read the default stream once WriteAsync has been called on it
-                            res.Body = new MemoryStream();
-                        }
-
-                        await handler(req, res, routeData);
-
-                        var scHandler = schandlers.FirstOrDefault(x => x.CanHandle(res.StatusCode));
-                        if (scHandler != null)
-                        {
-                            await scHandler.Handle(req.HttpContext);
-                        }
-
-                        if (req.Method == "HEAD")
-                        {
-                            var length = res.Body.Length;
-                            res.Body.SetLength(0);
-                            res.ContentLength = length;
-                        }
-                    };
+                    var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);
 
                     routeBuilder.MapVerb(route.Item1, route.Item2, finalHandler);
                 }
             }
 
             return builder.UseRouter(routeBuilder.Build());
+        }
+
+        private static Func<HttpRequest, HttpResponse, RouteData, Task> CreateFinalHandler(Func<HttpRequest, HttpResponse, RouteData, Task> handler, IEnumerable<IStatusCodeHandler> statusCodeHandlers)
+        {
+            Func<HttpRequest, HttpResponse, RouteData, Task> finalHandler = async (req, res, routeData) =>
+            {
+                if (req.Method == "HEAD")
+                {
+                    //Cannot read the default stream once WriteAsync has been called on it
+                    res.Body = new MemoryStream();
+                }
+
+                await handler(req, res, routeData);
+
+                var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(res.StatusCode));
+                if (scHandler != null)
+                {
+                    await scHandler.Handle(req.HttpContext);
+                }
+
+                if (req.Method == "HEAD")
+                {
+                    var length = res.Body.Length;
+                    res.Body.SetLength(0);
+                    res.ContentLength = length;
+                }
+            };
+            return finalHandler;
+        }
+
+        private static Func<HttpRequest, HttpResponse, RouteData, Task> CreateModuleBeforeHandler(BotwinModule module, Tuple<string, string, Func<HttpRequest, HttpResponse, RouteData, Task>> route)
+        {
+            Func<HttpRequest, HttpResponse, RouteData, Task> beforeHandler = async (req, res, routeData) =>
+            {
+                var beforeResult = await module.Before(req, res, routeData);
+                if (beforeResult == null)
+                {
+                    return;
+                }
+                await route.Item3(req, res, routeData);
+            };
+
+            return beforeHandler;
         }
 
         private static void ApplyGlobalAfterHook(IApplicationBuilder builder, BotwinOptions options)
@@ -156,7 +160,8 @@ namespace Botwin
                 await response.WriteAsync(JsonConvert.SerializeObject(obj));
                 return;
             }
-            else if (response.HttpContext.Request.GetTypedHeaders().Accept.Any(x => x.MediaType.IndexOf("xml", StringComparison.OrdinalIgnoreCase) >= 0))
+
+            if (response.HttpContext.Request.GetTypedHeaders().Accept.Any(x => x.MediaType.IndexOf("xml", StringComparison.OrdinalIgnoreCase) >= 0))
             {
                 //I don't know I didn't go to Burger King
             }
@@ -176,9 +181,9 @@ namespace Botwin
             var validatorType = Assembly.GetEntryAssembly()
                 .GetTypes()
                 .FirstOrDefault(t => t.GetTypeInfo().BaseType != null &&
-                                     t.GetTypeInfo().BaseType.GetTypeInfo().IsGenericType &&
-                                     t.GetTypeInfo().BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>) &&
-                                     t.Name.Equals(typeof(T).Name + "Validator", StringComparison.OrdinalIgnoreCase));
+                    t.GetTypeInfo().BaseType.GetTypeInfo().IsGenericType &&
+                    t.GetTypeInfo().BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>) &&
+                    t.Name.Equals(typeof(T).Name + "Validator", StringComparison.OrdinalIgnoreCase));
 
             IValidator validator = (IValidator)Activator.CreateInstance(validatorType);
             var result = validator.Validate(data);

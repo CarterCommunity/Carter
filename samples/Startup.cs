@@ -18,12 +18,12 @@ namespace Botwin.Samples
         {
             app.UseExceptionHandler("/errorhandler");
 
-            app.UseBotwin(GetOptions());
+            app.UseBotwin(this.GetOptions());
         }
 
         private BotwinOptions GetOptions()
         {
-            return new BotwinOptions(ctx => GetBeforeHook(ctx), ctx => GetAfterHook(ctx));
+            return new BotwinOptions(ctx => this.GetBeforeHook(ctx), ctx => this.GetAfterHook(ctx));
         }
 
         private Task<bool> GetBeforeHook(HttpContext ctx)
