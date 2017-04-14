@@ -24,6 +24,20 @@ I was also trying to think of a derivative name and I had recently been watching
 ### Sample
 
 ```
+public class Startup
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<IActorProvider, ActorProvider>();
+        services.AddBotwin();
+    }
+
+    public void Configure(IApplicationBuilder app)
+    {
+        app.UseBotwin();
+    }
+}
+
 public class ActorsModule : BotwinModule
 {
     public ActorsModule(IActorProvider actorProvider)
