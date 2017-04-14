@@ -4,7 +4,15 @@ Botwin is a library that allows [Nancy-esque](http://nancyfx.org) routing for us
 
 This is not a framework, it simply builds on top of [Microsoft.AspNetCore.Routing](https://github.com/aspnet/Routing) allowing you to have more elegant routing rather than have attribute routing, convention routing, ASP.Net Controllers or `IRouteBuilder` extensions. 
 
-For a better understanding take a good look at the [samples](https://github.com/jchannon/Botwin/tree/master/samples) inside this repo.  The sample also demonstrates usages of elegant extensions around common ASP.Net Core types as shown below.  Also included are extensions that use [FluentValidation](https://github.com/JeremySkinner/FluentValidation) to validate incoming HTTP requests.  Along with all the HTTP verbs you can also execute Before and After hooks to the routes defined in a Botwin module as well as define routes to use in common ASP.Net Core middleware eg. `app.UseExceptionHandler("/errorhandler");`.  `IStatusCodeHandler`s are also an option as the ASP.Net Core `UseStatusCodePages` middleware is not elegant enough IMO. `IStatusCodeHandler`s allow you to define what happens when one of your routes returns a specific status code.  An example usage is shown in the sample.
+For a better understanding take a good look at the [samples](https://github.com/jchannon/Botwin/tree/master/samples) inside this repo.  The sample also demonstrates usages of elegant extensions around common ASP.Net Core types as shown below.  
+
+Other extensions inculde:
+
+* `Bind/BindndValidate<T>` - [FluentValidation](https://github.com/JeremySkinner/FluentValidation) extensions to validate incoming HTTP requests.  
+* Global `Before/After hooks` for every request
+* `Before/After` hooks to the routes defined in a Botwin module
+* Routes to use in common ASP.Net Core middleware eg. `app.UseExceptionHandler("/errorhandler");`.  
+* `IStatusCodeHandler`s are also an option as the ASP.Net Core `UseStatusCodePages` middleware is not elegant enough IMO. `IStatusCodeHandler`s allow you to define what happens when one of your routes returns a specific status code.  An example usage is shown in the sample.
 
 
 ### Where does the name "Botwin" come from?
