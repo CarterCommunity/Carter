@@ -147,9 +147,9 @@ namespace Botwin
             }
         }
 
-        public static int AsInt(this RouteValueDictionary rvd, string key)
+        public static int AsInt(this RouteData routeData, string key)
         {
-            return Convert.ToInt32(rvd[key]);
+            return Convert.ToInt32(routeData.Values[key]);
         }
 
         public static async Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default(CancellationToken))

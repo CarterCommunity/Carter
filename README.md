@@ -50,7 +50,7 @@ public class ActorsModule : BotwinModule
 
         this.Get("/actors/{id:int}", async (req, res, routeData) =>
         {
-            var person = actorProvider.Get(routeData.Values.AsInt("id"));
+            var person = actorProvider.Get(routeData.AsInt("id"));
             await res.Negotiate(person);
         });
 
