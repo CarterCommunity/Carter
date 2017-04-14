@@ -26,26 +26,9 @@ namespace Botwin
 
         public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options)
         {
-            if (options != null && options.Before != null)
-            {
-                builder.Use(async (ctx, next) =>
-                {
-                    var carryOn = await options.Before(ctx);
-                    if (carryOn)
-                    {
-                        await next();
-                    }
-                });
-            }
+            ApplyGlobalBeforeHook(builder, options);
 
-            if (options != null && options.After != null)
-            {
-                builder.Use(async (ctx, next) =>
-                {
-                    await next();
-                    await options.After(ctx);
-                });
-            }
+            ApplyGlobalAfterHook(builder, options);
 
             var routeBuilder = new RouteBuilder(builder);
 
@@ -113,12 +96,34 @@ namespace Botwin
                 }
             }
 
-            var appBuilder = builder.UseRouter(routeBuilder.Build());
+            return builder.UseRouter(routeBuilder.Build());
+        }
 
+        private static void ApplyGlobalAfterHook(IApplicationBuilder builder, BotwinOptions options)
+        {
+            if (options != null && options.After != null)
+            {
+                builder.Use(async (ctx, next) =>
+                {
+                    await next();
+                    await options.After(ctx);
+                });
+            }
+        }
 
-
-            return appBuilder;
-
+        private static void ApplyGlobalBeforeHook(IApplicationBuilder builder, BotwinOptions options)
+        {
+            if (options != null && options.Before != null)
+            {
+                builder.Use(async (ctx, next) =>
+                {
+                    var carryOn = await options.Before(ctx);
+                    if (carryOn)
+                    {
+                        await next();
+                    }
+                });
+            }
         }
 
         public static void AddBotwin(this IServiceCollection services)
