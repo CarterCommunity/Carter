@@ -21,6 +21,32 @@ namespace Botwin
 
         public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder)
         {
+            return UseBotwin(null);
+        }
+
+        public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options)
+        {
+            if (options != null && options.Before != null)
+            {
+                builder.Use(async (ctx, next) =>
+                {
+                    var carryOn = await options.Before(ctx);
+                    if (carryOn)
+                    {
+                        await next();
+                    }
+                });
+            }
+
+            if (options != null && options.After != null)
+            {
+                builder.Use(async (ctx, next) =>
+                {
+                    await next();
+                    await options.After(ctx);
+                });
+            }
+
             var routeBuilder = new RouteBuilder(builder);
 
             //Invoke so ctors are called that adds routes to IRouter
@@ -87,7 +113,12 @@ namespace Botwin
                 }
             }
 
-            return builder.UseRouter(routeBuilder.Build());
+            var appBuilder = builder.UseRouter(routeBuilder.Build());
+
+
+
+            return appBuilder;
+
         }
 
         public static void AddBotwin(this IServiceCollection services)

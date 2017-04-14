@@ -1,6 +1,9 @@
 namespace Botwin.Samples
 {
+    using System;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Startup
@@ -15,7 +18,24 @@ namespace Botwin.Samples
         {
             app.UseExceptionHandler("/errorhandler");
 
-            app.UseBotwin();
+            app.UseBotwin(GetOptions());
+        }
+
+        private BotwinOptions GetOptions()
+        {
+            return new BotwinOptions(ctx => GetBeforeHook(ctx), ctx => GetAfterHook(ctx));
+        }
+
+        private Task<bool> GetBeforeHook(HttpContext ctx)
+        {
+            ctx.Request.Headers.Add("HOWDY", "FOLKS");
+            return Task.FromResult(true);
+        }
+
+        private Task GetAfterHook(HttpContext ctx)
+        {
+            Console.WriteLine("We hit a route!");
+            return Task.CompletedTask;
         }
     }
 }
