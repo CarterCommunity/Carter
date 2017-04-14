@@ -116,7 +116,9 @@ namespace Botwin
         {
             if (response.HttpContext.Request.GetTypedHeaders().Accept.Any(x => x.MediaType.IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0))
             {
+                response.ContentType = "application/json; charset=utf-8";
                 await response.WriteAsync(JsonConvert.SerializeObject(obj));
+                return;
             }
             else if (response.HttpContext.Request.GetTypedHeaders().Accept.Any(x => x.MediaType.IndexOf("xml", StringComparison.OrdinalIgnoreCase) >= 0))
             {
@@ -124,6 +126,7 @@ namespace Botwin
             }
 
             //Default to JSON
+            response.ContentType = "application/json; charset=utf-8";
             await response.WriteAsync(JsonConvert.SerializeObject(obj));
         }
 

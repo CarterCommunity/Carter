@@ -19,6 +19,10 @@ namespace Botwin.Samples
                 var feature = req.HttpContext.Features.Get<IExceptionHandlerFeature>();
                 if (feature != null)
                 {
+                    if (feature.Error is ArgumentNullException)
+                    {
+                        res.StatusCode = 402;
+                    }
                     error = feature.Error.ToString();
                 }
                 await res.WriteAsync($"There has been an error{Environment.NewLine}{error}");

@@ -1,8 +1,6 @@
 namespace Botwin.Samples
 {
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Startup
@@ -16,7 +14,6 @@ namespace Botwin.Samples
         public void Configure(IApplicationBuilder app)
         {
             app.UseExceptionHandler("/errorhandler");
-            //app.UseStatusCodePages((subapp) => subapp.Run((ctx) => ctx.Response.WriteAsync("409")));
 
             app.UseBotwin();
         }

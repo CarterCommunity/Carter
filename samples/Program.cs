@@ -13,6 +13,7 @@
                     .UseContentRoot(Directory.GetCurrentDirectory())
                     .UseKestrel()
                     .UseStartup<Startup>()
+                    .UseUrls("http://*:5000")
                     .Build())
             {
                 Console.WriteLine("Starting application...");
