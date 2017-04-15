@@ -13,6 +13,7 @@ namespace Botwin
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Net.Http.Headers;
     using Newtonsoft.Json;
 
     public static class BotwinExtensions
@@ -145,6 +146,13 @@ namespace Botwin
             {
                 services.AddTransient(typeof(IStatusCodeHandler), sch);
             }
+
+            var responseNegotiators = Assembly.GetEntryAssembly().GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator));
+            foreach (var negotiatator in responseNegotiators)
+            {
+                services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
+            }
+            services.AddSingleton(typeof(IResponseNegotiator), new DefaultJsonResponseNegotiator());
         }
 
         public static int AsInt(this RouteData routeData, string key)
@@ -154,21 +162,11 @@ namespace Botwin
 
         public static async Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (response.HttpContext.Request.GetTypedHeaders().Accept.Any(x => x.MediaType.IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0))
-            {
-                response.ContentType = "application/json; charset=utf-8";
-                await response.WriteAsync(JsonConvert.SerializeObject(obj));
-                return;
-            }
+            var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
 
-            if (response.HttpContext.Request.GetTypedHeaders().Accept.Any(x => x.MediaType.IndexOf("xml", StringComparison.OrdinalIgnoreCase) >= 0))
-            {
-                //I don't know I didn't go to Burger King
-            }
+            var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(response.HttpContext.Request.GetTypedHeaders().Accept)) ?? negotiators.FirstOrDefault(x => x.CanHandle(new List<MediaTypeHeaderValue>() { new MediaTypeHeaderValue("application/json") }));
 
-            //Default to JSON
-            response.ContentType = "application/json; charset=utf-8";
-            await response.WriteAsync(JsonConvert.SerializeObject(obj));
+            await negotiator.Handle(response.HttpContext.Request, response, obj);
         }
 
         public static (ValidationResult ValidationResult, T Data) BindAndValidate<T>(this HttpRequest request)
