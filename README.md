@@ -13,6 +13,8 @@ Other extensions inculde:
 * `Before/After` hooks to the routes defined in a Botwin module
 * Routes to use in common ASP.Net Core middleware eg. `app.UseExceptionHandler("/errorhandler");`.  
 * `IStatusCodeHandler`s are also an option as the ASP.Net Core `UseStatusCodePages` middleware is not elegant enough IMO. `IStatusCodeHandler`s allow you to define what happens when one of your routes returns a specific status code.  An example usage is shown in the sample.
+* `IResponseNeogitator`s allow you to define how the response should look on a certain Accept header.  Handling JSON is built in but implementing an interface allows the user to choose how they want to represent resources.
+* All interface implementations are registered into ASP.Net Core DI automatically, implement the interface and off you go.
 
 
 ### Where does the name "Botwin" come from?
