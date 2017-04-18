@@ -22,7 +22,7 @@ namespace Botwin
 
         public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder)
         {
-            return UseBotwin(null);
+            return UseBotwin(builder, null);
         }
 
         public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options)
@@ -133,21 +133,31 @@ namespace Botwin
 
         public static void AddBotwin(this IServiceCollection services)
         {
+            //Get IAssemblyProvider, if not found register default provider.
+            var provider = services.BuildServiceProvider();
+            var assProvider = provider.GetService<IAssemblyProvider>();
+            if (assProvider == null)
+            {
+                services.AddSingleton<IAssemblyProvider, AssemblyProvider>();
+            }
+            assProvider = provider.GetService<IAssemblyProvider>();
+
             services.AddRouting();
 
-            var modules = Assembly.GetEntryAssembly().GetTypes().Where(t => typeof(BotwinModule).IsAssignableFrom(t) && t != typeof(BotwinModule));
+
+            var modules = assProvider.GetAssembly().GetTypes().Where(t => typeof(BotwinModule).IsAssignableFrom(t) && t != typeof(BotwinModule));
             foreach (var module in modules)
             {
                 services.AddTransient(typeof(BotwinModule), module);
             }
 
-            var schs = Assembly.GetEntryAssembly().GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler));
+            var schs = assProvider.GetAssembly().GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler));
             foreach (var sch in schs)
             {
                 services.AddTransient(typeof(IStatusCodeHandler), sch);
             }
 
-            var responseNegotiators = Assembly.GetEntryAssembly().GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator));
+            var responseNegotiators = assProvider.GetAssembly().GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator));
             foreach (var negotiatator in responseNegotiators)
             {
                 services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
