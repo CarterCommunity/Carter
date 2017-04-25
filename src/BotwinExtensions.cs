@@ -5,21 +5,14 @@ namespace Botwin
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Threading;
     using System.Threading.Tasks;
-    using FluentValidation;
-    using FluentValidation.Results;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Net.Http.Headers;
-    using Newtonsoft.Json;
 
     public static class BotwinExtensions
     {
-        private static readonly JsonSerializer JsonSerializer = new JsonSerializer();
-
         public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder)
         {
             return UseBotwin(builder, null);
@@ -163,53 +156,6 @@ namespace Botwin
                 services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
             }
             services.AddSingleton(typeof(IResponseNegotiator), new DefaultJsonResponseNegotiator());
-        }
-
-        public static int AsInt(this RouteData routeData, string key)
-        {
-            return Convert.ToInt32(routeData.Values[key]);
-        }
-
-        public static async Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
-
-            var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(response.HttpContext.Request.GetTypedHeaders().Accept)) ?? negotiators.FirstOrDefault(x => x.CanHandle(new List<MediaTypeHeaderValue>() { new MediaTypeHeaderValue("application/json") }));
-
-            await negotiator.Handle(response.HttpContext.Request, response, obj);
-        }
-
-        public static (ValidationResult ValidationResult, T Data) BindAndValidate<T>(this HttpRequest request)
-        {
-            var data = request.Bind<T>();
-            if (data == null)
-            {
-                data = Activator.CreateInstance<T>();
-            }
-            var validatorType = Assembly.GetEntryAssembly()
-                .GetTypes()
-                .FirstOrDefault(t => t.GetTypeInfo().BaseType != null &&
-                    t.GetTypeInfo().BaseType.GetTypeInfo().IsGenericType &&
-                    t.GetTypeInfo().BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>) &&
-                    t.Name.Equals(typeof(T).Name + "Validator", StringComparison.OrdinalIgnoreCase));
-
-            IValidator validator = (IValidator)Activator.CreateInstance(validatorType);
-            var result = validator.Validate(data);
-            return (result, data);
-        }
-
-        public static T Bind<T>(this HttpRequest request)
-        {
-            using (var streamReader = new StreamReader(request.Body))
-            using (var jsonTextReader = new JsonTextReader(streamReader))
-            {
-                return JsonSerializer.Deserialize<T>(jsonTextReader);
-            }
-        }
-
-        public static IEnumerable<dynamic> GetFormattedErrors(this ValidationResult result)
-        {
-            return result.Errors.Select(x => new { x.PropertyName, x.ErrorMessage });
         }
     }
 }

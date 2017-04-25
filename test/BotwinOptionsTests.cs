@@ -39,6 +39,7 @@ namespace Botwin.Tests
         [Fact]
         public async Task Should_apply_global_after_hook()
         {
+            this.ConfigureServer();
             var response = await this.httpClient.GetAsync("/");
             var body = await response.Content.ReadAsStringAsync();
             Assert.True(body.Contains("GlobalAfter"));
