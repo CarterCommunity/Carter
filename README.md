@@ -47,7 +47,7 @@ public class ActorsModule : BotwinModule
         this.Get("/actors", async (req, res, routeData) =>
         {
             var people = actorProvider.Get();
-            await res.WriteAsync(JsonConvert.SerializeObject(people));
+            await res.AsJson(people);
         });
 
         this.Get("/actors/{id:int}", async (req, res, routeData) =>
@@ -88,6 +88,7 @@ public class ActorsModule : BotwinModule
             res.StatusCode = 201;
             await res.Negotiate(result.Data);
         });
+
     }
 }
 ```
