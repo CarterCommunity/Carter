@@ -6,7 +6,7 @@ This is not a framework, it simply builds on top of [Microsoft.AspNetCore.Routin
 
 For a better understanding take a good look at the [samples](https://github.com/jchannon/Botwin/tree/master/samples) inside this repo.  The sample also demonstrates usages of elegant extensions around common ASP.Net Core types as shown below.  
 
-Other extensions inculde:
+Other extensions include:
 
 * `Bind/BindndValidate<T>` - [FluentValidation](https://github.com/JeremySkinner/FluentValidation) extensions to validate incoming HTTP requests.  
 * Global `Before/After hooks` for every request
