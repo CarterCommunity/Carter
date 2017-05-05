@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+<Import Project="..\build\version.props" />
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <VersionPrefix>1.0.1</VersionPrefix>
