@@ -38,7 +38,7 @@ namespace Botwin
                 {
                     Func<HttpRequest, HttpResponse, RouteData, Task> handler;
 
-                    handler = module.Before != null ? CreateModuleBeforeHandler(module, route) : route.Item3;
+                    handler = module.Before != null ? CreateModuleBeforeHandler(module, route) : route.handler;
 
                     if (module.After != null)
                     {
@@ -47,7 +47,7 @@ namespace Botwin
 
                     var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);
 
-                    routeBuilder.MapVerb(route.Item1, route.Item2, finalHandler);
+                    routeBuilder.MapVerb(route.verb, route.path, finalHandler);
                 }
             }
 
@@ -67,11 +67,12 @@ namespace Botwin
                 await handler(req, res, routeData);
 
                 var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(res.StatusCode));
+
                 if (scHandler != null)
                 {
                     await scHandler.Handle(req.HttpContext);
                 }
-
+                
                 if (req.Method == "HEAD")
                 {
                     var length = res.Body.Length;
@@ -82,7 +83,7 @@ namespace Botwin
             return finalHandler;
         }
 
-        private static Func<HttpRequest, HttpResponse, RouteData, Task> CreateModuleBeforeHandler(BotwinModule module, Tuple<string, string, Func<HttpRequest, HttpResponse, RouteData, Task>> route)
+        private static Func<HttpRequest, HttpResponse, RouteData, Task> CreateModuleBeforeHandler(BotwinModule module, (string verb, string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) route)
         {
             Func<HttpRequest, HttpResponse, RouteData, Task> beforeHandler = async (req, res, routeData) =>
             {
@@ -91,7 +92,7 @@ namespace Botwin
                 {
                     return;
                 }
-                await route.Item3(req, res, routeData);
+                await route.handler(req, res, routeData);
             };
 
             return beforeHandler;
@@ -128,29 +129,29 @@ namespace Botwin
         {
             //Get IAssemblyProvider, if not found register default provider.
             var provider = services.BuildServiceProvider();
-            var assProvider = provider.GetService<IAssemblyProvider>();
-            if (assProvider == null)
+            var assemblyProvider = provider.GetService<IAssemblyProvider>();
+            if (assemblyProvider == null)
             {
                 services.AddSingleton<IAssemblyProvider, AssemblyProvider>();
             }
-            assProvider = provider.GetService<IAssemblyProvider>();
+            assemblyProvider = provider.GetService<IAssemblyProvider>();
 
             services.AddRouting();
 
 
-            var modules = assProvider.GetAssembly().GetTypes().Where(t => typeof(BotwinModule).IsAssignableFrom(t) && t != typeof(BotwinModule));
+            var modules = assemblyProvider.GetAssembly().GetTypes().Where(t => typeof(BotwinModule).IsAssignableFrom(t) && t != typeof(BotwinModule));
             foreach (var module in modules)
             {
                 services.AddTransient(typeof(BotwinModule), module);
             }
 
-            var schs = assProvider.GetAssembly().GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler));
+            var schs = assemblyProvider.GetAssembly().GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler));
             foreach (var sch in schs)
             {
                 services.AddTransient(typeof(IStatusCodeHandler), sch);
             }
 
-            var responseNegotiators = assProvider.GetAssembly().GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator));
+            var responseNegotiators = assemblyProvider.GetAssembly().GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator));
             foreach (var negotiatator in responseNegotiators)
             {
                 services.AddSingleton(typeof(IResponseNegotiator), negotiatator);

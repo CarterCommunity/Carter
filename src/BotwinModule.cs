@@ -8,8 +8,8 @@ namespace Botwin
 
     public class BotwinModule
     {
-        public List<Tuple<string, string, Func<HttpRequest, HttpResponse, RouteData, Task>>> Routes { get; } = new List<Tuple<string, string, Func<HttpRequest, HttpResponse, RouteData, Task>>>();
-
+        public List<(string verb, string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)> Routes = new List<(string verb, string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)>();
+       
         public Func<HttpRequest, HttpResponse, RouteData, Task<HttpResponse>> Before { get; set; }
 
         public Func<HttpRequest, HttpResponse, RouteData, Task> After { get; set; }
@@ -17,32 +17,33 @@ namespace Botwin
         public void Get(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
             path = path.StartsWith("/") ? path.Substring(1) : path;
-            this.Routes.Add(Tuple.Create("GET", path, handler));
-            this.Routes.Add(Tuple.Create("HEAD", path, handler));
+            this.Routes.Add(("GET", path, handler));
+            this.Routes.Add(("HEAD", path, handler));
+           
         }
 
         public void Post(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
             path = path.StartsWith("/") ? path.Substring(1) : path;
-            this.Routes.Add(Tuple.Create("POST", path, handler));
+            this.Routes.Add(("POST", path, handler));
         }
 
         public void Delete(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
             path = path.StartsWith("/") ? path.Substring(1) : path;
-            this.Routes.Add(Tuple.Create("DELETE", path, handler));
+            this.Routes.Add(("DELETE", path, handler));
         }
 
         public void Put(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
             path = path.StartsWith("/") ? path.Substring(1) : path;
-            this.Routes.Add(Tuple.Create("PUT", path, handler));
+            this.Routes.Add(("PUT", path, handler));
         }
 
         public void Head(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
             path = path.StartsWith("/") ? path.Substring(1) : path;
-            this.Routes.Add(Tuple.Create("HEAD", path, handler));
+            this.Routes.Add(("HEAD", path, handler));
         }
     }
 }
