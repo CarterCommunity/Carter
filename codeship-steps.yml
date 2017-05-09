@@ -1,9 +1,2 @@
-  - name: restore
-    service: app
-    command: dotnet restore Botwin.sln
-  - name: build
-    service: app
-    command: dotnet build Botwin.sln
-  - name: test   
-    service: app
-    command: dotnet test test/Botwin.Tests.csproj
+  - service: app
+    command: bash -c "dotnet restore Botwin.sln && dotnet build Botwin.sln && dotnet test test/Botwin.Tests.csproj"
