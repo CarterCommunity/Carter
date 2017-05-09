@@ -1,2 +1,2 @@
   - service: app
-    command: bash -c "dotnet restore Botwin.sln && dotnet build Botwin.sln && dotnet test test/Botwin.Tests.csproj"
+    command: dotnet restore Botwin.sln && dotnet build Botwin.sln && dotnet test test/Botwin.Tests.csproj
