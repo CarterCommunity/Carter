@@ -1,9 +1,9 @@
-- type: parallel
-  encrypted_dockercfg_path: dockercfg.encrypted
-  steps:
-  - service: app
+  - name: restore
+    service: app
     command: dotnet restore
-  - service: app
+  - name: build
+    service: app
     command: dotnet build
-  - service: app
+  - name: test
+    service: app
     command: dotnet test test/Botwin.Tests.csproj
