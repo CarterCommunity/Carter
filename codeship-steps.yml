@@ -1,3 +1,9 @@
   - name: restore
     service: app
-    command: dotnet restore && dotnet build
+    command: dotnet restore Botwin.sln
+  - name: build
+    service: app
+    command: dotnet build Botwin.sln
+  - name: test   
+    service: app
+    command: dotnet test test/Botwin.Tests.csproj
