@@ -1,9 +1,8 @@
-  - name: restore
-    service: app
+- type: parallel
+  steps:
+  - service: app
     command: dotnet restore
-  - name: build
-    service: app
+  - service: app
     command: dotnet build
-  - name: test
-    service: app
+  - service: app
     command: dotnet test test/Botwin.Tests.csproj
