@@ -1,0 +1,2 @@
+  - service: app
+    command: echo "Done"
