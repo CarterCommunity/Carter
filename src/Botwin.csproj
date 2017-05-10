@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard1.5</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="6.4.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.0.0-preview1-24352" />
+    <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.0.0-preview1-final" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <PackageReference Include="System.ValueTuple" Version="4.3.0" />
-    <PackageReference Include="microsoft.extensions.dependencyinjection" Version="2.0.0-preview1-24352"/>
+    <PackageReference Include="microsoft.extensions.dependencyinjection" Version="2.0.0-preview1-final"/>
   </ItemGroup>
 </Project>
