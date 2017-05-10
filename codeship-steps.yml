@@ -1,2 +1,0 @@
-  - service: app
-    command: dotnet restore Botwin.sln && dotnet build Botwin.sln && dotnet test test/Botwin.Tests.csproj

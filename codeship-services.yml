@@ -3,5 +3,3 @@ app:
     image: jchannon/botwin
     dockerfile_path: Dockerfile
   cached: true
-  volumes:
-    - ./:/code
