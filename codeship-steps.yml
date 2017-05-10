@@ -1,2 +1,5 @@
   - service: app
-    command: echo "Done"
+    command: bash -c "echo "Done"
+  - service: app
+    tag: ^Release v\d+.\d+.\d+-.+
+    command: bash -c "dotnet pack -c Release -o ./artifacts src/Botwin.csproj && dotnet nuget push -s https://www.nuget.org/api/v2/package -k $NUGETAPIKEY./artifacts/Botwin.$VERSION.nupkg"
