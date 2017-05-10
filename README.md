@@ -1,5 +1,7 @@
 # Botwin
 
+[![Codeship Status for jchannon/Botwin](https://app.codeship.com/projects/2bd4d660-15f5-0135-f340-62bb81783d1a/status?branch=master)]((https://app.codeship.com/projects/218025))
+
 Botwin is a library that allows [Nancy-esque](http://nancyfx.org) routing for use with ASP.Net Core. 
 
 This is not a framework, it simply builds on top of [Microsoft.AspNetCore.Routing](https://github.com/aspnet/Routing) allowing you to have more elegant routing rather than have attribute routing, convention routing, ASP.Net Controllers or `IRouteBuilder` extensions. 
