@@ -1,6 +1,6 @@
 # Botwin
 
-[![NuGet Version](http://img.shields.io/nuget/v/Botwin.svg?style=flat)](https://www.nuget.org/packages/Botwin/) [![Codeship Status for jchannon/Botwin](https://app.codeship.com/projects/2bd4d660-15f5-0135-f340-62bb81783d1a/status?branch=master)]((https://app.codeship.com/projects/218025))
+[![NuGet Version](http://img.shields.io/nuget/v/Botwin.svg?style=flat)](https://www.nuget.org/packages/Botwin/) [![Codeship Status for jchannon/Botwin](https://app.codeship.com/projects/2bd4d660-15f5-0135-f340-62bb81783d1a/status?branch=master)](https://app.codeship.com/projects/218025)
 
 Botwin is a library that allows [Nancy-esque](http://nancyfx.org) routing for use with ASP.Net Core. 
 
