@@ -11,7 +11,7 @@ For a better understanding take a good look at the [samples](https://github.com/
 Other extensions include:
 
 * `Bind/BindAndValidate<T>` - [FluentValidation](https://github.com/JeremySkinner/FluentValidation) extensions to validate incoming HTTP requests.  
-* Global `Before/After hooks` for every request
+* Global `Before/After` hooks for every request
 * `Before/After` hooks to the routes defined in a Botwin module
 * Routes to use in common ASP.Net Core middleware eg. `app.UseExceptionHandler("/errorhandler");`.  
 * `IStatusCodeHandler`s are also an option as the ASP.Net Core `UseStatusCodePages` middleware is not elegant enough IMO. `IStatusCodeHandler`s allow you to define what happens when one of your routes returns a specific status code.  An example usage is shown in the sample.
