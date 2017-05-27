@@ -16,34 +16,33 @@ namespace Botwin
 
         public void Get(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            path = path.StartsWith("/") ? path.Substring(1) : path;
-            this.Routes.Add(("GET", path, handler));
-            this.Routes.Add(("HEAD", path, handler));
-           
+            path = path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
+            this.Routes.Add((HttpMethods.Get, path, handler));
+            this.Routes.Add((HttpMethods.Head, path, handler));
         }
 
         public void Post(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            path = path.StartsWith("/") ? path.Substring(1) : path;
-            this.Routes.Add(("POST", path, handler));
+            path = path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
+            this.Routes.Add((HttpMethods.Post, path, handler));
         }
 
         public void Delete(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            path = path.StartsWith("/") ? path.Substring(1) : path;
-            this.Routes.Add(("DELETE", path, handler));
+            path = path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
+            this.Routes.Add((HttpMethods.Delete, path, handler));
         }
 
         public void Put(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            path = path.StartsWith("/") ? path.Substring(1) : path;
-            this.Routes.Add(("PUT", path, handler));
+            path = path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
+            this.Routes.Add((HttpMethods.Put, path, handler));
         }
 
         public void Head(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            path = path.StartsWith("/") ? path.Substring(1) : path;
-            this.Routes.Add(("HEAD", path, handler));
+            path = path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
+            this.Routes.Add((HttpMethods.Head, path, handler));
         }
     }
 }

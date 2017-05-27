@@ -4,7 +4,6 @@ namespace Botwin
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
@@ -58,7 +57,7 @@ namespace Botwin
         {
             Func<HttpRequest, HttpResponse, RouteData, Task> finalHandler = async (req, res, routeData) =>
             {
-                if (req.Method == "HEAD")
+                if (HttpMethods.IsHead(req.Method))
                 {
                     //Cannot read the default stream once WriteAsync has been called on it
                     res.Body = new MemoryStream();
@@ -73,7 +72,7 @@ namespace Botwin
                     await scHandler.Handle(req.HttpContext);
                 }
                 
-                if (req.Method == "HEAD")
+                if (HttpMethods.IsHead(req.Method))
                 {
                     var length = res.Body.Length;
                     res.Body.SetLength(0);
@@ -100,7 +99,7 @@ namespace Botwin
 
         private static void ApplyGlobalAfterHook(IApplicationBuilder builder, BotwinOptions options)
         {
-            if (options != null && options.After != null)
+            if (options?.After != null)
             {
                 builder.Use(async (ctx, next) =>
                 {
@@ -112,7 +111,7 @@ namespace Botwin
 
         private static void ApplyGlobalBeforeHook(IApplicationBuilder builder, BotwinOptions options)
         {
-            if (options != null && options.Before != null)
+            if (options?.Before != null)
             {
                 builder.Use(async (ctx, next) =>
                 {
