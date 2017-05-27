@@ -27,7 +27,7 @@ I was also trying to think of a derivative name and I had recently been watching
 
 ### Sample
 
-```
+```csharp
 public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
