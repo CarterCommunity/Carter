@@ -73,6 +73,22 @@
 
             Assert.Equal(200, (int)response.StatusCode);
         }
+        
+        [Fact]
+        public async Task Should_return_OPTIONS_requests()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Options, "/"));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_PATCH_requests()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"),"/"));
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
 
         [Fact]
         public async Task Should_handle_module_before_hook()
