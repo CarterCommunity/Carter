@@ -12,6 +12,8 @@ namespace Botwin.Tests
             this.Put("/", async (request, response, routeData) => { await response.WriteAsync("Hello"); });
             this.Delete("/", async (request, response, routeData) => { await response.WriteAsync("Hello"); });
             this.Head("/head", async (request, response, routeData) => { await response.WriteAsync("Hello"); });
+            this.Patch("/", async (request, response, routeData) => { await response.WriteAsync("Hello"); });
+            this.Options("/", async (request, response, routeData) => { await response.WriteAsync("Hello"); });
         }
     }
 }

@@ -16,33 +16,49 @@ namespace Botwin
 
         public void Get(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            path = path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
+            path =  RemoveSlash(path);
             this.Routes.Add((HttpMethods.Get, path, handler));
             this.Routes.Add((HttpMethods.Head, path, handler));
         }
 
         public void Post(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            path = path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
+            path =  RemoveSlash(path);
             this.Routes.Add((HttpMethods.Post, path, handler));
         }
 
         public void Delete(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            path = path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
+            path =  RemoveSlash(path);
             this.Routes.Add((HttpMethods.Delete, path, handler));
         }
 
         public void Put(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            path = path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
+            path = RemoveSlash(path);
             this.Routes.Add((HttpMethods.Put, path, handler));
         }
 
         public void Head(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            path = path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
+            path = RemoveSlash(path);
             this.Routes.Add((HttpMethods.Head, path, handler));
+        }
+        
+        public void Patch(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        {
+            path = RemoveSlash(path);
+            this.Routes.Add((HttpMethods.Patch, path, handler));
+        }
+        
+        public void Options(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        {
+            path = RemoveSlash(path);
+            this.Routes.Add((HttpMethods.Options, path, handler));
+        }
+        private string RemoveSlash(string path)
+        {
+            return path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
         }
     }
 }
