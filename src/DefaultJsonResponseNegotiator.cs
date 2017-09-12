@@ -12,7 +12,7 @@
     {
         public bool CanHandle(IList<MediaTypeHeaderValue> accept)
         {
-            return accept.Any(x => x.MediaType.IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0);
+            return accept.Any(x => x.MediaType.ToString().IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         public async Task Handle(HttpRequest req, HttpResponse res, object model)
