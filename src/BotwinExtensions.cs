@@ -129,7 +129,6 @@ namespace Botwin
 
         public static void AddBotwin(this IServiceCollection services, params Assembly[] assemblies)
         {
-            //Get IAssemblyProvider, if not found register default provider.
             assemblies = assemblies.Any() ? assemblies : new[] { Assembly.GetEntryAssembly() };
             
             var validators = assemblies.SelectMany(x=>
