@@ -9,6 +9,7 @@ namespace Botwin
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
 
     public static class BotwinExtensions
     {
@@ -127,16 +128,12 @@ namespace Botwin
         public static void AddBotwin(this IServiceCollection services)
         {
             //Get IAssemblyProvider, if not found register default provider.
+            services.TryAddSingleton<IAssemblyProvider, AssemblyProvider>();
+
             var provider = services.BuildServiceProvider();
             var assemblyProvider = provider.GetService<IAssemblyProvider>();
-            if (assemblyProvider == null)
-            {
-                services.AddSingleton<IAssemblyProvider, AssemblyProvider>();
-            }
-            assemblyProvider = provider.GetService<IAssemblyProvider>();
 
             services.AddRouting();
-
 
             var modules = assemblyProvider.GetAssembly().GetTypes().Where(t => typeof(BotwinModule).IsAssignableFrom(t) && t != typeof(BotwinModule));
             foreach (var module in modules)
