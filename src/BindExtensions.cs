@@ -23,14 +23,9 @@ namespace Botwin
                 data = Activator.CreateInstance<T>();
             }
 
-            var asses = request.HttpContext.RequestServices.GetService<IEnumerable<Assembly>>();
+            var validators = request.HttpContext.RequestServices.GetService<IEnumerable<Type>>();
 
-            var validatorType = asses.SelectMany(x=>
-                x.GetTypes())
-                .FirstOrDefault(t => t.GetTypeInfo().BaseType != null &&
-                    t.GetTypeInfo().BaseType.GetTypeInfo().IsGenericType &&
-                    t.GetTypeInfo().BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>) &&
-                    t.Name.Equals(typeof(T).Name + "Validator", StringComparison.OrdinalIgnoreCase));
+            var validatorType = validators.FirstOrDefault(t => t.Name.Equals(typeof(T).Name + "Validator", StringComparison.OrdinalIgnoreCase));
 
             if (validatorType == null)
             {

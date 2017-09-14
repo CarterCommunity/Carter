@@ -6,6 +6,7 @@ namespace Botwin
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
@@ -130,7 +131,14 @@ namespace Botwin
         {
             //Get IAssemblyProvider, if not found register default provider.
             assemblies = assemblies.Any() ? assemblies : new[] { Assembly.GetEntryAssembly() };
-            services.AddSingleton(typeof(IEnumerable<Assembly>), assemblies);
+            
+            var validators = assemblies.SelectMany(x=>
+                x.GetTypes())
+                .Where(t => t.GetTypeInfo().BaseType != null &&
+                    t.GetTypeInfo().BaseType.GetTypeInfo().IsGenericType &&
+                    t.GetTypeInfo().BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>));
+
+            services.AddSingleton(typeof(IEnumerable<Type>), validators);
 
 
             services.AddRouting();
