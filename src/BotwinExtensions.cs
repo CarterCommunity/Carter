@@ -4,6 +4,7 @@ namespace Botwin
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
@@ -72,7 +73,7 @@ namespace Botwin
                 {
                     await scHandler.Handle(req.HttpContext);
                 }
-                
+
                 if (HttpMethods.IsHead(req.Method))
                 {
                     var length = res.Body.Length;
@@ -125,33 +126,33 @@ namespace Botwin
             }
         }
 
-        public static void AddBotwin(this IServiceCollection services)
+        public static void AddBotwin(this IServiceCollection services, params Assembly[] assemblies)
         {
             //Get IAssemblyProvider, if not found register default provider.
-            services.TryAddSingleton<IAssemblyProvider, AssemblyProvider>();
+            assemblies = assemblies.Any() ? assemblies : new[] { Assembly.GetEntryAssembly() };
+            services.AddSingleton(typeof(IEnumerable<Assembly>), assemblies);
 
-            var provider = services.BuildServiceProvider();
-            var assemblyProvider = provider.GetService<IAssemblyProvider>();
 
             services.AddRouting();
 
-            var modules = assemblyProvider.GetAssembly().GetTypes().Where(t => typeof(BotwinModule).IsAssignableFrom(t) && t != typeof(BotwinModule));
+            var modules = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(BotwinModule).IsAssignableFrom(t) && t != typeof(BotwinModule)));
             foreach (var module in modules)
             {
                 services.AddTransient(typeof(BotwinModule), module);
             }
 
-            var schs = assemblyProvider.GetAssembly().GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler));
+            var schs = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler)));
             foreach (var sch in schs)
             {
                 services.AddTransient(typeof(IStatusCodeHandler), sch);
             }
 
-            var responseNegotiators = assemblyProvider.GetAssembly().GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator));
+            var responseNegotiators = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator)));
             foreach (var negotiatator in responseNegotiators)
             {
                 services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
             }
+
             services.AddSingleton(typeof(IResponseNegotiator), new DefaultJsonResponseNegotiator());
         }
     }

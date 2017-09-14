@@ -5,6 +5,7 @@ namespace Botwin.Tests
     using System.IO;
     using System.Linq;
     using System.Net.Http;
+    using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
     using FluentValidation;
@@ -28,8 +29,7 @@ namespace Botwin.Tests
             this.server = new TestServer(new WebHostBuilder()
                                        .ConfigureServices(x =>
                                        {
-                                           x.AddSingleton<IAssemblyProvider, TestAssemblyProvider>();
-                                           x.AddBotwin();
+                                           x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly);
                                        })
                                        .Configure(x => x.UseBotwin())
                                    );

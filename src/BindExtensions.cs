@@ -1,6 +1,7 @@
 namespace Botwin
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -22,9 +23,10 @@ namespace Botwin
                 data = Activator.CreateInstance<T>();
             }
 
-            var validatorType = request.HttpContext.RequestServices.GetService<IAssemblyProvider>()
-                .GetAssembly()
-                .GetTypes()
+            var asses = request.HttpContext.RequestServices.GetService<IEnumerable<Assembly>>();
+
+            var validatorType = asses.SelectMany(x=>
+                x.GetTypes())
                 .FirstOrDefault(t => t.GetTypeInfo().BaseType != null &&
                     t.GetTypeInfo().BaseType.GetTypeInfo().IsGenericType &&
                     t.GetTypeInfo().BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>) &&

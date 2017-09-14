@@ -4,6 +4,7 @@ namespace Botwin.Tests
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -23,9 +24,7 @@ namespace Botwin.Tests
             this.server = new TestServer(new WebHostBuilder()
                             .ConfigureServices(x =>
                             {
-                                x.AddSingleton<IAssemblyProvider, TestAssemblyProvider>();
-                                //x.AddSingleton<IResponseNegotiator, TestResponseNegotiator>();
-                                x.AddBotwin();
+                                x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly);
                             })
                             .Configure(x => x.UseBotwin())
                         );
