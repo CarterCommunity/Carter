@@ -1,10 +1,10 @@
 ﻿namespace Botwin.Tests
 {
     using System.Net.Http;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
-    using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
     public class BotwinModuleTests
@@ -18,8 +18,7 @@
             this.server = new TestServer(new WebHostBuilder()
                 .ConfigureServices(x =>
                 {
-                    x.AddSingleton<IAssemblyProvider, TestAssemblyProvider>();
-                    x.AddBotwin();
+                    x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly);
                 })
                 .Configure(x => x.UseBotwin())
             );

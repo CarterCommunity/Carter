@@ -1,6 +1,7 @@
 namespace Botwin
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -22,20 +23,15 @@ namespace Botwin
                 data = Activator.CreateInstance<T>();
             }
 
-            var validatorType = request.HttpContext.RequestServices.GetService<IAssemblyProvider>()
-                .GetAssembly()
-                .GetTypes()
-                .FirstOrDefault(t => t.GetTypeInfo().BaseType != null &&
-                    t.GetTypeInfo().BaseType.GetTypeInfo().IsGenericType &&
-                    t.GetTypeInfo().BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>) &&
-                    t.Name.Equals(typeof(T).Name + "Validator", StringComparison.OrdinalIgnoreCase));
+            var validatorLocator = request.HttpContext.RequestServices.GetService<IValidatorLocator>();
 
-            if (validatorType == null)
+            var validator = validatorLocator.GetValidator<T>();
+
+            if (validator == null)
             {
                 return (new ValidationResult(new[] { new ValidationFailure(typeof(T).Name, "No validator found") }), default(T));
             }
 
-            IValidator validator = (IValidator)Activator.CreateInstance(validatorType);
             var result = validator.Validate(data);
             return (result, data);
         }
