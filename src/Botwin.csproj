@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <VersionPrefix>1.2.0</VersionPrefix>
+    <VersionPrefix>1.1.0</VersionPrefix>
     <Authors>Jonathan Channon</Authors>
     <Description>Botwin is a library that allows Nancy-esque routing for use with ASP.Net Core.</Description>
     <PackageTags>asp.net core;nancy;.net core;routing</PackageTags>
