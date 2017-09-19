@@ -1,5 +1,6 @@
 namespace Botwin.Tests
 {
+    using System;
     using System.Collections.Generic;
     using System.Dynamic;
     using System.IO;
@@ -79,6 +80,14 @@ namespace Botwin.Tests
             Assert.Equal("No validator found", first.ErrorMessage);
             Assert.Equal("TestModelNoValidator", first.PropertyName);
         }
+        
+        [Fact]
+        public async Task Should_throw_exception_when_multiple_validators_found()
+        {
+           var ex = await Record.ExceptionAsync(async () => await this.httpClient.PostAsync("/duplicatevalidator", new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}", Encoding.UTF8, "application/json")));
+
+            Assert.IsType<InvalidOperationException>(ex);
+        }
     }
 
     public class TestModel
@@ -100,6 +109,20 @@ namespace Botwin.Tests
     {
         public int MyIntProperty { get; set; }
         public string MyStringProperty { get; set; }
+    }
+    
+    public class DuplicateTestModel
+    {
+    }
+
+    public class DuplicateTestModelOne : AbstractValidator<DuplicateTestModel>
+    {
+        
+    }
+
+    public class DuplicateTestModelTwo : AbstractValidator<DuplicateTestModel>
+    {
+        
     }
 
     public class BindModule : BotwinModule
@@ -133,8 +156,21 @@ namespace Botwin.Tests
                 }
                 await res.Negotiate(model);
             });
+            
+            this.Post("/duplicatevalidator", async (req, res, routeData) =>
+            {
+                var model = req.BindAndValidate<DuplicateTestModel>();
+                if (!model.ValidationResult.IsValid)
+                {
+                    await res.Negotiate(model.ValidationResult.Errors.Select(x => new { x.PropertyName, x.ErrorMessage }));
+                    return;
+                }
+                await res.Negotiate(model.Data);
+            });
 
           
         }
     }
+
+    
 }
