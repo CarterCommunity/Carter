@@ -131,17 +131,16 @@ namespace Botwin
         {
             assemblies = assemblies.Any() ? assemblies : new[] { Assembly.GetEntryAssembly() };
 
-           var validators =  assemblies.SelectMany(ass=>ass.GetExportedTypes())
+            var validators = assemblies.SelectMany(ass => ass.GetExportedTypes())
                 .Where(typeof(IValidator).IsAssignableFrom)
-                .Where(t => !t.GetTypeInfo().IsAbstract)
-                .ToArray();
+                .Where(t => !t.GetTypeInfo().IsAbstract);
 
             foreach (var validator in validators)
             {
                 services.AddSingleton(typeof(IValidator), validator);
             }
 
-            services.AddSingleton<IValidatorLocator, ValidatorLocator>();
+            services.AddSingleton<IValidatorLocator, DefaultValidatorLocator>();
 
             services.AddRouting();
 
