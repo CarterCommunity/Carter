@@ -130,15 +130,18 @@ namespace Botwin
         public static void AddBotwin(this IServiceCollection services, params Assembly[] assemblies)
         {
             assemblies = assemblies.Any() ? assemblies : new[] { Assembly.GetEntryAssembly() };
-            
-            var validators = assemblies.SelectMany(x=>
-                x.GetTypes())
-                .Where(t => t.GetTypeInfo().BaseType != null &&
-                    t.GetTypeInfo().BaseType.GetTypeInfo().IsGenericType &&
-                    t.GetTypeInfo().BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>));
 
-            services.AddSingleton(typeof(IEnumerable<Type>), validators);
+           var validators =  assemblies.SelectMany(ass=>ass.GetExportedTypes())
+                .Where(typeof(IValidator).IsAssignableFrom)
+                .Where(t => !t.GetTypeInfo().IsAbstract)
+                .ToArray();
 
+            foreach (var validator in validators)
+            {
+                services.AddSingleton(typeof(IValidator), validator);
+            }
+
+            services.AddSingleton<IValidatorLocator, ValidatorLocator>();
 
             services.AddRouting();
 

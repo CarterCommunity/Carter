@@ -23,16 +23,15 @@ namespace Botwin
                 data = Activator.CreateInstance<T>();
             }
 
-            var validators = request.HttpContext.RequestServices.GetService<IEnumerable<Type>>();
+            var validatorLocator = request.HttpContext.RequestServices.GetService<IValidatorLocator>();
 
-            var validatorType = validators.FirstOrDefault(t => t.Name.Equals(typeof(T).Name + "Validator", StringComparison.OrdinalIgnoreCase));
+            var validator = validatorLocator.GetValidator<T>();
 
-            if (validatorType == null)
+            if (validator == null)
             {
                 return (new ValidationResult(new[] { new ValidationFailure(typeof(T).Name, "No validator found") }), default(T));
             }
 
-            IValidator validator = (IValidator)Activator.CreateInstance(validatorType);
             var result = validator.Validate(data);
             return (result, data);
         }
