@@ -15,11 +15,11 @@ namespace Botwin
 
         public DefaultValidatorLocator(IEnumerable<IValidator> validators) => this.validators = validators;
 
-        public IValidator GetValidator<T>() => this.foundValidators.GetOrAdd(typeof(T), this.FindValidator<T>());
+        public IValidator GetValidator<T>() => this.foundValidators.GetOrAdd(typeof(T), this.FindValidator);
 
-        private IValidator FindValidator<T>()
+        private IValidator FindValidator(Type type)
         {
-            var fullType = CreateValidatorType(typeof(T));
+            var fullType = CreateValidatorType(type);
 
             var available = this.validators
                 .Where(validator => fullType.GetTypeInfo().IsAssignableFrom(validator.GetType()))
@@ -30,7 +30,7 @@ namespace Botwin
                 var names = string.Join(", ", available.Select(v => v.GetType().Name));
                 var message = string.Concat(
                     "Ambiguous choice between multiple validators for type ",
-                    typeof(T).Name,
+                    type.Name,
                     ". The validators available are: ",
                     names);
 

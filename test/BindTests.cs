@@ -44,6 +44,7 @@ namespace Botwin.Tests
         public async Task Should_return_instance_of_T_on_successful_validation()
         {
             var res = await this.httpClient.PostAsync("/bindandvalidate", new StringContent("{\"MyIntProperty\":\"911\",\"MyStringProperty\":\"Vincent Vega\"}", Encoding.UTF8, "application/json"));
+            
             var body = await res.Content.ReadAsStringAsync();
             var model = JsonConvert.DeserializeObject<TestModel>(body);
 
