@@ -1,13 +1,11 @@
 namespace Botwin.Tests
 {
-    using System;
     using System.Net.Http;
     using System.Reflection;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
-    using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
     public class StatusCodeHandlerTests
