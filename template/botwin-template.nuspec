@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+    <metadata>
+        <id>botwin-template</id>
+        <version>1.0.0</version>
+        <title>Botwin Template for dotnet-new</title>
+        <summary>A dotnet-new template for Botwin applications.</summary>
+        <description>A dotnet-new template for Botwin applications.</description>
+        <authors>Jonathan Channon</authors>
+        <owners>Jonathan Channon</owners>
+        <projectUrl>https://github.com/jchannon/Botwin</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <releaseNotes></releaseNotes>
+        <language>en-GB</language>
+        <tags>botwin nancyfx nancy dotnet new template</tags>
+        <packageTypes>
+            <packageType name="Template" />
+        </packageTypes>
+    </metadata>
+</package>
