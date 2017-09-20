@@ -7,7 +7,7 @@
     {
         public HomeModule()
         {
-            Get("/", async(req,res,routeData) => await res.WriteAsync("Hello from Botwin!"));
+            Get("/", async(req, res, routeData) => await res.WriteAsync("Hello from Botwin!"));
         }
     }
 }
