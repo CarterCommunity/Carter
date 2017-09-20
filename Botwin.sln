@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Botwin.Tests", "test\Botwin
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "template", "template", "{47344C99-29DA-410E-AFC2-8FD3BA6727DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BotwinTemplate", "template\BotwinTemplate.csproj", "{572762BB-5DFF-425F-8F66-500B973DBB0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BotwinTemplate", "template\content\BotwinTemplate.csproj", "{572762BB-5DFF-425F-8F66-500B973DBB0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
