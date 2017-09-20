@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
     <metadata>
-        <id>botwin-template</id>
+        <id>BotwinTemplate</id>
         <version>1.0.0</version>
         <title>Botwin Template for dotnet-new</title>
         <summary>A dotnet-new template for Botwin applications.</summary>
