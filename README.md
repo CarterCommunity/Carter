@@ -25,6 +25,20 @@ I have been a huge fan of and core contributor to [Nancy](http://nancyfx.org), t
 
 I was also trying to think of a derivative name and I had recently been watching [Weeds](http://www.imdb.com/title/tt0439100/) and the lead character was called Nancy Botwin so this is where I got the name from! 
 
+### Getting Started
+
+A template for Botwin is out!
+
+`dotnet new -i BotwinTemplate`
+
+`dotnet new botwin -n MyBotwinApp`
+
+`dotnet run`
+
+Enjoy!
+
+[https://www.nuget.org/packages/BotwinTemplate/](https://www.nuget.org/packages/BotwinTemplate/)
+
 ### Sample
 
 ```csharp
