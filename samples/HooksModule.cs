@@ -6,16 +6,16 @@ namespace Botwin.Samples
     {
         public HooksModule()
         {
-            this.Before = async (req, res, routeData) =>
+            this.Before = async (ctx) =>
             {
-                res.StatusCode = 402;
-                await res.WriteAsync("Pay up you filthy animal");
-                return null;
+                ctx.Response.StatusCode = 402;
+                await ctx.Response.WriteAsync("Pay up you filthy animal");
+                return false;
             };
 
             this.Get("/hooks", async (req, res, routeData) => await res.WriteAsync("Can't catch me here"));
 
-            this.After = async (req, res, routeData) => await res.WriteAsync("Don't forget you owe me big bucks!");
+            this.After = async (ctx) => await ctx.Response.WriteAsync("Don't forget you owe me big bucks!");
         }
     }
 }

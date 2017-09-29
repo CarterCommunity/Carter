@@ -38,17 +38,12 @@ namespace Botwin
             {
                 foreach (var route in module.Routes)
                 {
-                    Func<HttpRequest, HttpResponse, RouteData, Task> handler;
+                    RequestDelegate handler;
 
-                    handler = module.Before != null ? CreateModuleBeforeHandler(module, route) : route.handler;
-
-                    if (module.After != null)
-                    {
-                        handler += module.After;
-                    }
+                    handler = CreateModuleBeforeAfterHandler(module, route);
 
                     var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);
-
+                    
                     routeBuilder.MapVerb(route.verb, route.path, finalHandler);
                 }
             }
@@ -56,48 +51,59 @@ namespace Botwin
             return builder.UseRouter(routeBuilder.Build());
         }
 
-        private static Func<HttpRequest, HttpResponse, RouteData, Task> CreateFinalHandler(Func<HttpRequest, HttpResponse, RouteData, Task> handler, IEnumerable<IStatusCodeHandler> statusCodeHandlers)
+        
+
+        private static RequestDelegate CreateFinalHandler(RequestDelegate handler, IEnumerable<IStatusCodeHandler> statusCodeHandlers)
         {
-            Func<HttpRequest, HttpResponse, RouteData, Task> finalHandler = async (req, res, routeData) =>
+            RequestDelegate finalHandler = async (ctx) =>
             {
-                if (HttpMethods.IsHead(req.Method))
+                if (HttpMethods.IsHead(ctx.Request.Method))
                 {
                     //Cannot read the default stream once WriteAsync has been called on it
-                    res.Body = new MemoryStream();
+                    ctx.Response.Body = new MemoryStream();
                 }
 
-                await handler(req, res, routeData);
+                await handler(ctx);
 
-                var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(res.StatusCode));
+                var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(ctx.Response.StatusCode));
 
                 if (scHandler != null)
                 {
-                    await scHandler.Handle(req.HttpContext);
+                    await scHandler.Handle(ctx);
                 }
 
-                if (HttpMethods.IsHead(req.Method))
+                if (HttpMethods.IsHead(ctx.Request.Method))
                 {
-                    var length = res.Body.Length;
-                    res.Body.SetLength(0);
-                    res.ContentLength = length;
+                    var length = ctx.Response.Body.Length;
+                    ctx.Response.Body.SetLength(0);
+                    ctx.Response.ContentLength = length;
                 }
             };
             return finalHandler;
         }
 
-        private static Func<HttpRequest, HttpResponse, RouteData, Task> CreateModuleBeforeHandler(BotwinModule module, (string verb, string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) route)
+        private static RequestDelegate CreateModuleBeforeAfterHandler(BotwinModule module, (string verb, string path, RequestDelegate handler) route)
         {
-            Func<HttpRequest, HttpResponse, RouteData, Task> beforeHandler = async (req, res, routeData) =>
+            RequestDelegate afterHandler = async (context) =>
             {
-                var beforeResult = await module.Before(req, res, routeData);
-                if (beforeResult == null)
+                if (module.Before != null)
                 {
-                    return;
+                    var shouldContinue = await module.Before(context);
+                    if (!shouldContinue)
+                    {
+                        return;
+                    }
                 }
-                await route.handler(req, res, routeData);
+                
+                await route.handler(context);
+                
+                if (module.After != null)
+                {
+                    await module.After(context);
+                }
             };
 
-            return beforeHandler;
+            return afterHandler;
         }
 
         private static void ApplyGlobalAfterHook(IApplicationBuilder builder, BotwinOptions options)
@@ -118,7 +124,7 @@ namespace Botwin
             {
                 builder.Use(async (ctx, next) =>
                 {
-                    var carryOn = await options.Before(ctx);
+                    var carryOn = await options.Before(ctx); //TODO Check if return Task.CompletedTask will it continue
                     if (carryOn)
                     {
                         await next();

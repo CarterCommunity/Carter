@@ -14,7 +14,7 @@ namespace Botwin.Samples
                 await res.WriteAsync("There's no place like 127.0.0.1");
             });
 
-            this.After = (req, res, routeData) =>
+            this.After = (ctx) =>
             {
                 Console.WriteLine("Catch you later!");
                 return Task.CompletedTask;
