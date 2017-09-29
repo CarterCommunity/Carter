@@ -1,6 +1,6 @@
 # Botwin
 
-[![NuGet Version](http://img.shields.io/nuget/v/Botwin.svg?style=flat)](https://www.nuget.org/packages/Botwin/) [![Codeship Status for jchannon/Botwin](https://app.codeship.com/projects/2bd4d660-15f5-0135-f340-62bb81783d1a/status?branch=master)](https://app.codeship.com/projects/218025)
+[![NuGet Version](http://img.shields.io/nuget/v/Botwin.svg?style=flat)](https://www.nuget.org/packages/Botwin/) 
 
 Botwin is a library that allows [Nancy-esque](http://nancyfx.org) routing for use with ASP.Net Core. 
 
@@ -17,6 +17,24 @@ Other extensions include:
 * `IStatusCodeHandler`s are also an option as the ASP.Net Core `UseStatusCodePages` middleware is not elegant enough IMO. `IStatusCodeHandler`s allow you to define what happens when one of your routes returns a specific status code.  An example usage is shown in the sample.
 * `IResponseNegotiator`s allow you to define how the response should look on a certain Accept header.  Handling JSON is built in and the default response but implementing an interface allows the user to choose how they want to represent resources.
 * All interface implementations are registered into ASP.Net Core DI automatically, implement the interface and off you go.
+* Supports two different routing APIs 
+
+  (i)
+  ```
+  this.Get("/actors/{id:int}", async (req, res, routeData) =>
+  {
+      var person = actorProvider.Get(routeData.AsInt("id"));
+      await res.Negotiate(person);
+  });
+  ``` 
+  (ii)
+  ```
+  this.Get("/actors/{id:int}", async (ctx) =>
+  {
+      var person = actorProvider.Get(ctx.GetRouteData().AsInt("id"));
+      await ctx.Response.Negotiate(person);
+  };
+  ```
 
 
 ### Where does the name "Botwin" come from?
