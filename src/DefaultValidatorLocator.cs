@@ -22,7 +22,7 @@ namespace Botwin
             var fullType = CreateValidatorType(type);
 
             var available = this.validators
-                .Where(validator => fullType.GetTypeInfo().IsAssignableFrom(validator.GetType()))
+                .Where(validator => fullType.GetTypeInfo().IsInstanceOfType(validator))
                 .ToArray();
 
             if (available.Length > 1)
