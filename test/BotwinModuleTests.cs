@@ -88,6 +88,68 @@
             Assert.Equal(200, (int)response.StatusCode);
         }
 
+        [Fact]
+        public async Task Should_return_GET_requests_with_base_path()
+        {
+            var response = await this.httpClient.GetAsync("/test/");
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_POST_requests_with_base_path()
+        {
+            var response = await this.httpClient.PostAsync("/test/", new StringContent(""));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_PUT_requests_with_base_path()
+        {
+            var response = await this.httpClient.PutAsync("/test/", new StringContent(""));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_DELETE_requests_with_base_path()
+        {
+            var response = await this.httpClient.DeleteAsync("/test/");
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_HEAD_requests_with_base_path()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, "/test/head/"));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_HEAD_requests_for_defined_GET_routes_with_base_path()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, "/test/"));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+        
+        [Fact]
+        public async Task Should_return_OPTIONS_requests_with_base_path()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Options, "/test/"));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_PATCH_requests_with_base_path()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"),"/test/"));
+            Assert.Equal(200, (int)response.StatusCode);
+        }
 
         [Fact]
         public async Task Should_handle_module_before_hook()
