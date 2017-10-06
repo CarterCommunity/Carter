@@ -1,26 +1,20 @@
-using System.Threading;
-
 namespace Botwin
 {
     using System;
     using System.Collections.Generic;
-    using System.Dynamic;
-    using System.IO;
-    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
 
     public class BotwinModule
     {
+        public readonly List<(string verb, string path, RequestDelegate handler)> Routes;
+
         private readonly string basePath;
 
-        public List<(string verb, string path, RequestDelegate handler)> Routes =
-            new List<(string verb, string path, RequestDelegate handler)>();
+        public Func<HttpContext, Task<bool>> Before { get; protected set; }
 
-        public Func<HttpContext, Task<bool>> Before { get; set; }
-
-        public RequestDelegate After { get; set; }
+        public RequestDelegate After { get; protected set; }
 
         protected BotwinModule() : this(string.Empty)
         {
@@ -28,18 +22,18 @@ namespace Botwin
 
         protected BotwinModule(string basePath)
         {
+            this.Routes = new List<(string verb, string path, RequestDelegate handler)>();
             var cleanPath = this.RemoveStartingSlash(basePath);
             this.basePath = this.RemoveEndingSlash(cleanPath);
         }
 
-        public void Get(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected void Get(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            RequestDelegate requestDelegate = httpContext =>
-                handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Get(path, requestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
+            this.Get(path, RequestDelegate);
         }
 
-        public void Get(string path, RequestDelegate handler)
+        protected void Get(string path, RequestDelegate handler)
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
@@ -47,85 +41,79 @@ namespace Botwin
             this.Routes.Add((HttpMethods.Head, path, handler));
         }
 
-        public void Post(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected void Post(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            RequestDelegate requestDelegate = httpContext =>
-                handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Post(path, requestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
+            this.Post(path, RequestDelegate);
         }
 
-        public void Post(string path, RequestDelegate handler)
+        protected void Post(string path, RequestDelegate handler)
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
             this.Routes.Add((HttpMethods.Post, path, handler));
         }
 
-        public void Delete(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected void Delete(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            RequestDelegate requestDelegate = httpContext =>
-                handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Delete(path, requestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
+            this.Delete(path, RequestDelegate);
         }
 
-        public void Delete(string path, RequestDelegate handler)
+        protected void Delete(string path, RequestDelegate handler)
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
             this.Routes.Add((HttpMethods.Delete, path, handler));
         }
 
-        public void Put(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected void Put(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            RequestDelegate requestDelegate = httpContext =>
-                handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Put(path, requestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
+            this.Put(path, RequestDelegate);
         }
 
-        public void Put(string path, RequestDelegate handler)
+        protected void Put(string path, RequestDelegate handler)
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
             this.Routes.Add((HttpMethods.Put, path, handler));
         }
 
-        public void Head(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected void Head(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            RequestDelegate requestDelegate = httpContext =>
-                handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Head(path, requestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
+            this.Head(path, RequestDelegate);
         }
 
-        public void Head(string path, RequestDelegate handler)
+        protected void Head(string path, RequestDelegate handler)
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
             this.Routes.Add((HttpMethods.Head, path, handler));
         }
 
-        public void Patch(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected void Patch(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            RequestDelegate requestDelegate = httpContext =>
-                handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
 
-            this.Patch(path, requestDelegate);
+            this.Patch(path, RequestDelegate);
         }
 
-        public void Patch(string path, RequestDelegate handler)
+        protected void Patch(string path, RequestDelegate handler)
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
             this.Routes.Add((HttpMethods.Patch, path, handler));
         }
 
-        public void Options(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected void Options(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
         {
-            RequestDelegate requestDelegate = httpContext =>
-                handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Options(path, requestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
+            this.Options(path, RequestDelegate);
         }
 
-        public void Options(string path, RequestDelegate handler)
+        protected void Options(string path, RequestDelegate handler)
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
@@ -136,10 +124,10 @@ namespace Botwin
         {
             return path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
         }
-        
+
         private string RemoveEndingSlash(string path)
         {
-            return path.EndsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Remove(path.Length -1) : path;
+            return path.EndsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Remove(path.Length - 1) : path;
         }
 
         private string PrependBasePath(string path)

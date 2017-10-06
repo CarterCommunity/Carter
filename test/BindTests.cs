@@ -17,16 +17,15 @@ namespace Botwin.Tests
 
     public class BindTests
     {
-        private readonly TestServer server;
         private readonly HttpClient httpClient;
         
         public BindTests()
         {
-            this.server = new TestServer(new WebHostBuilder()
+            var server = new TestServer(new WebHostBuilder()
                 .ConfigureServices(x => { x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly); })
                 .Configure(x => x.UseBotwin())
             );
-            this.httpClient = this.server.CreateClient();
+            this.httpClient = server.CreateClient();
         }
 
         [Fact]
@@ -67,7 +66,7 @@ namespace Botwin.Tests
         {
             var res = await this.httpClient.PostAsync("/novalidator", new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}", Encoding.UTF8, "application/json"));
             var body = await res.Content.ReadAsStringAsync();
-            List<ExpandoObject> model = JsonConvert.DeserializeObject<List<ExpandoObject>>(body);
+            var model = JsonConvert.DeserializeObject<List<ExpandoObject>>(body);
             dynamic first = model.First();
             Assert.Equal(1, model.Count);
             Assert.Equal("No validator found", first.ErrorMessage);
