@@ -187,10 +187,12 @@
             Assert.True(body.Contains($"Managed to parse an int {idToTest}"));
         }
         
-        [Fact]
-        public async Task Should_return_GET_requests_with_multiple_parsed_querystring()
+        [Theory]
+        [InlineData("/multiquerystring?id=1&id=2")]
+        [InlineData("/multiquerystring?id=1,2")]
+        public async Task Should_return_GET_requests_with_multiple_parsed_querystring(string url)
         {
-            var response = await this.httpClient.GetAsync($"/multiquerystring?id=1&id=2");
+            var response = await this.httpClient.GetAsync(url);
 
             var body = await response.Content.ReadAsStringAsync();
 

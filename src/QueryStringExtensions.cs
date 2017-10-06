@@ -23,7 +23,9 @@
         {
             var values = query[key];
 
-            foreach (var val in values)
+            var splitValues = values.SelectMany(x => x.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+                
+            foreach (var val in splitValues)
             {
                 yield return (T)Convert.ChangeType(val, typeof(T));
             }
