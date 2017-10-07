@@ -72,7 +72,7 @@
 
             Assert.Equal(200, (int)response.StatusCode);
         }
-        
+
         [Fact]
         public async Task Should_return_OPTIONS_requests()
         {
@@ -84,7 +84,7 @@
         [Fact]
         public async Task Should_return_PATCH_requests()
         {
-            var response = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"),"/"));
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"), "/"));
             Assert.Equal(200, (int)response.StatusCode);
         }
 
@@ -135,7 +135,7 @@
 
             Assert.Equal(200, (int)response.StatusCode);
         }
-        
+
         [Fact]
         public async Task Should_return_OPTIONS_requests_with_base_path()
         {
@@ -147,7 +147,7 @@
         [Fact]
         public async Task Should_return_PATCH_requests_with_base_path()
         {
-            var response = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"),"/test/"));
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"), "/test/"));
             Assert.Equal(200, (int)response.StatusCode);
         }
 
@@ -174,11 +174,11 @@
             var body = await response.Content.ReadAsStringAsync();
             Assert.True(body.Contains("After"));
         }
-        
+
         [Fact]
         public async Task Should_return_GET_requests_with_parsed_querystring()
         {
-            const int idToTest = 69; 
+            const int idToTest = 69;
             var response = await this.httpClient.GetAsync($"/querystring?id={idToTest}");
 
             var body = await response.Content.ReadAsStringAsync();
@@ -186,7 +186,7 @@
             Assert.Equal(200, (int)response.StatusCode);
             Assert.True(body.Contains($"Managed to parse an int {idToTest}"));
         }
-        
+
         [Theory]
         [InlineData("/multiquerystring?id=1&id=2")]
         [InlineData("/multiquerystring?id=1,2")]
@@ -198,6 +198,17 @@
 
             Assert.Equal(200, (int)response.StatusCode);
             Assert.True(body.Contains($"Managed to parse multiple ints 2"));
+        }
+
+        [Fact]
+        public async Task Should_return_GET_requests_with_parsed_quersytring_with_default_value()
+        {
+            var response = await this.httpClient.GetAsync("querystringdefault");
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains($"Managed to parse default int 69"));
         }
     }
 }

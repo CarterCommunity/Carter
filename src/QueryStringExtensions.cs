@@ -7,13 +7,13 @@
 
     public static class QueryStringExtensions
     {
-        public static T As<T>(this IQueryCollection query, string key)
+        public static T As<T>(this IQueryCollection query, string key, T defaultValue = default(T))
         {
             var value = query[key].FirstOrDefault();
 
             if (value == null)
             {
-                throw new Exception("Multiple query string parameters cannot be parsed automatically, use AsMultiple");
+                return defaultValue;
             }
 
             return (T)Convert.ChangeType(value, typeof(T));
