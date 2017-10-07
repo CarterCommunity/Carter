@@ -4,6 +4,7 @@ namespace Botwin
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
@@ -40,7 +41,7 @@ namespace Botwin
                     handler = CreateModuleBeforeAfterHandler(module, route);
 
                     var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);
-                    
+
                     routeBuilder.MapVerb(route.verb, route.path, finalHandler);
                 }
             }
@@ -48,11 +49,11 @@ namespace Botwin
             return builder.UseRouter(routeBuilder.Build());
         }
 
-        
+
 
         private static RequestDelegate CreateFinalHandler(RequestDelegate handler, IEnumerable<IStatusCodeHandler> statusCodeHandlers)
         {
-            RequestDelegate finalHandler = async (ctx) =>
+            Task myFunc(HttpContext ctx)
             {
                 if (HttpMethods.IsHead(ctx.Request.Method))
                 {
@@ -60,13 +61,13 @@ namespace Botwin
                     ctx.Response.Body = new MemoryStream();
                 }
 
-                await handler(ctx);
+                handler(ctx);
 
                 var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(ctx.Response.StatusCode));
 
                 if (scHandler != null)
                 {
-                    await scHandler.Handle(ctx);
+                    scHandler.Handle(ctx);
                 }
 
                 if (HttpMethods.IsHead(ctx.Request.Method))
@@ -75,8 +76,11 @@ namespace Botwin
                     ctx.Response.Body.SetLength(0);
                     ctx.Response.ContentLength = length;
                 }
+
+                return Task.CompletedTask;
             };
-            return finalHandler;
+
+            return myFunc;
         }
 
         private static RequestDelegate CreateModuleBeforeAfterHandler(BotwinModule module, (string verb, string path, RequestDelegate handler) route)
@@ -91,9 +95,9 @@ namespace Botwin
                         return;
                     }
                 }
-                
+
                 await route.handler(context);
-                
+
                 if (module.After != null)
                 {
                     await module.After(context);
