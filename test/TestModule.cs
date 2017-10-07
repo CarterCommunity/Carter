@@ -25,8 +25,13 @@ namespace Botwin.Tests
             this.Get("/multiquerystring", async ctx =>
             {
                 var id = ctx.Request.Query.AsMultiple<int>("id");
-                
                 await ctx.Response.WriteAsync($"Managed to parse multiple ints {id.Count()}");
+            });
+
+            this.Get("/querystringdefault", async ctx =>
+            {
+                var id = ctx.Request.Query.As<int>("id", 69);
+                await ctx.Response.WriteAsync($"Managed to parse default int {id}");
             });
               
             this.Post("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });
