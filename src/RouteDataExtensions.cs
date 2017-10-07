@@ -5,9 +5,11 @@ namespace Botwin
 
     public static class RouteDataExtensions
     {
-        public static int AsInt(this RouteData routeData, string key)
+        public static T As<T>(this RouteData routeData, string key)
         {
-            return Convert.ToInt32(routeData.Values[key]);
+            var value = routeData.Values[key];
+
+            return (T)Convert.ChangeType(value, typeof(T));
         }
     }
 }
