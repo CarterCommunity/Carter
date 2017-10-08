@@ -53,7 +53,7 @@ namespace Botwin
 
         private static RequestDelegate CreateFinalHandler(RequestDelegate handler, IEnumerable<IStatusCodeHandler> statusCodeHandlers)
         {
-            Task myFunc(HttpContext ctx)
+            async Task myFunc(HttpContext ctx)
             {
                 if (HttpMethods.IsHead(ctx.Request.Method))
                 {
@@ -61,13 +61,13 @@ namespace Botwin
                     ctx.Response.Body = new MemoryStream();
                 }
 
-                handler(ctx);
+                await handler(ctx);
 
                 var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(ctx.Response.StatusCode));
 
                 if (scHandler != null)
                 {
-                    scHandler.Handle(ctx);
+                    await scHandler.Handle(ctx);
                 }
 
                 if (HttpMethods.IsHead(ctx.Request.Method))
@@ -77,7 +77,6 @@ namespace Botwin
                     ctx.Response.ContentLength = length;
                 }
 
-                return Task.CompletedTask;
             };
 
             return myFunc;
@@ -85,7 +84,7 @@ namespace Botwin
 
         private static RequestDelegate CreateModuleBeforeAfterHandler(BotwinModule module, (string verb, string path, RequestDelegate handler) route)
         {
-            RequestDelegate afterHandler = async (context) =>
+            async Task afterHandler(HttpContext context)
             {
                 if (module.Before != null)
                 {
