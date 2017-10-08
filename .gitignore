@@ -4,3 +4,6 @@ obj/
 .vscode/
 .idea/
 codeship.aes
+artifacts/
+tools/
+.dotnet
