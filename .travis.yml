@@ -3,6 +3,6 @@ mono: none
 dotnet: 2.0.0
 dist: trusty
 script:
- - dotnet build samples
+ - dotnet build Botwin.sln
  - dotnet test test
  - dotnet pack src
