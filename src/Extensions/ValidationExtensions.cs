@@ -1,4 +1,4 @@
-namespace Botwin
+namespace Botwin.Extensions
 {
     using System.Collections.Generic;
     using System.Linq;

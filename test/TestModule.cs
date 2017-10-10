@@ -1,6 +1,7 @@
 namespace Botwin.Tests
 {
     using System.Linq;
+    using Botwin.Extensions;
     using Microsoft.AspNetCore.Http;
 
     public class TestModule : BotwinModule
