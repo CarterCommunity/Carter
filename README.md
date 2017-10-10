@@ -23,7 +23,7 @@ Other extensions include:
   ```
   this.Get("/actors/{id:int}", async (req, res, routeData) =>
   {
-      var person = actorProvider.Get(routeData.AsInt("id"));
+      var person = actorProvider.Get(routeData.As<int>("id"));
       await res.Negotiate(person);
   });
   ``` 
@@ -31,7 +31,7 @@ Other extensions include:
   ```
   this.Get("/actors/{id:int}", async (ctx) =>
   {
-      var person = actorProvider.Get(ctx.GetRouteData().AsInt("id"));
+      var person = actorProvider.Get(ctx.GetRouteData().As<int>("id"));
       await ctx.Response.Negotiate(person);
   };
   ```
@@ -86,7 +86,7 @@ public class ActorsModule : BotwinModule
 
         this.Get("/actors/{id:int}", async (req, res, routeData) =>
         {
-            var person = actorProvider.Get(routeData.AsInt("id"));
+            var person = actorProvider.Get(routeData.As<int>("id"));
             await res.Negotiate(person);
         });
 
