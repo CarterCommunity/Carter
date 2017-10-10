@@ -69,23 +69,8 @@ namespace Botwin.Extensions
 
         public static async Task<IFormFile> BindFile(this HttpRequest request)
         {
-            if (request.HasFormContentType)
-            {
-                var form = await request.ReadFormAsync();
-
-                foreach (var file in form.Files)
-                {
-                    // If there is an <input type="file" ... /> in the form and is left blank.
-                    if (file.Length == 0 && string.IsNullOrEmpty(file.FileName))
-                    {
-                        continue;
-                    }
-
-                    return file;
-                }
-            }
-
-            return null;
+            var files = await request.BindFiles();
+            return files.First();
         }
 
         public static async Task BindAndSaveFiles(this HttpRequest request, string saveLocation)
