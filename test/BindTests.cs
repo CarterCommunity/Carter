@@ -8,7 +8,8 @@ namespace Botwin.Tests
     using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
-    using Botwin.Extensions;
+    using Botwin.ModelBinding;
+    using Botwin.Response;
     using FluentValidation;
     using FluentValidation.Results;
     using Microsoft.AspNetCore.Hosting;

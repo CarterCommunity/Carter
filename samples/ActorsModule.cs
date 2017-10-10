@@ -1,6 +1,8 @@
 namespace Botwin.Samples
 {
-    using Botwin.Extensions;
+    using Botwin.ModelBinding;
+    using Botwin.Request;
+    using Botwin.Response;
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
 
