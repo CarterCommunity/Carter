@@ -3,6 +3,7 @@ namespace Botwin.Extensions
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using FluentValidation.Results;
     using Microsoft.AspNetCore.Http;
@@ -42,11 +43,11 @@ namespace Botwin.Extensions
                 return JsonSerializer.Deserialize<T>(jsonTextReader);
             }
         }
-        
+
         public static async Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request)
         {
             var postedFiles = new List<IFormFile>();
-            
+
             if (request.HasFormContentType)
             {
                 var form = await request.ReadFormAsync();
@@ -65,10 +66,9 @@ namespace Botwin.Extensions
 
             return postedFiles;
         }
-        
-        public static async Task BindAndSaveFiles(this HttpRequest request, string saveLocation)
+
+        public static async Task<IFormFile> BindFile(this HttpRequest request)
         {
-            
             if (request.HasFormContentType)
             {
                 var form = await request.ReadFormAsync();
@@ -81,13 +81,33 @@ namespace Botwin.Extensions
                         continue;
                     }
 
-                    using (var fileToSave = File.Create(Path.Combine(saveLocation, file.FileName)))
-                    {
-                        await file.CopyToAsync(fileToSave);
-                    }
+                    return file;
                 }
             }
 
+            return null;
+        }
+
+        public static async Task BindAndSaveFiles(this HttpRequest request, string saveLocation)
+        {
+            var files = await request.BindFiles();
+            foreach (var file in files)
+            {
+                using (var fileToSave = File.Create(Path.Combine(saveLocation, file.FileName)))
+                {
+                    await file.CopyToAsync(fileToSave);
+                }
+            }
+        }
+
+        public static async Task BindAndSaveFile(this HttpRequest request, string saveLocation)
+        {
+            var file = await request.BindFile();
+
+            using (var fileToSave = File.Create(Path.Combine(saveLocation, file.FileName)))
+            {
+                await file.CopyToAsync(fileToSave);
+            }
         }
     }
 }
