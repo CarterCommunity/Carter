@@ -44,7 +44,7 @@ namespace Botwin.Extensions
             }
         }
 
-        public static async Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request)
+        private static async Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request, bool returnOnFirst)
         {
             var postedFiles = new List<IFormFile>();
 
@@ -61,15 +61,26 @@ namespace Botwin.Extensions
                     }
 
                     postedFiles.Add(file);
+                    
+                    if (returnOnFirst)
+                    {
+                        return postedFiles;
+                    }
                 }
             }
 
             return postedFiles;
         }
 
+        public static async Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request)
+        {
+            return await request.BindFiles(false);
+        }
+
         public static async Task<IFormFile> BindFile(this HttpRequest request)
         {
-            var files = await request.BindFiles();
+            var files = await request.BindFiles(true);
+
             return files.First();
         }
 
