@@ -74,12 +74,12 @@ namespace Botwin.Extensions
 
         public static async Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request)
         {
-            return await request.BindFiles(false);
+            return await request.BindFiles(returnOnFirst: false);
         }
 
         public static async Task<IFormFile> BindFile(this HttpRequest request)
         {
-            var files = await request.BindFiles(true);
+            var files = await request.BindFiles(returnOnFirst: true);
 
             return files.First();
         }
