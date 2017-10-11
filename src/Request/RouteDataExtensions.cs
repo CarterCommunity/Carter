@@ -1,4 +1,4 @@
-namespace Botwin.Extensions
+namespace Botwin.Request
 {
     using System;
     using Microsoft.AspNetCore.Routing;

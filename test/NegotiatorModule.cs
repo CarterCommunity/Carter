@@ -1,6 +1,6 @@
 namespace Botwin.Tests
 {
-    using Botwin.Extensions;
+    using Botwin.Response;
 
     public class NegotiatorModule : BotwinModule
     {

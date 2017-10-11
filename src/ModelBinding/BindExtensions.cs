@@ -1,4 +1,4 @@
-namespace Botwin.Extensions
+namespace Botwin.ModelBinding
 {
     using System;
     using System.Collections.Generic;
