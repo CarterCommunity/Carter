@@ -4,6 +4,7 @@ namespace Botwin
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
@@ -40,7 +41,7 @@ namespace Botwin
                     handler = CreateModuleBeforeAfterHandler(module, route);
 
                     var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);
-                    
+
                     routeBuilder.MapVerb(route.verb, route.path, finalHandler);
                 }
             }
@@ -48,11 +49,11 @@ namespace Botwin
             return builder.UseRouter(routeBuilder.Build());
         }
 
-        
+
 
         private static RequestDelegate CreateFinalHandler(RequestDelegate handler, IEnumerable<IStatusCodeHandler> statusCodeHandlers)
         {
-            RequestDelegate finalHandler = async (ctx) =>
+            async Task myFunc(HttpContext ctx)
             {
                 if (HttpMethods.IsHead(ctx.Request.Method))
                 {
@@ -75,13 +76,15 @@ namespace Botwin
                     ctx.Response.Body.SetLength(0);
                     ctx.Response.ContentLength = length;
                 }
+
             };
-            return finalHandler;
+
+            return myFunc;
         }
 
         private static RequestDelegate CreateModuleBeforeAfterHandler(BotwinModule module, (string verb, string path, RequestDelegate handler) route)
         {
-            RequestDelegate afterHandler = async (context) =>
+            async Task afterHandler(HttpContext context)
             {
                 if (module.Before != null)
                 {
@@ -91,9 +94,9 @@ namespace Botwin
                         return;
                     }
                 }
-                
+
                 await route.handler(context);
-                
+
                 if (module.After != null)
                 {
                     await module.After(context);
