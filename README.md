@@ -10,7 +10,8 @@ For a better understanding take a good look at the [samples](https://github.com/
 
 Other extensions include:
 
-* `Bind/BindAndValidate<T>` - [FluentValidation](https://github.com/JeremySkinner/FluentValidation) extensions to validate incoming HTTP requests.  
+* `Bind/BindAndValidate<T>` - [FluentValidation](https://github.com/JeremySkinner/FluentValidation) extensions to validate incoming HTTP requests. 
+* `BindFile/BindFiles/BindFileAndSave/BindFilesAndSave` - Allows you easily get access to a file/files that has been uploaded or alternatively you can call `BindFilesAndSave` and this will save it to a path you specify.
 * Global `Before/After` hooks for every request
 * `Before/After` hooks to the routes defined in a Botwin module
 * Routes to use in common ASP.Net Core middleware eg. `app.UseExceptionHandler("/errorhandler");`.  
