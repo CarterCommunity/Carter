@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <VersionPrefix>1.2.0</VersionPrefix>
+    <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>Jonathan Channon</Authors>
     <Description>Botwin is a library that allows Nancy-esque routing for use with ASP.Net Core.</Description>
     <PackageTags>asp.net core;nancy;.net core;routing;botwin</PackageTags>
@@ -10,7 +10,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="7.1.1" />
+    <PackageReference Include="FluentValidation" Version="7.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="System.ValueTuple" Version="4.4.0" />
