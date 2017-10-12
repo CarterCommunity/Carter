@@ -21,7 +21,7 @@ Other extensions include:
 * Supports two different routing APIs 
 
   (i)
-  ```
+  ```csharp
   this.Get("/actors/{id:int}", async (req, res, routeData) =>
   {
       var person = actorProvider.Get(routeData.As<int>("id"));
@@ -29,7 +29,7 @@ Other extensions include:
   });
   ``` 
   (ii)
-  ```
+  ```csharp
   this.Get("/actors/{id:int}", async (ctx) =>
   {
       var person = actorProvider.Get(ctx.GetRouteData().As<int>("id"));
