@@ -61,7 +61,7 @@ namespace Botwin.ModelBinding
                     }
 
                     postedFiles.Add(file);
-                    
+
                     if (returnOnFirst)
                     {
                         return postedFiles;
@@ -99,6 +99,9 @@ namespace Botwin.ModelBinding
         public static async Task BindAndSaveFile(this HttpRequest request, string saveLocation)
         {
             var file = await request.BindFile();
+
+            if (!Directory.Exists(saveLocation))
+                Directory.CreateDirectory(saveLocation);
 
             using (var fileToSave = File.Create(Path.Combine(saveLocation, file.FileName)))
             {

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Botwin", "src\Botwin.csproj", "{A6D020CF-1722-4AB3-A8B3-69F54319AD6A}"
 EndProject
@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Botwin.Tests", "test\Botwin
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "template", "template", "{47344C99-29DA-410E-AFC2-8FD3BA6727DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BotwinTemplate", "template\content\BotwinTemplate.csproj", "{572762BB-5DFF-425F-8F66-500B973DBB0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BotwinTemplate", "template\content\BotwinTemplate.csproj", "{572762BB-5DFF-425F-8F66-500B973DBB0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,16 +67,16 @@ Global
 		{32E3C950-F6C1-4635-B87F-0EA30044E2F4}.Release|x86.Build.0 = Release|Any CPU
 		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Debug|x64.ActiveCfg = Debug|x64
-		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Debug|x64.Build.0 = Debug|x64
-		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Debug|x86.ActiveCfg = Debug|x86
-		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Debug|x86.Build.0 = Debug|x86
+		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Debug|x64.Build.0 = Debug|Any CPU
+		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Debug|x86.Build.0 = Debug|Any CPU
 		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Release|x64.ActiveCfg = Release|x64
-		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Release|x64.Build.0 = Release|x64
-		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Release|x86.ActiveCfg = Release|x86
-		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Release|x86.Build.0 = Release|x86
+		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Release|x64.ActiveCfg = Release|Any CPU
+		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Release|x64.Build.0 = Release|Any CPU
+		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Release|x86.ActiveCfg = Release|Any CPU
+		{572762BB-5DFF-425F-8F66-500B973DBB0E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
