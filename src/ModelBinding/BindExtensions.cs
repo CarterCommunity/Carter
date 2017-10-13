@@ -61,7 +61,7 @@ namespace Botwin.ModelBinding
                     }
 
                     postedFiles.Add(file);
-                    
+
                     if (returnOnFirst)
                     {
                         return postedFiles;
@@ -87,23 +87,27 @@ namespace Botwin.ModelBinding
         public static async Task BindAndSaveFiles(this HttpRequest request, string saveLocation)
         {
             var files = await request.BindFiles();
+
             foreach (var file in files)
-            {
-                using (var fileToSave = File.Create(Path.Combine(saveLocation, file.FileName)))
-                {
-                    await file.CopyToAsync(fileToSave);
-                }
-            }
+                await SaveFileInternal(file, saveLocation);
         }
 
-        public static async Task BindAndSaveFile(this HttpRequest request, string saveLocation)
+        public static async Task BindAndSaveFile(this HttpRequest request, string saveLocation, string fileName = "")
         {
             var file = await request.BindFile();
 
-            using (var fileToSave = File.Create(Path.Combine(saveLocation, file.FileName)))
-            {
+            await SaveFileInternal(file, saveLocation, fileName);
+        }
+
+        private static async Task SaveFileInternal(IFormFile file, string saveLocation, string fileName = "")
+        {
+            if (!Directory.Exists(saveLocation))
+                Directory.CreateDirectory(saveLocation);
+
+            fileName = !string.IsNullOrWhiteSpace(fileName) ? fileName : file.FileName;
+
+            using (var fileToSave = File.Create(Path.Combine(saveLocation, fileName)))
                 await file.CopyToAsync(fileToSave);
-            }
         }
     }
 }
