@@ -116,6 +116,76 @@ namespace Botwin.Tests
                 Directory.Delete(model.Path, true);
             }
         }
+
+        [Fact]
+        public async Task Should_create_file_with_default_filename()
+        {
+            var multipartFormData = new MultipartFormDataContent();
+
+            using (var ms = new MemoryStream())
+            using (var sw = new StreamWriter(ms))
+            {
+                await sw.WriteLineAsync("Testing");
+
+                multipartFormData.Add(new StreamContent(ms)
+                {
+                    Headers =
+                    {
+                        ContentLength = ms.Length,
+                        ContentType = new MediaTypeHeaderValue("text/plain")
+                    }
+                }, "File", "test.txt");
+
+                var res = await this.httpClient.PostAsync("/bindandsave", multipartFormData);
+                var body = await res.Content.ReadAsStringAsync();
+                var model = JsonConvert.DeserializeObject<PathTestModel>(body);
+
+                Assert.True(res.IsSuccessStatusCode);
+                Assert.True(Directory.Exists(model.Path));
+
+                var files = Directory.GetFiles(model.Path);
+
+                Assert.NotEmpty(files);
+                Assert.True(files.All(x => new FileInfo(x).Name.Equals("test.txt")));
+
+                Directory.Delete(model.Path, true);
+            }
+        }
+
+        [Fact]
+        public async Task Should_create_file_with_custom_filename()
+        {
+            var multipartFormData = new MultipartFormDataContent();
+
+            using (var ms = new MemoryStream())
+            using (var sw = new StreamWriter(ms))
+            {
+                await sw.WriteLineAsync("Testing");
+
+                multipartFormData.Add(new StreamContent(ms)
+                {
+                    Headers =
+                    {
+                        ContentLength = ms.Length,
+                        ContentType = new MediaTypeHeaderValue("text/plain")
+                    }
+                }, "File", "test.txt");
+
+                var res = await this.httpClient.PostAsync("/bindandsavecustomname", multipartFormData);
+                var body = await res.Content.ReadAsStringAsync();
+                var model = JsonConvert.DeserializeObject<PathTestModel>(body);
+
+                Assert.True(res.IsSuccessStatusCode);
+                Assert.True(Directory.Exists(model.Path));
+
+                var files = Directory.GetFiles(model.Path);
+
+                Assert.NotEmpty(files);
+                Assert.True(files.All(x => new FileInfo(x).Name.Equals("mycustom.txt")));
+
+                Directory.Delete(model.Path, true);
+            }
+        }
     }
 
     public class TestModel
@@ -206,6 +276,15 @@ namespace Botwin.Tests
                 var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
                 await req.BindAndSaveFile(filePath);
+
+                await res.Negotiate(new PathTestModel { Path = filePath });
+            });
+
+            this.Post("/bindandsavecustomname", async (req, res, routeData) =>
+            {
+                var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
+                await req.BindAndSaveFile(filePath, "mycustom.txt");
 
                 await res.Negotiate(new PathTestModel { Path = filePath });
             });
