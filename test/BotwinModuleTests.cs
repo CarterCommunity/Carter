@@ -197,7 +197,7 @@
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(200, (int)response.StatusCode);
-            Assert.True(body.Contains($"Managed to parse multiple ints 2"));
+            Assert.True(body.Contains("Managed to parse multiple ints 2"));
         }
 
         [Fact]
@@ -208,7 +208,7 @@
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(200, (int)response.StatusCode);
-            Assert.True(body.Contains($"Managed to parse default int 69"));
+            Assert.True(body.Contains("Managed to parse default int 69"));
         }
     }
 }
