@@ -1,10 +1,8 @@
 namespace Botwin.Tests
 {
     using System.Linq;
-    using System.Text;
     using Botwin.Request;
     using Microsoft.AspNetCore.Http;
-    using System.Threading.Tasks;
 
     public class TestModule : BotwinModule
     {
