@@ -16,7 +16,7 @@ namespace Botwin.Tests
 
             this.After = async (ctx) => { await ctx.Response.WriteAsync("After"); };
             this.Get("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });
-            
+
             this.Get("/querystring", async ctx =>
             {
                 var id = ctx.Request.Query.As<int>("id");
@@ -34,7 +34,19 @@ namespace Botwin.Tests
                 var id = ctx.Request.Query.As<int>("id", 69);
                 await ctx.Response.WriteAsync($"Managed to parse default int {id}");
             });
-              
+
+            this.Post("/asstring", async ctx =>
+            {
+                var content = ctx.Request.Body.AsString();
+                await ctx.Response.WriteAsync(content);
+            });
+
+            this.Post("/asstringasync", async ctx =>
+            {
+                var content = await ctx.Request.Body.AsStringAsync();
+                await ctx.Response.WriteAsync(content);
+            });
+
             this.Post("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });
             this.Put("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });
             this.Delete("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });
