@@ -45,12 +45,8 @@ namespace Botwin.Tests
 
             this.Post("/asstringasync", async ctx =>
             {
-                var foo = ctx.Request.Body.AsStringAsync();
-                var bar = ctx.Request.Body.AsStringAsync(Encoding.UTF8);
-
-                await Task.WhenAll(foo, bar);
-
-                await ctx.Response.WriteAsync($"This is {nameof(foo)}: {await foo}, and {nameof(bar)} doesn't matter now.");
+                var content = await ctx.Request.Body.AsStringAsync();
+                await ctx.Response.WriteAsync(content);
             });
 
             this.Post("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });

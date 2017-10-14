@@ -42,6 +42,32 @@
         }
 
         [Fact]
+        public async Task Should_return_POST_request_body_AsString()
+        {
+            const string content = "Hello";
+
+            var response = await this.httpClient.PostAsync("/asstring", new StringContent(content));
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains(content));
+        }
+
+        [Fact]
+        public async Task Should_return_POST_request_body_AsStringAsync()
+        {
+            const string content = "Hello";
+
+            var response = await this.httpClient.PostAsync("/asstringasync", new StringContent(content));
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains(content));
+        }
+
+        [Fact]
         public async Task Should_return_PUT_requests()
         {
             var response = await this.httpClient.PutAsync("/", new StringContent(""));

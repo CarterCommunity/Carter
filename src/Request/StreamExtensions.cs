@@ -9,46 +9,62 @@
     {
         public static string AsString(this Stream stream)
         {
-            var reader = new StreamReader(stream);
+            using (var reader = new StreamReader(stream))
+            {
+                var readStream = reader.ReadToEnd();
 
-            var readStream = reader.ReadToEnd();
+                if (stream.CanSeek)
+                {
+                    stream.Position = 0;
+                }
 
-            stream.Position = 0;
-
-            return readStream;
+                return readStream;
+            }
         }
 
         public static string AsString(this Stream stream, Encoding encoding)
         {
-            var reader = new StreamReader(stream, encoding);
+            using (var reader = new StreamReader(stream, encoding))
+            {
+                var readStream = reader.ReadToEnd();
 
-            var readStream = reader.ReadToEnd();
+                if (stream.CanSeek)
+                {
+                    stream.Position = 0;
+                }
 
-            stream.Position = 0;
-
-            return readStream;
+                return readStream;
+            }
         }
 
-        public static async Task<string> AsStringAsync(this Stream stream, CancellationToken cancellationToken = default)
+        public static async Task<string> AsStringAsync(this Stream stream, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var reader = new StreamReader(stream);
+            using (var reader = new StreamReader(stream))
+            {
+                var readStream = await reader.ReadToEndAsync();
 
-            var readStream = await reader.ReadToEndAsync();
+                if (stream.CanSeek)
+                {
+                    stream.Position = 0;
+                }
 
-            stream.Position = 0;
-
-            return readStream;
+                return readStream;
+            }
         }
 
-        public static async Task<string> AsStringAsync(this Stream stream, Encoding encoding, CancellationToken cancellationToken = default)
+        public static async Task<string> AsStringAsync(this Stream stream, Encoding encoding, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var reader = new StreamReader(stream, encoding);
+            using (var reader = new StreamReader(stream, encoding))
+            {
+                var readStream = await reader.ReadToEndAsync();
 
-            var readStream = await reader.ReadToEndAsync();
+                if (stream.CanSeek)
+                {
+                    stream.Position = 0;
+                }
 
-            stream.Position = 0;
-
-            return readStream;
+                return readStream;
+            }
         }
     }
 }
