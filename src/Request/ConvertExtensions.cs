@@ -20,7 +20,7 @@
             return (T)Convert.ChangeType(value, type);
         }
 
-        public static IEnumerable<T> ConvertMultipleTo<T>(this IEnumerable<object> values)
+        public static IEnumerable<T> ConvertMultipleTo<T>(this IEnumerable<string> values)
         {
             var type = typeof(T);
             var underlyingType = Nullable.GetUnderlyingType(type);
