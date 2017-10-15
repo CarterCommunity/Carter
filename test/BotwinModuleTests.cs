@@ -213,6 +213,18 @@
             Assert.True(body.Contains($"Managed to parse an int {idToTest}"));
         }
 
+        [Fact]
+        public async Task Should_return_GET_requests_with_parsed_querystring_with_nullable_parameter()
+        {
+            const int idToTest = 69;
+            var response = await this.httpClient.GetAsync($"/nullablequerystring?id={idToTest}");
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains($"Managed to parse a Nullable<int> {idToTest}"));
+        }
+
         [Theory]
         [InlineData("/multiquerystring?id=1&id=2")]
         [InlineData("/multiquerystring?id=1,2")]
@@ -224,6 +236,19 @@
 
             Assert.Equal(200, (int)response.StatusCode);
             Assert.True(body.Contains("Managed to parse multiple ints 2"));
+        }
+
+        [Theory]
+        [InlineData("/nullablemultiquerystring?id=1&id=2")]
+        [InlineData("/nullablemultiquerystring?id=1,2")]
+        public async Task Should_return_GET_requests_with_multiple_parsed_querystring_with_nullable_parameters(string url)
+        {
+            var response = await this.httpClient.GetAsync(url);
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains("Managed to parse multiple Nullable<int>s 2"));
         }
 
         [Fact]

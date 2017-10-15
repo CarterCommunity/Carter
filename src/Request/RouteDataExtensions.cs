@@ -9,7 +9,7 @@ namespace Botwin.Request
         {
             var value = routeData.Values[key];
 
-            return (T)Convert.ChangeType(value, typeof(T));
+            return value.ConvertTo<T>();
         }
     }
 }
