@@ -16,7 +16,7 @@
                 return defaultValue;
             }
 
-            return (T)Convert.ChangeType(value, typeof(T));
+            return value.ConvertTo<T>();
         }
 
         public static IEnumerable<T> AsMultiple<T>(this IQueryCollection query, string key)
@@ -24,11 +24,8 @@
             var values = query[key];
 
             var splitValues = values.SelectMany(x => x.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-                
-            foreach (var val in splitValues)
-            {
-                yield return (T)Convert.ChangeType(val, typeof(T));
-            }
+
+            return splitValues.ConvertMultipleTo<T>();
         }
     }
 }

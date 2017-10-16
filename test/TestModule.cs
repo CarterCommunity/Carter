@@ -23,10 +23,22 @@ namespace Botwin.Tests
                 await ctx.Response.WriteAsync($"Managed to parse an int {id}");
             });
 
+            this.Get("/nullablequerystring", async ctx =>
+            {
+                var id = ctx.Request.Query.As<int?>("id");
+                await ctx.Response.WriteAsync($"Managed to parse a Nullable<int> {id}");
+            });
+
             this.Get("/multiquerystring", async ctx =>
             {
                 var id = ctx.Request.Query.AsMultiple<int>("id");
                 await ctx.Response.WriteAsync($"Managed to parse multiple ints {id.Count()}");
+            });
+
+            this.Get("/nullablemultiquerystring", async ctx =>
+            {
+                var id = ctx.Request.Query.AsMultiple<int?>("id");
+                await ctx.Response.WriteAsync($"Managed to parse multiple Nullable<int>s {id.Count()}");
             });
 
             this.Get("/querystringdefault", async ctx =>
