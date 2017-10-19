@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Net.Http.Headers;
@@ -15,10 +16,10 @@
             return accept.Any(x => x.MediaType.ToString().IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
-        public async Task Handle(HttpRequest req, HttpResponse res, object model)
+        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken)
         {
             res.ContentType = "application/json; charset=utf-8";
-            await res.WriteAsync(JsonConvert.SerializeObject(model));
+            await res.WriteAsync(JsonConvert.SerializeObject(model), cancellationToken);
         }
     }
 }
