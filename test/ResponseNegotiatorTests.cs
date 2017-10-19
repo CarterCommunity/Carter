@@ -5,6 +5,7 @@ namespace Botwin.Tests
     using System.Linq;
     using System.Net.Http;
     using System.Reflection;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -62,9 +63,9 @@ namespace Botwin.Tests
             return accept.Any(x => x.MediaType.ToString().IndexOf("foo/bar", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
-        public async Task Handle(HttpRequest req, HttpResponse res, object model)
+        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken))
         {
-            await res.WriteAsync("FOOBAR");
+            await res.WriteAsync("FOOBAR", cancellationToken);
         }
     }
 }
