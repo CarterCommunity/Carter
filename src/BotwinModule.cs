@@ -12,7 +12,7 @@ namespace Botwin
 
         private readonly string basePath;
 
-        public Func<HttpContext, Task<bool>> Before { get; protected set; }
+        public Func<HttpContext, Task<bool>> Before { get; set; } 
 
         public RequestDelegate After { get; protected set; }
 
