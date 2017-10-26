@@ -1,5 +1,7 @@
 ﻿namespace Botwin.Tests
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Net.Http;
     using System.Reflection;
     using System.Security.Claims;
@@ -14,7 +16,7 @@
     {
         private HttpClient httpClient;
 
-        private void ConfigureServer(bool authedUser = false)
+        private void ConfigureServer(bool authedUser = false, IEnumerable<Claim> claims = null)
         {
             var server = new TestServer(new WebHostBuilder()
                 .ConfigureServices(x => { x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly); })
@@ -24,11 +26,16 @@
                     {
                         x.Use(async (context, next) =>
                         {
-                            context.User = new ClaimsPrincipal(new GenericIdentity("AuthedUser"));
+                            var identity = new GenericIdentity("AuthedUser");
+                            if (claims != null)
+                            {
+                                identity.AddClaims(claims);
+                            }
+                            context.User = new ClaimsPrincipal(identity);
                             await next();
                         });
                     }
-                    
+
                     x.UseBotwin();
                 })
             );
@@ -50,12 +57,64 @@
         }
 
         [Fact]
-        public async Task Should_hit_route_if_user_authenticated()
+        public async Task Should_return_200_if_user_authenticated()
         {
             //Given
             this.ConfigureServer(authedUser: true);
             //When 
             var response = await this.httpClient.GetAsync("/secure");
+            var body = response.StatusCode;
+
+            //Then
+            Assert.Equal(200, (int)body);
+        }
+        
+        [Fact]
+        public async Task Should_return_401_when_not_authed_user_but_module_reqiures_claims()
+        {
+            //Given
+            this.ConfigureServer();
+            //When 
+            var response = await this.httpClient.GetAsync("/secureclaim");
+            var body = response.StatusCode;
+
+            //Then
+            Assert.Equal(401, (int)body);
+        }
+
+        [Fact]
+        public async Task Should_return_401_when_no_claims()
+        {
+            //Given
+            this.ConfigureServer(authedUser: true);
+            //When 
+            var response = await this.httpClient.GetAsync("/secureclaim");
+            var body = response.StatusCode;
+
+            //Then
+            Assert.Equal(401, (int)body);
+        }
+
+        [Fact]
+        public async Task Should_return_401_when_invalid_claims()
+        {
+            //Given
+            this.ConfigureServer(authedUser: true, claims: new[] { new Claim(ClaimTypes.Thumbprint, "Zebra") });
+            //When 
+            var response = await this.httpClient.GetAsync("/secureclaim");
+            var body = response.StatusCode;
+
+            //Then
+            Assert.Equal(401, (int)body);
+        }
+
+        [Fact]
+        public async Task Should_return_200_when_valid_claims()
+        {
+            //Given
+            this.ConfigureServer(authedUser: true, claims: new[] { new Claim(ClaimTypes.Actor, "Christian Slater") });
+            //When 
+            var response = await this.httpClient.GetAsync("/secureclaim");
             var body = response.StatusCode;
 
             //Then
