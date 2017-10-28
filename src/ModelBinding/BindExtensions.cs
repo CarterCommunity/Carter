@@ -14,6 +14,12 @@ namespace Botwin.ModelBinding
     {
         private static readonly JsonSerializer JsonSerializer = new JsonSerializer();
 
+        /// <summary>
+        /// Bind the incoming request body to a model and validate it
+        /// </summary>
+        /// <param name="request">Current <see cref="HttpRequest"/></param>
+        /// <typeparam name="T">Model type</typeparam>
+        /// <returns>Bound model</returns>
         public static (ValidationResult ValidationResult, T Data) BindAndValidate<T>(this HttpRequest request)
         {
             var data = request.Bind<T>();
@@ -35,6 +41,12 @@ namespace Botwin.ModelBinding
             return (result, data);
         }
 
+        /// <summary>
+        /// Bind the incoming request body to a model
+        /// </summary>
+        /// <param name="request">Current <see cref="HttpRequest"/></param>
+        /// <typeparam name="T">Model type</typeparam>
+        /// <returns>Bound model</returns>
         public static T Bind<T>(this HttpRequest request)
         {
             using (var streamReader = new StreamReader(request.Body))
@@ -72,11 +84,21 @@ namespace Botwin.ModelBinding
             return postedFiles;
         }
 
+        /// <summary>
+        /// Bind the <see cref="HttpRequest"/> form and return an <see cref="IEnumerable{IFormFile}"/> of files
+        /// </summary>
+        /// <param name="request">Current <see cref="HttpRequest"/></param>
+        /// <returns><see cref="IEnumerable{IFormFile}"/></returns>
         public static async Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request)
         {
             return await request.BindFiles(returnOnFirst: false);
         }
 
+        /// <summary>
+        /// Bind the <see cref="HttpRequest"/> form and return the first <see cref="IFormFile"/>
+        /// </summary>
+        /// <param name="request">Current <see cref="HttpRequest"/></param>
+        /// <returns><see cref="IFormFile"/></returns>
         public static async Task<IFormFile> BindFile(this HttpRequest request)
         {
             var files = await request.BindFiles(returnOnFirst: true);
@@ -84,6 +106,12 @@ namespace Botwin.ModelBinding
             return files.First();
         }
 
+        /// <summary>
+        /// Save all files in the <see cref="HttpRequest"/> form to the path provided by <param name="saveLocation"></param>
+        /// </summary>
+        /// <param name="request">Current <see cref="HttpRequest"/></param>
+        /// <param name="saveLocation">The location of where to save the file</param>
+        /// <returns>Awaited <see cref="Task"/></returns>
         public static async Task BindAndSaveFiles(this HttpRequest request, string saveLocation)
         {
             var files = await request.BindFiles();
@@ -92,6 +120,13 @@ namespace Botwin.ModelBinding
                 await SaveFileInternal(file, saveLocation);
         }
 
+        /// <summary>
+        /// Save the first file in the <see cref="HttpRequest"/> form to the path provided by <param name="fileName"></param>
+        /// </summary>
+        /// <param name="request">Current <see cref="HttpRequest"/></param>
+        /// <param name="saveLocation">The location of where to save the file</param>
+        /// <param name="fileName">The filename to use when saving the file</param>
+        /// <returns>Awaited <see cref="Task"/></returns>
         public static async Task BindAndSaveFile(this HttpRequest request, string saveLocation, string fileName = "")
         {
             var file = await request.BindFile();
