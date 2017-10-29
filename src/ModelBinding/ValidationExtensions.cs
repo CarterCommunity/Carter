@@ -10,7 +10,7 @@ namespace Botwin.ModelBinding
         /// Retrieve formatted validation errors
         /// </summary>
         /// <param name="result"><see cref="ValidationResult"/></param>
-        /// <returns>Property names and associated error messages <see cref="IEnumerable{dynamic}"/></returns>
+        /// <returns><see cref="IEnumerable{dynamic}"/> of property names and associated error messages</returns>
         public static IEnumerable<dynamic> GetFormattedErrors(this ValidationResult result)
         {
             return result.Errors.Select(x => new { x.PropertyName, x.ErrorMessage });

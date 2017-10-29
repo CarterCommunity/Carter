@@ -8,13 +8,13 @@
     public static class QueryStringExtensions
     {
         /// <summary>
-        /// Retrieve strongly typed query paramater value for given key
+        /// Retrieve strongly typed query parameter value for given key
         /// </summary>
         /// <typeparam name="T">Query param type</typeparam>
         /// <param name="query"><see cref="IQueryCollection"/></param>
         /// <param name="key">Query param key</param>
-        /// <param name="defaultValue">Default quary paramter value</param>
-        /// <returns>Query paramater value</returns>
+        /// <param name="defaultValue">Default value if key not found</param>
+        /// <returns>Query parameter value</returns>
         public static T As<T>(this IQueryCollection query, string key, T defaultValue = default(T))
         {
             var value = query[key].FirstOrDefault();
@@ -28,7 +28,7 @@
         }
 
         /// <summary>
-        /// Retrieve strongly typed query paramater values for given key
+        /// Retrieve strongly typed query parameter values for given key
         /// </summary>
         /// <typeparam name="T">Query param type</typeparam>
         /// <param name="query"><see cref="IQueryCollection"/></param>
