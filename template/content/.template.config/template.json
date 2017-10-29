@@ -1,0 +1,16 @@
+{
+    "author": "Jonathan Channon <jonathan.channon@gmail.com>",
+    "classifications": [
+        "Botwin",
+        "Botwin Template",
+        "NancyFX"
+    ],
+    "name": "Botwin Template",
+    "groupIdentity": "Botwin",
+    "identity": "Botwin.Template",
+    "shortName": "botwin",
+    "tags": {
+        "language": "C#"
+    },
+    "sourceName": "BotwinTemplate"
+}

@@ -4,11 +4,12 @@ namespace Botwin.Tests
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
+    using System.Reflection;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Net.Http.Headers;
     using Xunit;
 
@@ -23,9 +24,7 @@ namespace Botwin.Tests
             this.server = new TestServer(new WebHostBuilder()
                             .ConfigureServices(x =>
                             {
-                                x.AddSingleton<IAssemblyProvider, TestAssemblyProvider>();
-                                //x.AddSingleton<IResponseNegotiator, TestResponseNegotiator>();
-                                x.AddBotwin();
+                                x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly);
                             })
                             .Configure(x => x.UseBotwin())
                         );
@@ -61,12 +60,12 @@ namespace Botwin.Tests
     {
         public bool CanHandle(IList<MediaTypeHeaderValue> accept)
         {
-            return accept.Any(x => x.MediaType.IndexOf("foo/bar", StringComparison.OrdinalIgnoreCase) >= 0);
+            return accept.Any(x => x.MediaType.ToString().IndexOf("foo/bar", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
-        public async Task Handle(HttpRequest req, HttpResponse res, object model)
+        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken))
         {
-            await res.WriteAsync("FOOBAR");
+            await res.WriteAsync("FOOBAR", cancellationToken);
         }
     }
 }

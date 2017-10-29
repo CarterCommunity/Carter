@@ -1,12 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard1.5</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <Authors>Jonathan Channon</Authors>
+    <Description>Botwin is a library that allows Nancy-esque routing for use with ASP.Net Core.</Description>
+    <PackageTags>asp.net core;nancy;.net core;routing;botwin</PackageTags>
+    <PackageProjectUrl>https://github.com/jchannon/botwin</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/jchannon/Botwin/blob/master/LICENSE</PackageLicenseUrl>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="6.4.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.0.0-preview1-24352" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
-    <PackageReference Include="System.ValueTuple" Version="4.3.0" />
-    <PackageReference Include="microsoft.extensions.dependencyinjection" Version="2.0.0-preview1-24352"/>
+    <PackageReference Include="FluentValidation" Version="7.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="System.ValueTuple" Version="4.4.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
   </ItemGroup>
 </Project>

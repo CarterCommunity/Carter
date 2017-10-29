@@ -1,5 +1,8 @@
 namespace Botwin.Samples
 {
+    using Botwin.ModelBinding;
+    using Botwin.Request;
+    using Botwin.Response;
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
 
@@ -15,7 +18,7 @@ namespace Botwin.Samples
 
             this.Get("/actors/{id:int}", async (req, res, routeData) =>
             {
-                var person = actorProvider.Get(routeData.AsInt("id"));
+                var person = actorProvider.Get(routeData.As<int>("id"));
                 await res.Negotiate(person);
             });
 

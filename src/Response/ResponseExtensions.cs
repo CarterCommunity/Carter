@@ -1,4 +1,4 @@
-namespace Botwin
+namespace Botwin.Response
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -18,7 +18,7 @@ namespace Botwin
 
             var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(accept)) ?? negotiators.FirstOrDefault(x => x.CanHandle(new List<MediaTypeHeaderValue>() { new MediaTypeHeaderValue("application/json") }));
 
-            await negotiator.Handle(response.HttpContext.Request, response, obj);
+            await negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
         }
 
         public static async Task AsJson(this HttpResponse response, object obj, CancellationToken cancellationToken = default(CancellationToken))
@@ -27,7 +27,7 @@ namespace Botwin
 
             var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(new List<MediaTypeHeaderValue>() { new MediaTypeHeaderValue("application/json") }));
 
-            await negotiator.Handle(response.HttpContext.Request, response, obj);
+            await negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
         }
     }
 }

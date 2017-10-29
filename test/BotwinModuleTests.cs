@@ -1,10 +1,10 @@
 ﻿namespace Botwin.Tests
 {
     using System.Net.Http;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
-    using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
     public class BotwinModuleTests
@@ -18,8 +18,7 @@
             this.server = new TestServer(new WebHostBuilder()
                 .ConfigureServices(x =>
                 {
-                    x.AddSingleton<IAssemblyProvider, TestAssemblyProvider>();
-                    x.AddBotwin();
+                    x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly);
                 })
                 .Configure(x => x.UseBotwin())
             );
@@ -40,6 +39,32 @@
             var response = await this.httpClient.PostAsync("/", new StringContent(""));
 
             Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_POST_request_body_AsString()
+        {
+            const string content = "Hello";
+
+            var response = await this.httpClient.PostAsync("/asstring", new StringContent(content));
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains(content));
+        }
+
+        [Fact]
+        public async Task Should_return_POST_request_body_AsStringAsync()
+        {
+            const string content = "Hello";
+
+            var response = await this.httpClient.PostAsync("/asstringasync", new StringContent(content));
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains(content));
         }
 
         [Fact]
@@ -75,6 +100,84 @@
         }
 
         [Fact]
+        public async Task Should_return_OPTIONS_requests()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Options, "/"));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_PATCH_requests()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"), "/"));
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_GET_requests_with_base_path()
+        {
+            var response = await this.httpClient.GetAsync("/test/");
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_POST_requests_with_base_path()
+        {
+            var response = await this.httpClient.PostAsync("/test/", new StringContent(""));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_PUT_requests_with_base_path()
+        {
+            var response = await this.httpClient.PutAsync("/test/", new StringContent(""));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_DELETE_requests_with_base_path()
+        {
+            var response = await this.httpClient.DeleteAsync("/test/");
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_HEAD_requests_with_base_path()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, "/test/head/"));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_HEAD_requests_for_defined_GET_routes_with_base_path()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, "/test/"));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_OPTIONS_requests_with_base_path()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Options, "/test/"));
+
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_PATCH_requests_with_base_path()
+        {
+            var response = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"), "/test/"));
+            Assert.Equal(200, (int)response.StatusCode);
+        }
+
+        [Fact]
         public async Task Should_handle_module_before_hook()
         {
             var response = await this.httpClient.GetAsync("/");
@@ -96,6 +199,67 @@
             var response = await this.httpClient.GetAsync("/");
             var body = await response.Content.ReadAsStringAsync();
             Assert.True(body.Contains("After"));
+        }
+
+        [Fact]
+        public async Task Should_return_GET_requests_with_parsed_querystring()
+        {
+            const int idToTest = 69;
+            var response = await this.httpClient.GetAsync($"/querystring?id={idToTest}");
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains($"Managed to parse an int {idToTest}"));
+        }
+
+        [Fact]
+        public async Task Should_return_GET_requests_with_parsed_querystring_with_nullable_parameter()
+        {
+            const int idToTest = 69;
+            var response = await this.httpClient.GetAsync($"/nullablequerystring?id={idToTest}");
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains($"Managed to parse a Nullable<int> {idToTest}"));
+        }
+
+        [Theory]
+        [InlineData("/multiquerystring?id=1&id=2")]
+        [InlineData("/multiquerystring?id=1,2")]
+        public async Task Should_return_GET_requests_with_multiple_parsed_querystring(string url)
+        {
+            var response = await this.httpClient.GetAsync(url);
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains("Managed to parse multiple ints 2"));
+        }
+
+        [Theory]
+        [InlineData("/nullablemultiquerystring?id=1&id=2")]
+        [InlineData("/nullablemultiquerystring?id=1,2")]
+        public async Task Should_return_GET_requests_with_multiple_parsed_querystring_with_nullable_parameters(string url)
+        {
+            var response = await this.httpClient.GetAsync(url);
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains("Managed to parse multiple Nullable<int>s 2"));
+        }
+
+        [Fact]
+        public async Task Should_return_GET_requests_with_parsed_quersytring_with_default_value()
+        {
+            var response = await this.httpClient.GetAsync("querystringdefault");
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(200, (int)response.StatusCode);
+            Assert.True(body.Contains("Managed to parse default int 69"));
         }
     }
 }

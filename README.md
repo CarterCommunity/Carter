@@ -1,20 +1,41 @@
 # Botwin
 
+[![NuGet Version](http://img.shields.io/nuget/v/Botwin.svg?style=flat)](https://www.nuget.org/packages/Botwin/) 
+
 Botwin is a library that allows [Nancy-esque](http://nancyfx.org) routing for use with ASP.Net Core. 
 
 This is not a framework, it simply builds on top of [Microsoft.AspNetCore.Routing](https://github.com/aspnet/Routing) allowing you to have more elegant routing rather than have attribute routing, convention routing, ASP.Net Controllers or `IRouteBuilder` extensions. 
 
 For a better understanding take a good look at the [samples](https://github.com/jchannon/Botwin/tree/master/samples) inside this repo.  The sample also demonstrates usages of elegant extensions around common ASP.Net Core types as shown below.  
 
-Other extensions inculde:
+Other extensions include:
 
-* `Bind/BindndValidate<T>` - [FluentValidation](https://github.com/JeremySkinner/FluentValidation) extensions to validate incoming HTTP requests.  
-* Global `Before/After hooks` for every request
+* `Bind/BindAndValidate<T>` - [FluentValidation](https://github.com/JeremySkinner/FluentValidation) extensions to validate incoming HTTP requests. 
+* `BindFile/BindFiles/BindFileAndSave/BindFilesAndSave` - Allows you easily get access to a file/files that has been uploaded or alternatively you can call `BindFilesAndSave` and this will save it to a path you specify.
+* Global `Before/After` hooks for every request
 * `Before/After` hooks to the routes defined in a Botwin module
 * Routes to use in common ASP.Net Core middleware eg. `app.UseExceptionHandler("/errorhandler");`.  
 * `IStatusCodeHandler`s are also an option as the ASP.Net Core `UseStatusCodePages` middleware is not elegant enough IMO. `IStatusCodeHandler`s allow you to define what happens when one of your routes returns a specific status code.  An example usage is shown in the sample.
 * `IResponseNegotiator`s allow you to define how the response should look on a certain Accept header.  Handling JSON is built in and the default response but implementing an interface allows the user to choose how they want to represent resources.
 * All interface implementations are registered into ASP.Net Core DI automatically, implement the interface and off you go.
+* Supports two different routing APIs 
+
+  (i)
+  ```csharp
+  this.Get("/actors/{id:int}", async (req, res, routeData) =>
+  {
+      var person = actorProvider.Get(routeData.As<int>("id"));
+      await res.Negotiate(person);
+  });
+  ``` 
+  (ii)
+  ```csharp
+  this.Get("/actors/{id:int}", async (ctx) =>
+  {
+      var person = actorProvider.Get(ctx.GetRouteData().As<int>("id"));
+      await ctx.Response.Negotiate(person);
+  };
+  ```
 
 
 ### Where does the name "Botwin" come from?
@@ -23,9 +44,23 @@ I have been a huge fan of and core contributor to [Nancy](http://nancyfx.org), t
 
 I was also trying to think of a derivative name and I had recently been watching [Weeds](http://www.imdb.com/title/tt0439100/) and the lead character was called Nancy Botwin so this is where I got the name from! 
 
+### Getting Started
+
+A template for Botwin is out!
+
+`dotnet new -i BotwinTemplate`
+
+`dotnet new botwin -n MyBotwinApp`
+
+`dotnet run`
+
+Enjoy!
+
+[https://www.nuget.org/packages/BotwinTemplate/](https://www.nuget.org/packages/BotwinTemplate/)
+
 ### Sample
 
-```
+```csharp
 public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
@@ -52,7 +87,7 @@ public class ActorsModule : BotwinModule
 
         this.Get("/actors/{id:int}", async (req, res, routeData) =>
         {
-            var person = actorProvider.Get(routeData.AsInt("id"));
+            var person = actorProvider.Get(routeData.As<int>("id"));
             await res.Negotiate(person);
         });
 
