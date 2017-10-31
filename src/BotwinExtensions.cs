@@ -12,11 +12,22 @@ namespace Botwin
 
     public static class BotwinExtensions
     {
+        /// <summary>
+        /// Adds Botwin to the specified <see cref="IApplicationBuilder"/>.
+        /// </summary>
+        /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
+        /// <returns>A reference to this instance after the operation has completed.</returns>
         public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder)
         {
             return UseBotwin(builder, null);
         }
 
+        /// <summary>
+        /// Adds Botwin to the specified <see cref="IApplicationBuilder"/>.
+        /// </summary>
+        /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
+        /// <param name="options">A <see cref="BotwinOptions"/> instance.</param>
+        /// <returns>A reference to this instance after the operation has completed.</returns>
         public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options)
         {
             ApplyGlobalBeforeHook(builder, options);
@@ -47,8 +58,6 @@ namespace Botwin
 
             return builder.UseRouter(routeBuilder.Build());
         }
-
-        
 
         private static RequestDelegate CreateFinalHandler(RequestDelegate handler, IEnumerable<IStatusCodeHandler> statusCodeHandlers)
         {
@@ -130,6 +139,11 @@ namespace Botwin
             }
         }
 
+        /// <summary>
+        /// Adds Botwin to the specified <see cref="IServiceCollection"/>.
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to add Botwin to.</param>
+        /// <param name="assemblies">Optional array of <see cref="Assembly"/> to add to the services collection. If assemblies are not provided, Assembly.GetEntryAssembly is called.</param>
         public static void AddBotwin(this IServiceCollection services, params Assembly[] assemblies)
         {
             assemblies = assemblies.Any() ? assemblies : new[] { Assembly.GetEntryAssembly() };
