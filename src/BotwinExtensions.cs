@@ -19,14 +19,16 @@ namespace Botwin
 
         public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options)
         {
+            //Invoke so ctors are called that adds routes to IRouter
+            var srvs = builder.ApplicationServices.GetServices<BotwinModule>();
+
+            Add405Handler(builder, srvs);
+
             ApplyGlobalBeforeHook(builder, options);
 
             ApplyGlobalAfterHook(builder, options);
 
             var routeBuilder = new RouteBuilder(builder);
-
-            //Invoke so ctors are called that adds routes to IRouter
-            var srvs = builder.ApplicationServices.GetServices<BotwinModule>();
 
             //Cache status code handlers
             var statusCodeHandlers = builder.ApplicationServices.GetServices<IStatusCodeHandler>();
@@ -40,7 +42,7 @@ namespace Botwin
                     handler = CreateModuleBeforeAfterHandler(module, route);
 
                     var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);
-                    
+
                     routeBuilder.MapVerb(route.verb, route.path, finalHandler);
                 }
             }
@@ -48,7 +50,30 @@ namespace Botwin
             return builder.UseRouter(routeBuilder.Build());
         }
 
-        
+        private static void Add405Handler(IApplicationBuilder builder, IEnumerable<BotwinModule> srvs)
+        {
+            var systemRoutes = new List<(string verb, string route)>();
+
+            foreach (var module in srvs)
+            {
+                foreach (var route in module.Routes)
+                {
+                    systemRoutes.Add((route.verb, "/" + route.path));
+                }
+            }
+
+            builder.Use(async (context, next) =>
+            {
+                var strippedPath = context.Request.Path.Value.Substring(0, context.Request.Path.Value.Length - 1);
+                var verbsForPath = systemRoutes.Where(x => x.route.StartsWith(strippedPath)).Select(y => y.verb);
+                if (verbsForPath.All(x => x != context.Request.Method))
+                {
+                    context.Response.StatusCode = 405;
+                    return;
+                }
+                await next();
+            });
+        }
 
         private static RequestDelegate CreateFinalHandler(RequestDelegate handler, IEnumerable<IStatusCodeHandler> statusCodeHandlers)
         {
@@ -91,9 +116,9 @@ namespace Botwin
                         return;
                     }
                 }
-                
+
                 await route.handler(context);
-                
+
                 if (module.After != null)
                 {
                     await module.After(context);

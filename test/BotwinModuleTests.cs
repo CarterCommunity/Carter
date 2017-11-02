@@ -261,5 +261,13 @@
             Assert.Equal(200, (int)response.StatusCode);
             Assert.True(body.Contains("Managed to parse default int 69"));
         }
+        
+        [Fact]
+        public async Task Should_return_405_if_path_not_found_for_supplied_method() 
+        {
+            var response = await this.httpClient.PostAsync("/405test", new StringContent(""));
+
+            Assert.Equal(405, (int)response.StatusCode);
+        }
     }
 }
