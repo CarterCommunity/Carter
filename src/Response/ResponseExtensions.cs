@@ -11,7 +11,7 @@ namespace Botwin.Response
     public static class ResponseExtensions
     {
         /// <summary>
-        /// Handles current response, utilizing an accepted media type if possible and defaulting to "application/json" if none found.
+        /// Executes content negotiation on current <see cref="HttpResponse"/>, utilizing an accepted media type if possible and defaulting to "application/json" if none found.
         /// </summary>
         /// <param name="response">Current <see cref="HttpResponse"/></param>
         /// <param name="obj">View model</param>
@@ -29,7 +29,7 @@ namespace Botwin.Response
         }
 
         /// <summary>
-        /// Handles current response as Json data
+        /// Returns a Json response
         /// </summary>
         /// <param name="response">Current <see cref="HttpResponse"/></param>
         /// <param name="obj">View model</param>
