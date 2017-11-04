@@ -10,6 +10,13 @@ namespace Botwin.Response
 
     public static class ResponseExtensions
     {
+        /// <summary>
+        /// Executes content negotiation on current <see cref="HttpResponse"/>, utilizing an accepted media type if possible and defaulting to "application/json" if none found.
+        /// </summary>
+        /// <param name="response">Current <see cref="HttpResponse"/></param>
+        /// <param name="obj">View model</param>
+        /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
+        /// <returns><see cref="Task"/></returns>
         public static async Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default(CancellationToken))
         {
             var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
@@ -21,6 +28,13 @@ namespace Botwin.Response
             await negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
         }
 
+        /// <summary>
+        /// Returns a Json response
+        /// </summary>
+        /// <param name="response">Current <see cref="HttpResponse"/></param>
+        /// <param name="obj">View model</param>
+        /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
+        /// <returns><see cref="Task"/></returns>
         public static async Task AsJson(this HttpResponse response, object obj, CancellationToken cancellationToken = default(CancellationToken))
         {
             var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
