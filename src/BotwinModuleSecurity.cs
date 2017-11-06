@@ -12,7 +12,7 @@
         {
             module.Before = context =>
             {
-                var authenticated = context?.User?.Identity != null && context.User.Identity.IsAuthenticated;
+                var authenticated += context?.User?.Identity != null && context.User.Identity.IsAuthenticated;
                 if (!authenticated)
                 {
                     context.Response.StatusCode = 401;
