@@ -165,7 +165,7 @@ namespace Botwin
                 services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
             }
 
-            services.AddSingleton(typeof(IResponseNegotiator), new DefaultJsonResponseNegotiator());
+            services.AddSingleton<IResponseNegotiator, DefaultJsonResponseNegotiator>();
         }
     }
 }
