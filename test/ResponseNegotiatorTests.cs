@@ -10,7 +10,9 @@ namespace Botwin.Tests
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Net.Http.Headers;
+    using Newtonsoft.Json.Serialization;
     using Xunit;
 
     public class ResponseNegotiatorTests
@@ -53,6 +55,33 @@ namespace Botwin.Tests
         {
             var response = await this.httpClient.GetAsync("/negotiate");
             Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
+        }
+
+        [Fact]
+        public async Task Should_PascalCase_json()
+        {
+            this.httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            var response = await this.httpClient.GetAsync("/negotiatecase");
+            var body = await response.Content.ReadAsStringAsync();
+            Assert.Equal("{\"FirstName\":\"Jim\"}", body);
+        }
+
+        [Fact]
+        public async Task Should_camelCase_json()
+        {
+            var testServer = new TestServer(new WebHostBuilder()
+                .ConfigureServices(x =>
+                {
+                    x.AddSingleton<IContractResolver>(new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() });
+                    x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly);
+                })
+                .Configure(x => x.UseBotwin())
+            );
+            var client = testServer.CreateClient();
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            var response = await client.GetAsync("/negotiatecase");
+            var body = await response.Content.ReadAsStringAsync();
+            Assert.Equal("{\"firstName\":\"Jim\"}", body);
         }
     }
 
