@@ -1,5 +1,6 @@
 namespace Botwin
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -58,14 +59,18 @@ namespace Botwin
             {
                 foreach (var route in module.Routes)
                 {
-                    systemRoutes.Add((route.verb, "/" + route.path));
+                    var strippedPath = route.path.EndsWith("/") ? route.path.Substring(0, route.path.Length - 1) : route.path;
+                    systemRoutes.Add((route.verb, "/" + strippedPath));
                 }
             }
 
             builder.Use(async (context, next) =>
             {
-                var strippedPath = context.Request.Path.Value.Substring(0, context.Request.Path.Value.Length - 1);
-                var verbsForPath = systemRoutes.Where(x => x.route.StartsWith(strippedPath)).Select(y => y.verb);
+                var strippedPath = context.Request.Path.Value.EndsWith("/") && context.Request.Path.Value.Length > 1
+                    ? context.Request.Path.Value.Substring(0, context.Request.Path.Value.Length - 1)
+                    : context.Request.Path.Value;
+                
+                var verbsForPath = systemRoutes.Where(x => x.route == strippedPath).Select(y => y.verb);
                 if (verbsForPath.All(x => x != context.Request.Method))
                 {
                     context.Response.StatusCode = 405;
