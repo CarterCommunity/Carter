@@ -36,23 +36,30 @@ namespace Botwin
 
             var routeBuilder = new RouteBuilder(builder);
 
-            //Invoke so ctors are called that adds routes to IRouter
-            var srvs = builder.ApplicationServices.GetServices<BotwinModule>();
-
-            //Cache status code handlers
-            var statusCodeHandlers = builder.ApplicationServices.GetServices<IStatusCodeHandler>();
-
-            foreach (var module in srvs)
+            //Create a "startup scope" to resolve modules from
+            using (var scope = builder.ApplicationServices.CreateScope())
             {
-                foreach (var route in module.Routes)
+                //Get all instances of BotwinModule to fetch and register declared routes
+                foreach (var module in scope.ServiceProvider.GetServices<BotwinModule>())
                 {
-                    RequestDelegate handler;
+                    var moduleType = module.GetType();
 
-                    handler = CreateModuleBeforeAfterHandler(module, route);
+                    foreach (var route in module.Routes)
+                    {
+                        routeBuilder.MapVerb(route.verb, route.path, ctx =>
+                        {
+                            var statusCodeHandlers = ctx.RequestServices.GetServices<IStatusCodeHandler>();
 
-                    var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);
-                    
-                    routeBuilder.MapVerb(route.verb, route.path, finalHandler);
+                            var requestScopedModule = ctx.RequestServices.GetRequiredService(moduleType) as BotwinModule;
+
+                            // TODO: Use the handler from the resolved 'requestScopedModule' instead of the one from the "startup scope".
+                            var handler = CreateModuleBeforeAfterHandler(requestScopedModule, route.handler);
+
+                            var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);
+
+                            return finalHandler.Invoke(ctx);
+                        });
+                    }
                 }
             }
 
@@ -88,7 +95,7 @@ namespace Botwin
             return finalHandler;
         }
 
-        private static RequestDelegate CreateModuleBeforeAfterHandler(BotwinModule module, (string verb, string path, RequestDelegate handler) route)
+        private static RequestDelegate CreateModuleBeforeAfterHandler(BotwinModule module, RequestDelegate handler)
         {
             RequestDelegate afterHandler = async (context) =>
             {
@@ -101,7 +108,7 @@ namespace Botwin
                     }
                 }
                 
-                await route.handler(context);
+                await handler(context);
                 
                 if (module.After != null)
                 {
@@ -164,13 +171,14 @@ namespace Botwin
             var modules = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(BotwinModule).IsAssignableFrom(t) && t != typeof(BotwinModule)));
             foreach (var module in modules)
             {
-                services.AddTransient(typeof(BotwinModule), module);
+                services.AddScoped(module);
+                services.AddScoped(typeof(BotwinModule), module);
             }
 
             var schs = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler)));
             foreach (var sch in schs)
             {
-                services.AddTransient(typeof(IStatusCodeHandler), sch);
+                services.AddScoped(typeof(IStatusCodeHandler), sch);
             }
 
             var responseNegotiators = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator)));
