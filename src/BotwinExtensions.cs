@@ -53,7 +53,8 @@ namespace Botwin
                             var requestScopedModule = ctx.RequestServices.GetRequiredService(moduleType) as BotwinModule;
 
                             // TODO: Use the handler from the resolved 'requestScopedModule' instead of the one from the "startup scope".
-                            var handler = CreateModuleBeforeAfterHandler(requestScopedModule, route.handler);
+                            var routeHandler = requestScopedModule.Routes.FirstOrDefault(x => x.path == route.path && x.verb == route.verb).handler;
+                            var handler = CreateModuleBeforeAfterHandler(requestScopedModule, routeHandler);
 
                             var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);
 
