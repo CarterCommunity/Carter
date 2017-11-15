@@ -161,7 +161,11 @@ namespace Botwin
 
             services.AddRouting();
 
-            var modules = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(BotwinModule).IsAssignableFrom(t) && t != typeof(BotwinModule)));
+            var modules = assemblies.SelectMany(x => x.GetTypes()
+            .Where(
+                t => !t.IsAbstract &&
+                typeof(BotwinModule).IsAssignableFrom(t) && 
+                t != typeof(BotwinModule)));
             foreach (var module in modules)
             {
                 services.AddTransient(typeof(BotwinModule), module);
