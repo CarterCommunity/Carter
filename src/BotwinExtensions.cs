@@ -47,7 +47,7 @@ namespace Botwin
 
                     foreach (var route in module.Routes.Keys)
                     {
-                        routeBuilder.MapVerb(route.verb, route.path, ctx =>
+                        routeBuilder.MapVerb(route.verb, route.path, async ctx =>
                         {
                             var statusCodeHandlers = ctx.RequestServices.GetServices<IStatusCodeHandler>();
 
@@ -56,70 +56,52 @@ namespace Botwin
                             if (!requestScopedModule.Routes.TryGetValue((route.verb, route.path), out var routeHandler))
                                 throw new InvalidOperationException($"Route {route.verb} '{route.path}' was no longer found");
 
-                            var handler = CreateModuleBeforeAfterHandler(requestScopedModule, routeHandler);
+                            // begin handling the request
+                            if (HttpMethods.IsHead(ctx.Request.Method))
+                            {
+                                //Cannot read the default stream once WriteAsync has been called on it
+                                ctx.Response.Body = new MemoryStream();
+                            }
 
-                            var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);
+                            // run the module handlers
+                            bool shouldContinue = true;
+                            if (requestScopedModule.Before != null)
+                            {
+                                shouldContinue = await requestScopedModule.Before(ctx);
+                            }
 
-                            return finalHandler.Invoke(ctx);
+                            if (shouldContinue)
+                            {
+                                // run the route handler
+                                await routeHandler(ctx);
+
+                                // run after handler
+                                if (requestScopedModule.After != null)
+                                {
+                                    await requestScopedModule.After(ctx);
+                                }
+                            }
+
+                            // run status code handler
+                            var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(ctx.Response.StatusCode));
+
+                            if (scHandler != null)
+                            {
+                                await scHandler.Handle(ctx);
+                            }
+
+                            if (HttpMethods.IsHead(ctx.Request.Method))
+                            {
+                                var length = ctx.Response.Body.Length;
+                                ctx.Response.Body.SetLength(0);
+                                ctx.Response.ContentLength = length;
+                            }
                         });
                     }
                 }
             }
 
             return builder.UseRouter(routeBuilder.Build());
-        }
-
-        private static RequestDelegate CreateFinalHandler(RequestDelegate handler, IEnumerable<IStatusCodeHandler> statusCodeHandlers)
-        {
-            RequestDelegate finalHandler = async (ctx) =>
-            {
-                if (HttpMethods.IsHead(ctx.Request.Method))
-                {
-                    //Cannot read the default stream once WriteAsync has been called on it
-                    ctx.Response.Body = new MemoryStream();
-                }
-
-                await handler(ctx);
-
-                var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(ctx.Response.StatusCode));
-
-                if (scHandler != null)
-                {
-                    await scHandler.Handle(ctx);
-                }
-
-                if (HttpMethods.IsHead(ctx.Request.Method))
-                {
-                    var length = ctx.Response.Body.Length;
-                    ctx.Response.Body.SetLength(0);
-                    ctx.Response.ContentLength = length;
-                }
-            };
-            return finalHandler;
-        }
-
-        private static RequestDelegate CreateModuleBeforeAfterHandler(BotwinModule module, RequestDelegate handler)
-        {
-            RequestDelegate afterHandler = async (context) =>
-            {
-                if (module.Before != null)
-                {
-                    var shouldContinue = await module.Before(context);
-                    if (!shouldContinue)
-                    {
-                        return;
-                    }
-                }
-                
-                await handler(context);
-                
-                if (module.After != null)
-                {
-                    await module.After(context);
-                }
-            };
-
-            return afterHandler;
         }
 
         private static void ApplyGlobalAfterHook(IApplicationBuilder builder, BotwinOptions options)
