@@ -1,6 +1,6 @@
 namespace Botwin
 {
-    using System.Collections.Generic;
+    using System;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -36,41 +36,64 @@ namespace Botwin
 
             var routeBuilder = new RouteBuilder(builder);
 
-            //Invoke so ctors are called that adds routes to IRouter
-            var srvs = builder.ApplicationServices.GetServices<BotwinModule>();
-
-            //Cache status code handlers
-            var statusCodeHandlers = builder.ApplicationServices.GetServices<IStatusCodeHandler>();
-
-            foreach (var module in srvs)
+            //Create a "startup scope" to resolve modules from
+            using (var scope = builder.ApplicationServices.CreateScope())
             {
-                foreach (var route in module.Routes)
+                //Get all instances of BotwinModule to fetch and register declared routes
+                foreach (var module in scope.ServiceProvider.GetServices<BotwinModule>())
                 {
-                    RequestDelegate handler;
+                    var moduleType = module.GetType();
 
-                    handler = CreateModuleBeforeAfterHandler(module, route);
-
-                    var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);
-                    
-                    routeBuilder.MapVerb(route.verb, route.path, finalHandler);
+                    foreach (var route in module.Routes.Keys)
+                    {
+                        routeBuilder.MapVerb(route.verb, route.path, CreateRouteHandler(route, moduleType));
+                    }
                 }
             }
 
             return builder.UseRouter(routeBuilder.Build());
         }
 
-        private static RequestDelegate CreateFinalHandler(RequestDelegate handler, IEnumerable<IStatusCodeHandler> statusCodeHandlers)
+        private static RequestDelegate CreateRouteHandler((string verb, string path) route, Type moduleType)
         {
-            RequestDelegate finalHandler = async (ctx) =>
+            return async ctx =>
             {
+                var module = ctx.RequestServices.GetRequiredService(moduleType) as BotwinModule;
+
+                if (!module.Routes.TryGetValue((route.verb, route.path), out var routeHandler))
+                {
+                    throw new InvalidOperationException($"Route {route.verb} '{route.path}' was no longer found");
+                }
+
+                // begin handling the request
                 if (HttpMethods.IsHead(ctx.Request.Method))
                 {
                     //Cannot read the default stream once WriteAsync has been called on it
                     ctx.Response.Body = new MemoryStream();
                 }
 
-                await handler(ctx);
+                // run the module handlers
+                bool shouldContinue = true;
 
+                if (module.Before != null)
+                {
+                    shouldContinue = await module.Before(ctx);
+                }
+
+                if (shouldContinue)
+                {
+                    // run the route handler
+                    await routeHandler(ctx);
+
+                    // run after handler
+                    if (module.After != null)
+                    {
+                        await module.After(ctx);
+                    }
+                }
+
+                // run status code handler
+                var statusCodeHandlers = ctx.RequestServices.GetServices<IStatusCodeHandler>();
                 var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(ctx.Response.StatusCode));
 
                 if (scHandler != null)
@@ -85,31 +108,6 @@ namespace Botwin
                     ctx.Response.ContentLength = length;
                 }
             };
-            return finalHandler;
-        }
-
-        private static RequestDelegate CreateModuleBeforeAfterHandler(BotwinModule module, (string verb, string path, RequestDelegate handler) route)
-        {
-            RequestDelegate afterHandler = async (context) =>
-            {
-                if (module.Before != null)
-                {
-                    var shouldContinue = await module.Before(context);
-                    if (!shouldContinue)
-                    {
-                        return;
-                    }
-                }
-                
-                await route.handler(context);
-                
-                if (module.After != null)
-                {
-                    await module.After(context);
-                }
-            };
-
-            return afterHandler;
         }
 
         private static void ApplyGlobalAfterHook(IApplicationBuilder builder, BotwinOptions options)
@@ -162,19 +160,23 @@ namespace Botwin
             services.AddRouting();
 
             var modules = assemblies.SelectMany(x => x.GetTypes()
-            .Where(
-                t => !t.IsAbstract &&
-                typeof(BotwinModule).IsAssignableFrom(t) && 
-                t != typeof(BotwinModule)));
+                .Where(t =>
+                    !t.IsAbstract &&
+                    typeof(BotwinModule).IsAssignableFrom(t) &&
+                    t != typeof(BotwinModule) &&
+                    t.IsPublic
+                ));
+
             foreach (var module in modules)
             {
-                services.AddTransient(typeof(BotwinModule), module);
+                services.AddScoped(module);
+                services.AddScoped(typeof(BotwinModule), module);
             }
 
             var schs = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler)));
             foreach (var sch in schs)
             {
-                services.AddTransient(typeof(IStatusCodeHandler), sch);
+                services.AddScoped(typeof(IStatusCodeHandler), sch);
             }
 
             var responseNegotiators = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator)));

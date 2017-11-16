@@ -11,14 +11,14 @@ namespace Botwin
     /// </summary>
     public class BotwinModule
     {
-        public readonly List<(string verb, string path, RequestDelegate handler)> Routes;
+        public readonly Dictionary<(string verb, string path), RequestDelegate> Routes;
 
         private readonly string basePath;
 
         /// <summary>
         /// A handler that can be invoked before the defined route
         /// </summary>
-        public Func<HttpContext, Task<bool>> Before { get; set; } 
+        public Func<HttpContext, Task<bool>> Before { get; set; }
 
         /// <summary>
         /// A handler that can be invoked after the defined route
@@ -38,7 +38,7 @@ namespace Botwin
         /// <param name="basePath">A base path to group routes in your <see cref="BotwinModule"/></param>
         protected BotwinModule(string basePath)
         {
-            this.Routes = new List<(string verb, string path, RequestDelegate handler)>();
+            this.Routes = new Dictionary<(string verb, string path), RequestDelegate>(RouteComparer.Comparer);
             var cleanPath = this.RemoveStartingSlash(basePath);
             this.basePath = this.RemoveEndingSlash(cleanPath);
         }
@@ -63,8 +63,8 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Get, path, handler));
-            this.Routes.Add((HttpMethods.Head, path, handler));
+            this.Routes.Add((HttpMethods.Get, path), handler);
+            this.Routes.Add((HttpMethods.Head, path), handler);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Post, path, handler));
+            this.Routes.Add((HttpMethods.Post, path), handler);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Delete, path, handler));
+            this.Routes.Add((HttpMethods.Delete, path), handler);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Put, path, handler));
+            this.Routes.Add((HttpMethods.Put, path), handler);
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Head, path, handler));
+            this.Routes.Add((HttpMethods.Head, path), handler);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Patch, path, handler));
+            this.Routes.Add((HttpMethods.Patch, path), handler);
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Options, path, handler));
+            this.Routes.Add((HttpMethods.Options, path), handler);
         }
 
         private string RemoveStartingSlash(string path)
@@ -225,6 +225,23 @@ namespace Botwin
             }
 
             return $"{this.basePath}/{path}";
+        }
+
+        /// <summary>
+        /// Case-insensitive comparer for routes.
+        /// </summary>
+        private class RouteComparer : IEqualityComparer<(string verb, string path)>
+        {
+            /// <summary>
+            /// Shared comparer instance.
+            /// </summary>
+            public static RouteComparer Comparer = new RouteComparer();
+
+            public bool Equals((string verb, string path) x, (string verb, string path) y)
+                => StringComparer.OrdinalIgnoreCase.Equals(x.verb, y.verb) && StringComparer.OrdinalIgnoreCase.Equals(x.path, y.path);
+
+            public int GetHashCode((string verb, string path) obj)
+                => (StringComparer.OrdinalIgnoreCase.GetHashCode(obj.verb), StringComparer.OrdinalIgnoreCase.GetHashCode(obj.path)).GetHashCode();
         }
     }
 }
