@@ -1,5 +1,6 @@
 namespace Botwin
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -44,7 +45,7 @@ namespace Botwin
                 {
                     var moduleType = module.GetType();
 
-                    foreach (var route in module.Routes)
+                    foreach (var route in module.Routes.Keys)
                     {
                         routeBuilder.MapVerb(route.verb, route.path, ctx =>
                         {
@@ -52,8 +53,9 @@ namespace Botwin
 
                             var requestScopedModule = ctx.RequestServices.GetRequiredService(moduleType) as BotwinModule;
 
-                            // TODO: Use the handler from the resolved 'requestScopedModule' instead of the one from the "startup scope".
-                            var routeHandler = requestScopedModule.Routes.FirstOrDefault(x => x.path == route.path && x.verb == route.verb).handler;
+                            if (!requestScopedModule.Routes.TryGetValue((route.verb, route.path), out var routeHandler))
+                                throw new InvalidOperationException($"Route {route.verb} '{route.path}' was no longer found");
+
                             var handler = CreateModuleBeforeAfterHandler(requestScopedModule, routeHandler);
 
                             var finalHandler = CreateFinalHandler(handler, statusCodeHandlers);

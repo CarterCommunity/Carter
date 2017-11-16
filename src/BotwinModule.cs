@@ -11,14 +11,14 @@ namespace Botwin
     /// </summary>
     public class BotwinModule
     {
-        public readonly List<(string verb, string path, RequestDelegate handler)> Routes;
+        public readonly Dictionary<(string verb, string path), RequestDelegate> Routes;
 
         private readonly string basePath;
 
         /// <summary>
         /// A handler that can be invoked before the defined route
         /// </summary>
-        public Func<HttpContext, Task<bool>> Before { get; set; } 
+        public Func<HttpContext, Task<bool>> Before { get; set; }
 
         /// <summary>
         /// A handler that can be invoked after the defined route
@@ -38,7 +38,7 @@ namespace Botwin
         /// <param name="basePath">A base path to group routes in your <see cref="BotwinModule"/></param>
         protected BotwinModule(string basePath)
         {
-            this.Routes = new List<(string verb, string path, RequestDelegate handler)>();
+            this.Routes = new Dictionary<(string verb, string path), RequestDelegate>();
             var cleanPath = this.RemoveStartingSlash(basePath);
             this.basePath = this.RemoveEndingSlash(cleanPath);
         }
@@ -63,8 +63,8 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Get, path, handler));
-            this.Routes.Add((HttpMethods.Head, path, handler));
+            this.Routes.Add((HttpMethods.Get, path), handler);
+            this.Routes.Add((HttpMethods.Head, path), handler);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Post, path, handler));
+            this.Routes.Add((HttpMethods.Post, path), handler);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Delete, path, handler));
+            this.Routes.Add((HttpMethods.Delete, path), handler);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Put, path, handler));
+            this.Routes.Add((HttpMethods.Put, path), handler);
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Head, path, handler));
+            this.Routes.Add((HttpMethods.Head, path), handler);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Patch, path, handler));
+            this.Routes.Add((HttpMethods.Patch, path), handler);
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace Botwin
         {
             path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Options, path, handler));
+            this.Routes.Add((HttpMethods.Options, path), handler);
         }
 
         private string RemoveStartingSlash(string path)
