@@ -18,7 +18,7 @@
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                var m = new ExampleModuleWithConflictingRoutes();
+                new ExampleModuleWithConflictingRoutes();
             });
         }
 

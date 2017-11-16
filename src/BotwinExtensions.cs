@@ -64,7 +64,7 @@ namespace Botwin
                 {
                     throw new InvalidOperationException($"Route {route.verb} '{route.path}' was no longer found");
                 }
-                
+
                 // begin handling the request
                 if (HttpMethods.IsHead(ctx.Request.Method))
                 {
@@ -74,7 +74,7 @@ namespace Botwin
 
                 // run the module handlers
                 bool shouldContinue = true;
-                
+
                 if (module.Before != null)
                 {
                     shouldContinue = await module.Before(ctx);
@@ -160,10 +160,13 @@ namespace Botwin
             services.AddRouting();
 
             var modules = assemblies.SelectMany(x => x.GetTypes()
-            .Where(
-                t => !t.IsAbstract &&
-                typeof(BotwinModule).IsAssignableFrom(t) && 
-                t != typeof(BotwinModule)));
+                .Where(t =>
+                    !t.IsAbstract &&
+                    typeof(BotwinModule).IsAssignableFrom(t) &&
+                    t != typeof(BotwinModule) &&
+                    t.IsPublic
+                ));
+
             foreach (var module in modules)
             {
                 services.AddScoped(module);
