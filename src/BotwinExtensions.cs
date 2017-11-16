@@ -1,6 +1,7 @@
 namespace Botwin
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -39,8 +40,12 @@ namespace Botwin
             //Create a "startup scope" to resolve modules from
             using (var scope = builder.ApplicationServices.CreateScope())
             {
+                var modules = scope.ServiceProvider.GetServices<BotwinModule>();
+
+                Apply405Handler(builder, modules);
+
                 //Get all instances of BotwinModule to fetch and register declared routes
-                foreach (var module in scope.ServiceProvider.GetServices<BotwinModule>())
+                foreach (var module in modules)
                 {
                     var moduleType = module.GetType();
 
@@ -52,6 +57,34 @@ namespace Botwin
             }
 
             return builder.UseRouter(routeBuilder.Build());
+        }
+
+        private static void Apply405Handler(IApplicationBuilder builder, IEnumerable<BotwinModule> modules)
+        {
+            var systemRoutes = new List<(string verb, string route)>();
+            foreach (var module in modules)
+            {
+                foreach (var route in module.Routes.Keys)
+                {
+                    var strippedPath = route.path.EndsWith("/") ? route.path.Substring(0, route.path.Length - 1) : route.path;
+                    systemRoutes.Add((route.verb, "/" + strippedPath));
+                }
+            }
+
+            builder.Use(async (context, next) =>
+            {
+                var strippedPath = context.Request.Path.Value.EndsWith("/") && context.Request.Path.Value.Length > 1
+                    ? context.Request.Path.Value.Substring(0, context.Request.Path.Value.Length - 1)
+                    : context.Request.Path.Value;
+
+                var verbsForPath = systemRoutes.Where(x => x.route == strippedPath).Select(y => y.verb);
+                if (verbsForPath.All(x => x != context.Request.Method))
+                {
+                    context.Response.StatusCode = 405;
+                    return;
+                }
+                await next();
+            });
         }
 
         private static RequestDelegate CreateRouteHandler((string verb, string path) route, Type moduleType)

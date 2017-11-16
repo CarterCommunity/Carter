@@ -16,10 +16,7 @@
         public BotwinModuleTests()
         {
             this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x =>
-                {
-                    x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly);
-                })
+                .ConfigureServices(x => { x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly); })
                 .Configure(x => x.UseBotwin())
             );
             this.httpClient = this.server.CreateClient();
@@ -260,6 +257,18 @@
 
             Assert.Equal(200, (int)response.StatusCode);
             Assert.True(body.Contains("Managed to parse default int 69"));
+        }
+
+        [Theory]
+        [InlineData("/405test")]
+        [InlineData("/405test/")]
+        [InlineData("/405testwithslash")]
+        [InlineData("/405testwithslash/")]
+        public async Task Should_return_405_if_path_not_found_for_supplied_method(string path)
+        {
+            var response = await this.httpClient.PostAsync(path, new StringContent(""));
+
+            Assert.Equal(405, (int)response.StatusCode);
         }
     }
 }
