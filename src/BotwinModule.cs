@@ -38,7 +38,7 @@ namespace Botwin
         /// <param name="basePath">A base path to group routes in your <see cref="BotwinModule"/></param>
         protected BotwinModule(string basePath)
         {
-            this.Routes = new Dictionary<(string verb, string path), RequestDelegate>();
+            this.Routes = new Dictionary<(string verb, string path), RequestDelegate>(RouteComparer.Comparer);
             var cleanPath = this.RemoveStartingSlash(basePath);
             this.basePath = this.RemoveEndingSlash(cleanPath);
         }
@@ -225,6 +225,23 @@ namespace Botwin
             }
 
             return $"{this.basePath}/{path}";
+        }
+
+        /// <summary>
+        /// Case-insensitive comparer for routes.
+        /// </summary>
+        private class RouteComparer : IEqualityComparer<(string verb, string path)>
+        {
+            /// <summary>
+            /// Shared comparer instance.
+            /// </summary>
+            public static RouteComparer Comparer = new RouteComparer();
+
+            public bool Equals((string verb, string path) x, (string verb, string path) y)
+                => StringComparer.OrdinalIgnoreCase.Equals(x.verb, y.verb) && StringComparer.OrdinalIgnoreCase.Equals(x.path, y.path);
+
+            public int GetHashCode((string verb, string path) obj)
+                => (StringComparer.OrdinalIgnoreCase.GetHashCode(obj.verb), StringComparer.OrdinalIgnoreCase.GetHashCode(obj.path)).GetHashCode();
         }
     }
 }
