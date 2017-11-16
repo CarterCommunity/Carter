@@ -1,7 +1,6 @@
 namespace Botwin
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -57,12 +56,15 @@ namespace Botwin
 
         private static RequestDelegate CreateRouteHandler((string verb, string path) route, Type moduleType)
         {
-            return async (HttpContext ctx) =>
+            return async ctx =>
             {
                 var module = ctx.RequestServices.GetRequiredService(moduleType) as BotwinModule;
-                if (!module.Routes.TryGetValue((route.verb, route.path), out var routeHandler))
-                    throw new InvalidOperationException($"Route {route.verb} '{route.path}' was no longer found");
 
+                if (!module.Routes.TryGetValue((route.verb, route.path), out var routeHandler))
+                {
+                    throw new InvalidOperationException($"Route {route.verb} '{route.path}' was no longer found");
+                }
+                
                 // begin handling the request
                 if (HttpMethods.IsHead(ctx.Request.Method))
                 {
@@ -72,6 +74,7 @@ namespace Botwin
 
                 // run the module handlers
                 bool shouldContinue = true;
+                
                 if (module.Before != null)
                 {
                     shouldContinue = await module.Before(ctx);
