@@ -59,6 +59,9 @@ namespace Botwin.Tests
                 await ctx.Response.WriteAsync(content);
             });
 
+            this.Get("405test", context => context.Response.WriteAsync("hi"));
+            this.Get("405testwithslash/", context => context.Response.WriteAsync("hi"));
+
             this.Post("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });
             this.Put("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });
             this.Delete("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });
