@@ -270,5 +270,13 @@
 
             Assert.Equal(405, (int)response.StatusCode);
         }
+        
+        [Fact]
+        public async Task Should_return_404_if_path_not_found()
+        {
+            var response = await this.httpClient.GetAsync("/flibbertygibbert");
+
+            Assert.Equal(404, (int)response.StatusCode);
+        }
     }
 }

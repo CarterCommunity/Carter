@@ -5,6 +5,7 @@ namespace Botwin
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
@@ -36,13 +37,12 @@ namespace Botwin
             ApplyGlobalAfterHook(builder, options);
 
             var routeBuilder = new RouteBuilder(builder);
+            var systemRoutes = new List<(string verb, string route)>();
 
             //Create a "startup scope" to resolve modules from
             using (var scope = builder.ApplicationServices.CreateScope())
             {
                 var modules = scope.ServiceProvider.GetServices<BotwinModule>();
-
-                Apply405Handler(builder, modules);
 
                 //Get all instances of BotwinModule to fetch and register declared routes
                 foreach (var module in modules)
@@ -52,39 +52,43 @@ namespace Botwin
                     foreach (var route in module.Routes.Keys)
                     {
                         routeBuilder.MapVerb(route.verb, route.path, CreateRouteHandler(route, moduleType));
+
+                        var strippedPath = route.path.EndsWith("/") ? route.path.Substring(0, route.path.Length - 1) : route.path;
+                        systemRoutes.Add((route.verb, "/" + strippedPath));
                     }
                 }
-            }
 
-            return builder.UseRouter(routeBuilder.Build());
+                builder.UseRouter(routeBuilder.Build());
+
+                return builder.Use((ctx, next) => GetMethodNotAllowedHandler(ctx, next, systemRoutes));
+            }
         }
 
-        private static void Apply405Handler(IApplicationBuilder builder, IEnumerable<BotwinModule> modules)
+        /// <summary>
+        /// This method is only called if it's a valid 404 or 405
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <param name="systemRoutes"></param>
+        /// <returns></returns>
+        private static async Task GetMethodNotAllowedHandler(HttpContext context, Func<Task> next, IEnumerable<(string verb, string route)> systemRoutes)
         {
-            var systemRoutes = new List<(string verb, string route)>();
-            foreach (var module in modules)
-            {
-                foreach (var route in module.Routes.Keys)
-                {
-                    var strippedPath = route.path.EndsWith("/") ? route.path.Substring(0, route.path.Length - 1) : route.path;
-                    systemRoutes.Add((route.verb, "/" + strippedPath));
-                }
-            }
+            //Call the final pipeline which gets ASP.Net Core status code, usually a 404 in this case
+            await next();
 
-            builder.Use(async (context, next) =>
-            {
-                var strippedPath = context.Request.Path.Value.EndsWith("/") && context.Request.Path.Value.Length > 1
-                    ? context.Request.Path.Value.Substring(0, context.Request.Path.Value.Length - 1)
-                    : context.Request.Path.Value;
+            var strippedPath = context.Request.Path.Value.EndsWith("/") && context.Request.Path.Value.Length > 1
+                ? context.Request.Path.Value.Substring(0, context.Request.Path.Value.Length - 1)
+                : context.Request.Path.Value;
 
+            //ASP.Net Core will set a 405 response to 404. Let's check if it's a valid 404 first otherwise if we know about the route it's most likely a 405
+            if (context.Response.StatusCode == 404 && systemRoutes.Any(x => x.route == strippedPath))
+            {
                 var verbsForPath = systemRoutes.Where(x => x.route == strippedPath).Select(y => y.verb);
                 if (verbsForPath.All(x => x != context.Request.Method))
                 {
                     context.Response.StatusCode = 405;
-                    return;
                 }
-                await next();
-            });
+            }
         }
 
         private static RequestDelegate CreateRouteHandler((string verb, string path) route, Type moduleType)
