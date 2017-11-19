@@ -65,7 +65,10 @@ namespace Botwin.Tests
             this.Get("405multiple", context => context.Response.WriteAsync("405multiple-get"));
             this.Post("405multiple", context => context.Response.WriteAsync("405multiple-post"));
 
-            this.Get("/parameterized/{name}", ctx => ctx.Response.WriteAsync("echo " + ctx.GetRouteData().Values["name"]));
+            this.Get("/parameterized/{name:alpha}", ctx => ctx.Response.WriteAsync("echo " + ctx.GetRouteData().Values["name"]));
+            this.Get("/parameterized/{id:int}", ctx => ctx.Response.WriteAsync("echo " + ctx.GetRouteData().Values["id"]));
+            this.Get("/parameterized/{id:guid}", ctx => ctx.Response.WriteAsync("echo " + ctx.GetRouteData().Values["id"]));
+
 
             this.Post("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });
             this.Put("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });

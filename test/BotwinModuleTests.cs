@@ -299,6 +299,8 @@
         [Theory]
         [InlineData("/parameterized/foo", "Beforeecho fooAfter")]
         [InlineData("/parameterized/bar", "Beforeecho barAfter")]
+        [InlineData("/parameterized/e3c6af72-9cb7-4638-b3ea-4e4705f96cea","Beforeecho e3c6af72-9cb7-4638-b3ea-4e4705f96ceaAfter")]
+        [InlineData("/parameterized/911", "Beforeecho 911After")]
         public async Task Should_parameterized_route_work(string route, string content)
         {
             var result = await this.httpClient.GetAsync(route);
