@@ -6,7 +6,7 @@ namespace Botwin.Tests
     {
         public NegotiatorModule()
         {
-            this.Get("/negotiate", (req, res, routeData) => res.Negotiate(new { Name = "Jim" }));
+            this.Get("/negotiate", (req, res, routeData) => res.Negotiate(new { FirstName = "Jim" }));
         }
     }
 }
