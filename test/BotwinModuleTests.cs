@@ -261,5 +261,58 @@
             Assert.Equal(200, (int)response.StatusCode);
             Assert.True(body.Contains("Managed to parse default int 69"));
         }
+
+        [Theory]
+        [InlineData("/405test")]
+        [InlineData("/405test/")]
+        [InlineData("/405testwithslash")]
+        [InlineData("/405testwithslash/")]
+        public async Task Should_return_405_if_path_not_found_for_supplied_method(string path)
+        {
+            var response = await this.httpClient.PostAsync(path, new StringContent(""));
+
+            Assert.Equal(405, (int)response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_405_only_for_unconfigured_verbs()
+        {
+            var getResult = await this.httpClient.GetAsync("/405multiple");
+            var postResult = await this.httpClient.PostAsync("/405multiple", new StringContent(""));
+            var putResult = await this.httpClient.PutAsync("/405multiple", new StringContent(""));
+
+            Assert.Equal(200, (int)getResult.StatusCode);
+            Assert.Equal("Before405multiple-getAfter", await getResult.Content.ReadAsStringAsync());
+            Assert.Equal(200, (int)postResult.StatusCode);
+            Assert.Equal("Before405multiple-postAfter", await postResult.Content.ReadAsStringAsync());
+            Assert.Equal(405, (int)putResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task Should_return_404_if_path_not_found()
+        {
+            var response = await this.httpClient.GetAsync("/flibbertygibbert");
+
+            Assert.Equal(404, (int)response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("/parameterized/foo", "Beforeecho fooAfter")]
+        [InlineData("/parameterized/bar", "Beforeecho barAfter")]
+        public async Task Should_parameterized_route_work(string route, string content)
+        {
+            var result = await this.httpClient.GetAsync(route);
+
+            Assert.Equal(200, (int)result.StatusCode);
+            Assert.Equal(content, await result.Content.ReadAsStringAsync());
+        }
+
+        [Fact]
+        public async Task Should_parameterized_route_return_405()
+        {
+            var result = await this.httpClient.PostAsync("/parameterized/foo", new StringContent(""));
+
+            Assert.Equal(405, (int)result.StatusCode);
+        }
     }
 }

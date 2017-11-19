@@ -3,6 +3,7 @@ namespace Botwin.Tests
     using System.Linq;
     using Botwin.Request;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
 
     public class TestModule : BotwinModule
     {
@@ -58,6 +59,13 @@ namespace Botwin.Tests
                 var content = await ctx.Request.Body.AsStringAsync();
                 await ctx.Response.WriteAsync(content);
             });
+
+            this.Get("405test", context => context.Response.WriteAsync("hi"));
+            this.Get("405testwithslash/", context => context.Response.WriteAsync("hi"));
+            this.Get("405multiple", context => context.Response.WriteAsync("405multiple-get"));
+            this.Post("405multiple", context => context.Response.WriteAsync("405multiple-post"));
+
+            this.Get("/parameterized/{name}", ctx => ctx.Response.WriteAsync("echo " + ctx.GetRouteData().Values["name"]));
 
             this.Post("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });
             this.Put("/", async (ctx) => { await ctx.Response.WriteAsync("Hello"); });

@@ -1,9 +1,11 @@
 namespace Botwin
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
@@ -43,10 +45,11 @@ namespace Botwin
                 foreach (var module in scope.ServiceProvider.GetServices<BotwinModule>())
                 {
                     var moduleType = module.GetType();
+                    var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
 
-                    foreach (var route in module.Routes.Keys)
+                    foreach (var path in distinctPaths)
                     {
-                        routeBuilder.MapVerb(route.verb, route.path, CreateRouteHandler(route, moduleType));
+                        routeBuilder.MapRoute(path, CreateRouteHandler(path, moduleType));
                     }
                 }
             }
@@ -54,15 +57,18 @@ namespace Botwin
             return builder.UseRouter(routeBuilder.Build());
         }
 
-        private static RequestDelegate CreateRouteHandler((string verb, string path) route, Type moduleType)
+        private static RequestDelegate CreateRouteHandler(string path, Type moduleType)
         {
             return async ctx =>
             {
                 var module = ctx.RequestServices.GetRequiredService(moduleType) as BotwinModule;
 
-                if (!module.Routes.TryGetValue((route.verb, route.path), out var routeHandler))
+                if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
                 {
-                    throw new InvalidOperationException($"Route {route.verb} '{route.path}' was no longer found");
+                    // if the path was registered but a handler matching the
+                    // current method was not found, return MethodNotFound
+                    ctx.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
+                    return;
                 }
 
                 // begin handling the request
