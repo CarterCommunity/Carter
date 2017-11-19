@@ -74,8 +74,8 @@ namespace Botwin.Tests
             var model = JsonConvert.DeserializeObject<List<ExpandoObject>>(body);
             dynamic first = model.First();
             Assert.Equal(1, model.Count);
-            Assert.Equal("No validator found", first.ErrorMessage);
-            Assert.Equal("TestModelNoValidator", first.PropertyName);
+            Assert.Equal("No validator found", first.errorMessage);
+            Assert.Equal("TestModelNoValidator", first.propertyName);
         }
 
         [Fact]

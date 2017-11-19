@@ -12,11 +12,11 @@
 
     public class DefaultJsonResponseNegotiator : IResponseNegotiator
     {
-        private readonly IContractResolver _contractResolver;
+        private readonly JsonSerializerSettings jsonSettings;
 
-        public DefaultJsonResponseNegotiator(IContractResolver contractResolver = null)
+        public DefaultJsonResponseNegotiator()
         {
-            _contractResolver = contractResolver ?? new DefaultContractResolver { NamingStrategy = new DefaultNamingStrategy() };
+            this.jsonSettings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
         }
 
         public bool CanHandle(IList<MediaTypeHeaderValue> accept)
@@ -27,7 +27,7 @@
         public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken)
         {
             res.ContentType = "application/json; charset=utf-8";
-            await res.WriteAsync(JsonConvert.SerializeObject(model, new JsonSerializerSettings { ContractResolver = _contractResolver }), cancellationToken);
+            await res.WriteAsync(JsonConvert.SerializeObject(model, this.jsonSettings), cancellationToken);
         }
     }
 }

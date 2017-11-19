@@ -58,28 +58,10 @@ namespace Botwin.Tests
         }
 
         [Fact]
-        public async Task Should_PascalCase_json()
-        {
-            this.httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            var response = await this.httpClient.GetAsync("/negotiatecase");
-            var body = await response.Content.ReadAsStringAsync();
-            Assert.Equal("{\"FirstName\":\"Jim\"}", body);
-        }
-
-        [Fact]
         public async Task Should_camelCase_json()
         {
-            var testServer = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x =>
-                {
-                    x.AddSingleton<IContractResolver>(new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() });
-                    x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly);
-                })
-                .Configure(x => x.UseBotwin())
-            );
-            var client = testServer.CreateClient();
-            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            var response = await client.GetAsync("/negotiatecase");
+            this.httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
             Assert.Equal("{\"firstName\":\"Jim\"}", body);
         }
