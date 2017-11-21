@@ -16,7 +16,11 @@
 
         public DefaultJsonResponseNegotiator()
         {
-            this.jsonSettings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
+            var contractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            };
+            this.jsonSettings = new JsonSerializerSettings { ContractResolver = contractResolver };
         }
 
         public bool CanHandle(IList<MediaTypeHeaderValue> accept)
