@@ -23,7 +23,9 @@
     public class Composition
     {
         public delegate Actor GetActor();
+
         private static GetActor func;
+        
         public static GetActor FunctionalHandler
         {
             get
@@ -64,3 +66,4 @@
             }
         }
     }
+}
