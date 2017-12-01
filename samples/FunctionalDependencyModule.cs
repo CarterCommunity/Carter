@@ -26,7 +26,7 @@
         {
             return () => FunctionalRoute.Handle(() =>
             {
-                Console.WriteLine($"Getting sql connection from settings {AppConfiguration.ConnectionString}");
+                Console.WriteLine($"Getting sql connection from settings {AppConfiguration.ConnectionString} as an example of how you'd get app settings");
                 return new[] { new Actor() };
             }, () => true);
         }
