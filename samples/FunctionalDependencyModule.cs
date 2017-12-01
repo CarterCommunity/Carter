@@ -11,9 +11,9 @@
         {
             this.Get("/functional", async (req, res, routeData) =>
             {
-                var data = Composition.ComposeFunctionalHandler();
+                var handler = Composition.ComposeFunctionalHandler();
 
-                var actor = data();
+                var actor = handler.Invoke();
 
                 await res.Negotiate(actor);
             });
