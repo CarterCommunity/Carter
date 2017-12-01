@@ -13,7 +13,7 @@
             {
                 var handler = Composition.ComposeFunctionalHandler();
 
-                var actor = handler.Invoke();
+                var actor = handler?.Invoke();
 
                 await res.Negotiate(actor);
             });
