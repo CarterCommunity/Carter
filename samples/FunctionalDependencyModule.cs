@@ -11,7 +11,7 @@
         {
             this.Get("/functional", async (req, res, routeData) =>
             {
-                var handler = Composition.ComposeFunctionalHandler();
+                var handler = Composition.FunctionalHandler;
 
                 var actor = handler?.Invoke();
 
@@ -22,33 +22,45 @@
 
     public class Composition
     {
-        public static Func<Actor> ComposeFunctionalHandler()
+        public delegate Actor GetActor();
+        private static GetActor func;
+        public static GetActor FunctionalHandler
         {
-            return () => FunctionalRoute.Handle(() =>
+            get
             {
-                Console.WriteLine($"Getting sql connection from settings {AppConfiguration.ConnectionString} as an example of how you'd get app settings");
-                return new[] { new Actor() };
-            }, () => true);
-        }
-    }
-
-    public class AppConfiguration
-    {
-        public static string ConnectionString { get; set; }
-    }
-
-    public static class FunctionalRoute
-    {
-        public static Actor Handle(Func<IEnumerable<Actor>> getActors, Func<bool> userAllowed)
-        {
-            var currentUserAllowed = userAllowed();
-            if (!currentUserAllowed)
-            {
-                return null;
+                return func ?? (() => FunctionalRoute.Handle(() =>
+                    {
+                        Console.WriteLine($"Getting sql connection from settings {AppConfiguration.ConnectionString} as an example of how you'd get app settings");
+                        return new[] { new Actor() };
+                    }, () => true));
             }
 
-            var actors = getActors();
-            return actors.FirstOrDefault();
+            set
+            {
+                func = value;
+            }
+        }
+
+        public class AppConfiguration
+        {
+            public static string ConnectionString { get; set; }
+        }
+
+        public static class FunctionalRoute
+        {
+            public delegate IEnumerable<Actor> GetActors();
+            public delegate bool UserAllowed();
+            
+            public static Actor Handle(GetActors getActors, UserAllowed userAllowed)
+            {
+                var currentUserAllowed = userAllowed();
+                if (!currentUserAllowed)
+                {
+                    return null;
+                }
+
+                var actors = getActors();
+                return actors.FirstOrDefault();
+            }
         }
     }
-}
