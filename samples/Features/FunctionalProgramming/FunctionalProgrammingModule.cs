@@ -1,6 +1,8 @@
 ﻿namespace Botwin.Samples
 {
+    using Botwin.Request;
     using Botwin.Response;
+    using Microsoft.AspNetCore.Routing;
 
     public class FunctionalProgrammingModule : BotwinModule
     {
@@ -19,6 +21,15 @@
                 }
 
                 await res.AsJson(actor);
+            });
+            
+            this.Get("/directors/{id:int}", async (req, res, routeData) =>
+            {
+                var handler = RouteHandlers.GetDirectorByIdHandler;
+
+                var director = handler?.Invoke(routeData.As<int>("id"));
+
+                await res.AsJson(director);
             });
         }
     }
