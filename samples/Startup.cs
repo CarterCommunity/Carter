@@ -3,6 +3,7 @@ namespace Botwin.Samples
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using BotwinSample;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;

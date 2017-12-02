@@ -1,12 +1,9 @@
-using System;
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Xunit;
-using Botwin.Samples;
 using System.Threading.Tasks;
 using System.Net;
-using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using Microsoft.AspNetCore;
 
@@ -29,28 +26,21 @@ namespace Botwin.Samples.Tests
         [Fact]
         public async Task Should_return_actor_data()
         {
-            RouteHandlers.GetActorHandler = () => FunctionalRoute.Handle(() =>
-                    {
-                        return new[] { new Actor { Name = "John Travolta" } };
-                    }, () => true);
+            RouteHandlers.ListDirectorsHandler = () => GetDirectorsRoute.Handle(() => new[] { new Director { Name = "Ridley Scott" } }, () => true);
 
 
-            var res = await client.GetAsync("/functional");
+            var res = await client.GetAsync("/functional/directors");
 
             Assert.Equal(HttpStatusCode.OK, res.StatusCode);
-            Assert.True((await res.Content.ReadAsStringAsync()).Contains("Travolta"));
+            Assert.True((await res.Content.ReadAsStringAsync()).Contains("Ridley"));
         }
 
         [Fact]
         public async Task Should_return_null_if_permission_not_allowed()
         {
-            RouteHandlers.GetActorHandler = () => FunctionalRoute.Handle(() =>
-                    {
-                        return Enumerable.Empty<Actor>();
-                    }, () => false);
+            RouteHandlers.ListDirectorsHandler = () => GetDirectorsRoute.Handle(() => Enumerable.Empty<Director>(), () => false);
 
-
-            var res = await client.GetAsync("/functional");
+            var res = await client.GetAsync("/functional/directors");
 
             Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
         }
