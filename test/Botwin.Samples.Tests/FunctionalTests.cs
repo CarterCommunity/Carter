@@ -29,7 +29,7 @@ namespace Botwin.Samples.Tests
         [Fact]
         public async Task Should_return_actor_data()
         {
-            Composition.FunctionalHandler = () => FunctionalRoute.Handle(() =>
+            RouteHandlers.GetActorHandler = () => FunctionalRoute.Handle(() =>
                     {
                         return new[] { new Actor { Name = "John Travolta" } };
                     }, () => true);
@@ -44,7 +44,7 @@ namespace Botwin.Samples.Tests
         [Fact]
         public async Task Should_return_null_if_permission_not_allowed()
         {
-            Composition.FunctionalHandler = () => FunctionalRoute.Handle(() =>
+            RouteHandlers.GetActorHandler = () => FunctionalRoute.Handle(() =>
                     {
                         return Enumerable.Empty<Actor>();
                     }, () => false);

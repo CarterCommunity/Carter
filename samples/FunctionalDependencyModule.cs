@@ -11,11 +11,11 @@
         {
             this.Get("/functional", async (req, res, routeData) =>
             {
-                var handler = Composition.FunctionalHandler;
+                var handler = RouteHandlers.GetActorHandler;
 
                 var actor = handler?.Invoke();
 
-                if(actor==null)
+                if (actor == null)
                 {
                     res.StatusCode = 401;
                     return;
@@ -26,21 +26,21 @@
         }
     }
 
-    public class Composition
+    public class RouteHandlers
     {
         public delegate Actor GetActor();
 
         private static GetActor func;
 
-        public static GetActor FunctionalHandler
+        public static GetActor GetActorHandler
         {
             get
             {
-                return func ?? (() => FunctionalRoute.Handle(() =>
-                    {
-                        Console.WriteLine($"Getting sql connection from settings {AppConfiguration.ConnectionString} as an example of how you'd get app settings");
-                        return new[] { new Actor() };
-                    }, () => true));
+                return func ?? (() => FunctionalRoute.Handle(getActors: () =>
+                     {
+                         Console.WriteLine($"Getting sql connection from settings {AppConfiguration.ConnectionString} as an example of how you'd get app settings");
+                         return new[] { new Actor() };
+                     }, userAllowed: () => true));
             }
 
             set
