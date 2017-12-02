@@ -15,7 +15,13 @@
 
                 var actor = handler?.Invoke();
 
-                await res.Negotiate(actor);
+                if(actor==null)
+                {
+                    res.StatusCode = 401;
+                    return;
+                }
+
+                await res.AsJson(actor);
             });
         }
     }
@@ -25,7 +31,7 @@
         public delegate Actor GetActor();
 
         private static GetActor func;
-        
+
         public static GetActor FunctionalHandler
         {
             get
@@ -42,28 +48,27 @@
                 func = value;
             }
         }
+    }
+    public class AppConfiguration
+    {
+        public static string ConnectionString { get; set; }
+    }
 
-        public class AppConfiguration
-        {
-            public static string ConnectionString { get; set; }
-        }
+    public static class FunctionalRoute
+    {
+        public delegate IEnumerable<Actor> GetActors();
+        public delegate bool UserAllowed();
 
-        public static class FunctionalRoute
+        public static Actor Handle(GetActors getActors, UserAllowed userAllowed)
         {
-            public delegate IEnumerable<Actor> GetActors();
-            public delegate bool UserAllowed();
-            
-            public static Actor Handle(GetActors getActors, UserAllowed userAllowed)
+            var currentUserAllowed = userAllowed();
+            if (!currentUserAllowed)
             {
-                var currentUserAllowed = userAllowed();
-                if (!currentUserAllowed)
-                {
-                    return null;
-                }
-
-                var actors = getActors();
-                return actors.FirstOrDefault();
+                return null;
             }
+
+            var actors = getActors();
+            return actors.FirstOrDefault();
         }
     }
 }

@@ -150,7 +150,7 @@ namespace Botwin
         /// <param name="assemblies">Optional array of <see cref="Assembly"/> to add to the services collection. If assemblies are not provided, Assembly.GetEntryAssembly is called.</param>
         public static void AddBotwin(this IServiceCollection services, params Assembly[] assemblies)
         {
-            assemblies = assemblies.Any() ? assemblies : new[] { Assembly.GetEntryAssembly() };
+            assemblies = assemblies.Any() ? assemblies : new[] { Assembly.GetCallingAssembly() };
 
             var validators = assemblies.SelectMany(ass => ass.GetExportedTypes())
                 .Where(typeof(IValidator).IsAssignableFrom)
