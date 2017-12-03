@@ -3,11 +3,14 @@ namespace Botwin.Samples.Tests
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Text;
     using System.Threading.Tasks;
+    using Botwin.Samples.CreateDirector;
     using Botwin.Samples.GetDirectorById;
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
+    using Newtonsoft.Json;
     using Xunit;
 
     public class FunctionalTests
@@ -54,6 +57,33 @@ namespace Botwin.Samples.Tests
             var res = await client.GetAsync("/functional/directors/123");
 
             Assert.True((await res.Content.ReadAsStringAsync()).Contains("123"));
+        }
+
+        [Fact]
+        public async Task Should_store_director()
+        {
+            //Given
+            RouteHandlers.CreateDirectorHandler = director => CreateDirectorRoute.Handle(director, newDirector => 1);
+
+            //When
+            var res = await this.client.PostAsync("/functional/directors", new StringContent(JsonConvert.SerializeObject(new Director() { Name = "Jon Favreau" }), Encoding.UTF8, "application/json"));
+
+            //Then
+            Assert.Equal(HttpStatusCode.Created, res.StatusCode);
+            Assert.NotNull(res.Headers.Location);
+        }
+
+        [Fact]
+        public async Task Should_return_422_storing_dodgy_director()
+        {
+            //Given
+            RouteHandlers.CreateDirectorHandler = director => CreateDirectorRoute.Handle(director, newDirector => 1);
+
+            //When
+            var res = await this.client.PostAsync("/functional/directors", new StringContent(JsonConvert.SerializeObject(new Director { Name = "" }), Encoding.UTF8, "application/json"));
+
+            //Then
+            Assert.Equal(422, (int)res.StatusCode);
         }
     }
 }

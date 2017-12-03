@@ -1,5 +1,6 @@
 ﻿namespace Botwin.Samples
 {
+    using Botwin.ModelBinding;
     using Botwin.Request;
     using Botwin.Response;
     using Microsoft.AspNetCore.Routing;
@@ -30,6 +31,25 @@
                 var director = handler?.Invoke(routeData.As<int>("id"));
 
                 await res.AsJson(director);
+            });
+            
+            this.Post("/directors", async (req, res, routeData) =>
+            {
+                var result = req.BindAndValidate<Director>();
+
+                if (!result.ValidationResult.IsValid)
+                {
+                    res.StatusCode = 422;
+                    await res.Negotiate(result.ValidationResult.GetFormattedErrors());
+                    return;
+                }
+                    
+                var handler = RouteHandlers.CreateDirectorHandler;
+
+                var id = handler.Invoke(result.Data);
+
+                res.StatusCode = 201;
+                res.Headers["Location"] = "/" + id;
             });
         }
     }
