@@ -38,6 +38,13 @@
             get { return createDirector ?? (director => CreateDirectorRoute.Handle(director, newDirector =>
             {
                 //Create database connection here and store in the database
+                
+                /*
+                using(var conn = new NpgsqlConnection(AppConfiguration.ConnectionString))
+                {
+                   return conn.Execute("insert into director (name, age, dob) values (@name, @age, @dob)",director);
+                }
+                */
                 return 1123;
             })); }
             set => createDirector = value;
