@@ -1,9 +1,12 @@
 namespace Botwin.Samples
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
+    using BotwinSample;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Startup
@@ -14,8 +17,11 @@ namespace Botwin.Samples
             services.AddBotwin();
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IConfiguration config)
         {
+            var appconfig = new AppConfiguration();
+            config.Bind(appconfig);
+
             app.UseExceptionHandler("/errorhandler");
 
             app.UseBotwin(this.GetOptions());
@@ -28,7 +34,7 @@ namespace Botwin.Samples
 
         private Task<bool> GetBeforeHook(HttpContext ctx)
         {
-            ctx.Request.Headers.Add("HOWDY", "FOLKS");
+            ctx.Request.Headers["HOWDY"] = "FOLKS";
             return Task.FromResult(true);
         }
 

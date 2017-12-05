@@ -4,5 +4,6 @@ dotnet: 2.0.0
 dist: trusty
 script:
  - dotnet build Botwin.sln
- - dotnet test test
+ - dotnet test test/Botwin.Samples.Tests/Botwin.Samples.Tests.csproj
+ - dotnet test test/Botwin.Tests/Botwin.Tests.csproj
  - dotnet pack src
