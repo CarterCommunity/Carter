@@ -1,9 +1,11 @@
 ﻿namespace Botwin.Samples
 {
     using System.Collections.Generic;
+    using System.Linq;
 
-    public static class GetDirectorsRoute
+    public static class ListDirectorsRoute
     {
+        public delegate IEnumerable<Director> ListDirectorsHandler();
         public delegate IEnumerable<Director> ListDirectors();
         public delegate bool UserAllowed();
         
@@ -16,7 +18,8 @@
             }
 
             var directors = listDirectors();
-            return directors;
+            
+            return directors ?? Enumerable.Empty<Director>();
         }
     }
 }
