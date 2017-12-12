@@ -19,26 +19,17 @@ namespace Botwin.ModelBinding
         /// </summary>
         /// <param name="request">Current <see cref="HttpRequest"/></param>
         /// <typeparam name="T">Model type</typeparam>
-        /// <returns>Bound model</returns>
+        /// <returns><see cref="ValidationResult"/> and bound model</returns>
         public static (ValidationResult ValidationResult, T Data) BindAndValidate<T>(this HttpRequest request)
         {
-            var data = request.Bind<T>();
-            if (data == null)
+            var model = request.Bind<T>();
+            if (model == null)
             {
-                data = Activator.CreateInstance<T>();
+                model = Activator.CreateInstance<T>();
             }
 
-            var validatorLocator = request.HttpContext.RequestServices.GetService<IValidatorLocator>();
-
-            var validator = validatorLocator.GetValidator<T>();
-
-            if (validator == null)
-            {
-                return (new ValidationResult(new[] { new ValidationFailure(typeof(T).Name, "No validator found") }), default(T));
-            }
-
-            var result = validator.Validate(data);
-            return (result, data);
+            var validationResult = request.Validate(model);            
+            return (validationResult, model);
         }
 
         /// <summary>
