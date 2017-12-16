@@ -6,7 +6,9 @@ namespace Botwin.Samples.Tests
     using System.Text;
     using System.Threading.Tasks;
     using Botwin.Samples.CreateDirector;
+    using Botwin.Samples.DeleteDirector;
     using Botwin.Samples.GetDirectorById;
+    using Botwin.Samples.UpdateDirector;
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
@@ -31,22 +33,24 @@ namespace Botwin.Samples.Tests
         [Fact]
         public async Task Should_return_list_of_director_data()
         {
-            RouteHandlers.ListDirectorsHandler = () => GetDirectorsRoute.Handle(() => new[] { new Director { Name = "Ridley Scott" } }, () => true);
+            RouteHandlers.ListDirectorsHandler = () => ListDirectorsRoute.Handle(() => new[] { new Director { Name = "Ridley Scott" } }, () => true);
 
             var res = await client.GetAsync("/functional/directors");
 
             Assert.Equal(HttpStatusCode.OK, res.StatusCode);
-            Assert.True((await res.Content.ReadAsStringAsync()).Contains("Ridley"));
+            Assert.Contains("Ridley", await res.Content.ReadAsStringAsync());
         }
 
         [Fact]
         public async Task Should_return_null_if_permission_not_allowed()
         {
-            RouteHandlers.ListDirectorsHandler = () => GetDirectorsRoute.Handle(() => Enumerable.Empty<Director>(), () => false);
+            RouteHandlers.ListDirectorsHandler = () => ListDirectorsRoute.Handle(() => Enumerable.Empty<Director>(), () => false);
+
+            RouteHandlers.UpdateDirectorHandler = director => UpdateDirectorRoute.Handle(director, director1 => 9, () => true);
 
             var res = await client.GetAsync("/functional/directors");
 
-            Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, res.StatusCode);
         }
 
         [Fact]
@@ -56,7 +60,7 @@ namespace Botwin.Samples.Tests
 
             var res = await client.GetAsync("/functional/directors/123");
 
-            Assert.True((await res.Content.ReadAsStringAsync()).Contains("123"));
+            Assert.Contains("123",await res.Content.ReadAsStringAsync());
         }
 
         [Fact]
@@ -66,7 +70,7 @@ namespace Botwin.Samples.Tests
             RouteHandlers.CreateDirectorHandler = director => CreateDirectorRoute.Handle(director, newDirector => 1);
 
             //When
-            var res = await this.client.PostAsync("/functional/directors", new StringContent(JsonConvert.SerializeObject(new Director() { Name = "Jon Favreau" }), Encoding.UTF8, "application/json"));
+            var res = await this.client.PostAsync("/functional/directors", new StringContent(JsonConvert.SerializeObject(new Director { Name = "Jon Favreau" }), Encoding.UTF8, "application/json"));
 
             //Then
             Assert.Equal(HttpStatusCode.Created, res.StatusCode);
@@ -84,6 +88,84 @@ namespace Botwin.Samples.Tests
 
             //Then
             Assert.Equal(422, (int)res.StatusCode);
+        }
+        
+        [Fact]
+        public async Task Should_return_422_updating_dodgy_director()
+        {
+            //Given
+            RouteHandlers.UpdateDirectorHandler = director => UpdateDirectorRoute.Handle(director, newDirector => 1, () => true);
+
+            //When
+            var res = await this.client.PutAsync("/functional/directors/1", new StringContent(JsonConvert.SerializeObject(new Director { Name = "" }), Encoding.UTF8, "application/json"));
+
+            //Then
+            Assert.Equal(422, (int)res.StatusCode);
+        }
+        
+        [Fact]
+        public async Task Should_update_director()
+        {
+            //Given
+            RouteHandlers.UpdateDirectorHandler = director => UpdateDirectorRoute.Handle(director, newDirector => 1, () => true);
+
+            //When
+            var res = await this.client.PutAsync("/functional/directors/1", new StringContent(JsonConvert.SerializeObject(new Director { Name = "Plop" }), Encoding.UTF8, "application/json"));
+
+            //Then
+            Assert.Equal(204, (int)res.StatusCode);
+        }
+        
+        [Fact]
+        public async Task Should_return_403_if_user_not_allowed_on_update()
+        {
+            //Given
+            RouteHandlers.UpdateDirectorHandler = director => UpdateDirectorRoute.Handle(director, newDirector => 1, () => false);
+
+            //When
+            var res = await this.client.PutAsync("/functional/directors/1", new StringContent(JsonConvert.SerializeObject(new Director { Name = "Plop" }), Encoding.UTF8, "application/json"));
+
+            //Then
+            Assert.Equal(403, (int)res.StatusCode);
+        }
+        
+        [Fact]
+        public async Task Should_return_400_if_user_not_successfully_updated()
+        {
+            //Given
+            RouteHandlers.UpdateDirectorHandler = director => UpdateDirectorRoute.Handle(director, newDirector => 0, () => true);
+
+            //When
+            var res = await this.client.PutAsync("/functional/directors/1", new StringContent(JsonConvert.SerializeObject(new Director { Name = "Plop" }), Encoding.UTF8, "application/json"));
+
+            //Then
+            Assert.Equal(400, (int)res.StatusCode);
+        }
+        
+        [Fact]
+        public async Task Should_delete_director()
+        {
+            //Given
+            RouteHandlers.DeleteDirectorHandler = id => DeleteDirectorRoute.Handle(id, newDirector => 1, () => true);
+
+            //When
+            var res = await this.client.DeleteAsync("/functional/directors/1");
+
+            //Then
+            Assert.Equal(204, (int)res.StatusCode);
+        }
+        
+        [Fact]
+        public async Task Should_return_403_if_user_not_allowed_on_delete()
+        {
+            //Given
+            RouteHandlers.DeleteDirectorHandler = id => DeleteDirectorRoute.Handle(id, newDirector => 1, () => false);
+
+            //When
+            var res = await this.client.DeleteAsync("/functional/directors/1");
+
+            //Then
+            Assert.Equal(403, (int)res.StatusCode);
         }
     }
 }

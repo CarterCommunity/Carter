@@ -2,22 +2,24 @@
 {
     using System;
     using Botwin.Samples.CreateDirector;
+    using Botwin.Samples.DeleteDirector;
     using Botwin.Samples.GetDirectorById;
+    using Botwin.Samples.UpdateDirector;
     using BotwinSample;
 
     public static class RouteHandlers
     {
-        private static GetDirectorsRoute.ListDirectors listDirectors;
-
-        private static GetDirectorByIdRoute.GetDirectorById getDirectorById;
-
-        private static CreateDirectorRoute.CreateDirector createDirector;
-
-        public static GetDirectorsRoute.ListDirectors ListDirectorsHandler
+        private static ListDirectorsRoute.ListDirectorsHandler listDirectors;
+        private static GetDirectorByIdRoute.GetDirectorByIdHandler getDirectorById;
+        private static CreateDirectorRoute.CreateDirectorHandler createDirector;
+        private static UpdateDirectorRoute.UpdateDirectorHandler updateDirectorHandler;
+        private static DeleteDirectorRoute.DeleteDirectorHandler deleteDirectorHandler;
+        
+        public static ListDirectorsRoute.ListDirectorsHandler ListDirectorsHandler
         {
             get
             {
-                return listDirectors ?? (() => GetDirectorsRoute.Handle(listDirectors: () =>
+                return listDirectors ?? (() => ListDirectorsRoute.Handle(listDirectors: () =>
                 {
                     Console.WriteLine($"Getting sql connection from settings {AppConfiguration.ConnectionString} as an example of how you'd get app settings");
                     return new[] { new Director() };
@@ -27,27 +29,42 @@
             set => listDirectors = value;
         }
 
-        public static GetDirectorByIdRoute.GetDirectorById GetDirectorByIdHandler
+        public static GetDirectorByIdRoute.GetDirectorByIdHandler GetDirectorByIdHandler
         {
             get { return getDirectorById ?? (dirId => GetDirectorByIdRoute.Handle(dirId, id => new Director(), () => true)); }
             set => getDirectorById = value;
         }
 
-        public static CreateDirectorRoute.CreateDirector CreateDirectorHandler
+        public static CreateDirectorRoute.CreateDirectorHandler CreateDirectorHandler
         {
-            get { return createDirector ?? (director => CreateDirectorRoute.Handle(director, newDirector =>
+            get
             {
-                //Create database connection here and store in the database
-                
-                /*
-                using(var conn = new NpgsqlConnection(AppConfiguration.ConnectionString))
+                return createDirector ?? (director => CreateDirectorRoute.Handle(director, newDirector =>
                 {
-                   return conn.Execute("insert into director (name, age, dob) values (@name, @age, @dob)",director);
-                }
-                */
-                return 1123;
-            })); }
+                    //Create database connection here and store in the database
+
+                    /*
+                    using(var conn = new NpgsqlConnection(AppConfiguration.ConnectionString))
+                    {
+                       return conn.Execute("insert into director (name, age, dob) values (@name, @age, @dob)",director);
+                    }
+                    */
+                    return 1123;
+                }));
+            }
             set => createDirector = value;
+        }
+
+        public static UpdateDirectorRoute.UpdateDirectorHandler UpdateDirectorHandler
+        {
+            get { return updateDirectorHandler ?? (director => UpdateDirectorRoute.Handle(director, director1 => 1, () => true)); }
+            set => updateDirectorHandler = value;
+        }
+
+        public static DeleteDirectorRoute.DeleteDirectorHandler DeleteDirectorHandler
+        {
+            get { return deleteDirectorHandler ?? (dirId => DeleteDirectorRoute.Handle(dirId, directorId => 1 , () => true)); }
+            set => deleteDirectorHandler = value;
         }
     }
 }
