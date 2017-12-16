@@ -2,6 +2,7 @@
 {
     using System;
     using Botwin.Samples.CreateDirector;
+    using Botwin.Samples.DeleteDirector;
     using Botwin.Samples.GetDirectorById;
     using Botwin.Samples.UpdateDirector;
     using BotwinSample;

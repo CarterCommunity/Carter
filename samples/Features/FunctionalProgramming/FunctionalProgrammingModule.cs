@@ -85,7 +85,7 @@
 
                     res.StatusCode = 204;
                 }
-                catch (Exception e)
+                catch
                 {
                     res.StatusCode = 403;
                 }
@@ -102,7 +102,7 @@
                     res.StatusCode = 204;
                     return Task.CompletedTask;
                 }
-                catch (InvalidOperationException e)
+                catch (InvalidOperationException)
                 {
                     res.StatusCode = 403;
                     return Task.CompletedTask;

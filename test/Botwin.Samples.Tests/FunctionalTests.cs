@@ -6,6 +6,7 @@ namespace Botwin.Samples.Tests
     using System.Text;
     using System.Threading.Tasks;
     using Botwin.Samples.CreateDirector;
+    using Botwin.Samples.DeleteDirector;
     using Botwin.Samples.GetDirectorById;
     using Botwin.Samples.UpdateDirector;
     using Microsoft.AspNetCore;
