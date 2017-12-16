@@ -2,7 +2,6 @@
 {
     using System.Collections.Generic;
     using System.Linq;
-    using samples.Features.FunctionalProgramming;
 
     public static class ListDirectorsRoute
     {
