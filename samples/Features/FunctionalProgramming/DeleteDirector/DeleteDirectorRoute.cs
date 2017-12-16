@@ -1,4 +1,4 @@
-﻿namespace Botwin.Samples
+﻿namespace Botwin.Samples.DeleteDirector
 {
     using System;
 
