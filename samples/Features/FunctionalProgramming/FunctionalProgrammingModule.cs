@@ -15,22 +15,22 @@
             {
                 var handler = RouteHandlers.ListDirectorsHandler;
 
-                var actor = handler.Invoke();
+                var directors = handler();
 
-                if (actor == null)
+                if (directors == null)
                 {
                     res.StatusCode = 403;
                     return;
                 }
 
-                await res.AsJson(actor);
+                await res.AsJson(directors);
             });
 
             this.Get("/directors/{id:int}", async (req, res, routeData) =>
             {
                 var handler = RouteHandlers.GetDirectorByIdHandler;
 
-                var director = handler.Invoke(routeData.As<int>("id"));
+                var director = handler(routeData.As<int>("id"));
 
                 if (director == null)
                 {
@@ -54,7 +54,7 @@
 
                 var handler = RouteHandlers.CreateDirectorHandler;
 
-                var id = handler.Invoke(result.Data);
+                var id = handler(result.Data);
 
                 res.StatusCode = 201;
                 res.Headers["Location"] = "/" + id;
@@ -75,7 +75,7 @@
 
                 try
                 {
-                    var success = handler.Invoke(result.Data);
+                    var success = handler(result.Data);
 
                     if (!success)
                     {
@@ -97,7 +97,7 @@
 
                 try
                 {
-                    handler.Invoke(routeData.As<int>("id"));
+                    handler(routeData.As<int>("id"));
 
                     res.StatusCode = 204;
                     return Task.CompletedTask;
