@@ -14,7 +14,7 @@
         private static CreateDirectorRoute.CreateDirectorHandler createDirector;
         private static UpdateDirectorRoute.UpdateDirectorHandler updateDirectorHandler;
         private static DeleteDirectorRoute.DeleteDirectorHandler deleteDirectorHandler;
-        
+
         public static ListDirectorsRoute.ListDirectorsHandler ListDirectorsHandler
         {
             get
@@ -23,7 +23,7 @@
                 {
                     Console.WriteLine($"Getting sql connection from settings {AppConfiguration.ConnectionString} as an example of how you'd get app settings");
                     return new[] { new Director() };
-                }, userAllowed: () => true));
+                }, userAllowed: () => true, sharedDelegateExample: SharedImplementations.SharedImplementation));
             }
 
             set => listDirectors = value;
@@ -63,7 +63,7 @@
 
         public static DeleteDirectorRoute.DeleteDirectorHandler DeleteDirectorHandler
         {
-            get { return deleteDirectorHandler ?? (dirId => DeleteDirectorRoute.Handle(dirId, directorId => 1 , () => true)); }
+            get { return deleteDirectorHandler ?? (dirId => DeleteDirectorRoute.Handle(dirId, directorId => 1, () => true)); }
             set => deleteDirectorHandler = value;
         }
     }

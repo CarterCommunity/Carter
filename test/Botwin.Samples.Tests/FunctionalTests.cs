@@ -33,7 +33,7 @@ namespace Botwin.Samples.Tests
         [Fact]
         public async Task Should_return_list_of_director_data()
         {
-            RouteHandlers.ListDirectorsHandler = () => ListDirectorsRoute.Handle(() => new[] { new Director { Name = "Ridley Scott" } }, () => true);
+            RouteHandlers.ListDirectorsHandler = () => ListDirectorsRoute.Handle(() => new[] { new Director { Name = "Ridley Scott" } }, () => true, () => false);
 
             var res = await client.GetAsync("/functional/directors");
 
@@ -44,7 +44,7 @@ namespace Botwin.Samples.Tests
         [Fact]
         public async Task Should_return_null_if_permission_not_allowed()
         {
-            RouteHandlers.ListDirectorsHandler = () => ListDirectorsRoute.Handle(() => Enumerable.Empty<Director>(), () => false);
+            RouteHandlers.ListDirectorsHandler = () => ListDirectorsRoute.Handle(() => Enumerable.Empty<Director>(), () => false, () => false);
 
             RouteHandlers.UpdateDirectorHandler = director => UpdateDirectorRoute.Handle(director, director1 => 9, () => true);
 
@@ -60,7 +60,7 @@ namespace Botwin.Samples.Tests
 
             var res = await client.GetAsync("/functional/directors/123");
 
-            Assert.Contains("123",await res.Content.ReadAsStringAsync());
+            Assert.Contains("123", await res.Content.ReadAsStringAsync());
         }
 
         [Fact]
@@ -89,7 +89,7 @@ namespace Botwin.Samples.Tests
             //Then
             Assert.Equal(422, (int)res.StatusCode);
         }
-        
+
         [Fact]
         public async Task Should_return_422_updating_dodgy_director()
         {
@@ -102,7 +102,7 @@ namespace Botwin.Samples.Tests
             //Then
             Assert.Equal(422, (int)res.StatusCode);
         }
-        
+
         [Fact]
         public async Task Should_update_director()
         {
@@ -115,7 +115,7 @@ namespace Botwin.Samples.Tests
             //Then
             Assert.Equal(204, (int)res.StatusCode);
         }
-        
+
         [Fact]
         public async Task Should_return_403_if_user_not_allowed_on_update()
         {
@@ -128,7 +128,7 @@ namespace Botwin.Samples.Tests
             //Then
             Assert.Equal(403, (int)res.StatusCode);
         }
-        
+
         [Fact]
         public async Task Should_return_400_if_user_not_successfully_updated()
         {
@@ -141,7 +141,7 @@ namespace Botwin.Samples.Tests
             //Then
             Assert.Equal(400, (int)res.StatusCode);
         }
-        
+
         [Fact]
         public async Task Should_delete_director()
         {
@@ -154,7 +154,7 @@ namespace Botwin.Samples.Tests
             //Then
             Assert.Equal(204, (int)res.StatusCode);
         }
-        
+
         [Fact]
         public async Task Should_return_403_if_user_not_allowed_on_delete()
         {
