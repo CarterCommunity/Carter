@@ -152,7 +152,7 @@ namespace Botwin
         {
             assemblies = assemblies.Any() ? assemblies : new[] { Assembly.GetCallingAssembly() };
 
-            var validators = assemblies.SelectMany(ass => ass.GetExportedTypes())
+            var validators = assemblies.SelectMany(ass => ass.GetTypes())
                 .Where(typeof(IValidator).IsAssignableFrom)
                 .Where(t => !t.GetTypeInfo().IsAbstract);
 
