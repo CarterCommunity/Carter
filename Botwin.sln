@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2002
@@ -20,6 +20,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BotwinTemplate", "template\content\BotwinTemplate.csproj", "{572762BB-5DFF-425F-8F66-500B973DBB0E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Botwin.Samples.Tests", "test\Botwin.Samples.Tests\Botwin.Samples.Tests.csproj", "{DD5E942A-D546-489B-A5E9-8CB42C61BEC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BotwinAndMVC", "samples\BotwinAndMVC\BotwinAndMVC.csproj", "{CE26885C-BB25-4A2C-B550-1D807CD1A066}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +93,18 @@ Global
 		{DD5E942A-D546-489B-A5E9-8CB42C61BEC1}.Release|x64.Build.0 = Release|x64
 		{DD5E942A-D546-489B-A5E9-8CB42C61BEC1}.Release|x86.ActiveCfg = Release|x86
 		{DD5E942A-D546-489B-A5E9-8CB42C61BEC1}.Release|x86.Build.0 = Release|x86
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Debug|x64.Build.0 = Debug|Any CPU
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Debug|x86.Build.0 = Debug|Any CPU
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Release|x64.ActiveCfg = Release|Any CPU
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Release|x64.Build.0 = Release|Any CPU
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Release|x86.ActiveCfg = Release|Any CPU
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -101,6 +115,7 @@ Global
 		{32E3C950-F6C1-4635-B87F-0EA30044E2F4} = {DCB5B9A0-F06D-4BDF-917D-A459C790C718}
 		{572762BB-5DFF-425F-8F66-500B973DBB0E} = {47344C99-29DA-410E-AFC2-8FD3BA6727DB}
 		{DD5E942A-D546-489B-A5E9-8CB42C61BEC1} = {DCB5B9A0-F06D-4BDF-917D-A459C790C718}
+		{CE26885C-BB25-4A2C-B550-1D807CD1A066} = {35DE35A0-758D-4FDD-BDA3-67F04F65677D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9096DE78-6327-48BA-AE0E-336F769681A7}
