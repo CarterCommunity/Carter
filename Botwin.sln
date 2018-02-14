@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Botwin", "src\Botwin.csproj", "{A6D020CF-1722-4AB3-A8B3-69F54319AD6A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BotwinSample", "samples\BotwinSample.csproj", "{2C511F74-490A-4804-A826-DC9626C669E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BotwinSample", "samples\BotwinSample\BotwinSample.csproj", "{2C511F74-490A-4804-A826-DC9626C669E9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{5D056A8A-821C-4C3C-A281-4FA7F8CE251B}"
 EndProject
