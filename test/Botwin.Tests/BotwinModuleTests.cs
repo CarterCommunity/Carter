@@ -18,7 +18,7 @@
             this.server = new TestServer(new WebHostBuilder()
                 .ConfigureServices(x =>
                 {
-                    x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly);
+                    x.AddBotwin();
                 })
                 .Configure(x => x.UseBotwin())
             );

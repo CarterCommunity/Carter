@@ -27,7 +27,7 @@ namespace Botwin.Tests
         public BindTests()
         {
             var server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly); })
+                .ConfigureServices(x => { x.AddBotwin(); })
                 .Configure(x => x.UseBotwin())
             );
             this.httpClient = server.CreateClient();

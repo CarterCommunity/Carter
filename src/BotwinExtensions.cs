@@ -1,7 +1,6 @@
 namespace Botwin
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -148,9 +147,11 @@ namespace Botwin
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Botwin to.</param>
         /// <param name="assemblies">Optional array of <see cref="Assembly"/> to add to the services collection. If assemblies are not provided, Assembly.GetEntryAssembly is called.</param>
-        public static void AddBotwin(this IServiceCollection services, params Assembly[] assemblies)
+        public static void AddBotwin(this IServiceCollection services)
         {
-            assemblies = assemblies.Any() ? assemblies : new[] { Assembly.GetCallingAssembly() };
+            var assemblyCatalog = new DependencyContextAssemblyCatalog();
+            
+            var assemblies = assemblyCatalog.GetAssemblies();
 
             var validators = assemblies.SelectMany(ass => ass.GetTypes())
                 .Where(typeof(IValidator).IsAssignableFrom)

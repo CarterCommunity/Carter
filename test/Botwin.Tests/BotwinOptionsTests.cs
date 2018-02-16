@@ -19,7 +19,7 @@ namespace Botwin.Tests
             this.server = new TestServer(new WebHostBuilder()
                             .ConfigureServices(x =>
                             {
-                                x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly);
+                                x.AddBotwin();
                             })
                             .Configure(x => x.UseBotwin(new BotwinOptions(before: async (ctx) => { await ctx.Response.WriteAsync("GlobalBefore"); return continueRequest; }, after: async (ctx) => await ctx.Response.WriteAsync("GlobalAfter"))))
                         );
