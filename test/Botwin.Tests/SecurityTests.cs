@@ -19,7 +19,7 @@
         private void ConfigureServer(bool authedUser = false, IEnumerable<Claim> claims = null)
         {
             var server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddBotwin(typeof(TestModule).GetTypeInfo().Assembly); })
+                .ConfigureServices(x => { x.AddBotwin(); })
                 .Configure(x =>
                 {
                     if (authedUser)
