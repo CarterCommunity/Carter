@@ -4,16 +4,14 @@ namespace Botwin.Tests
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
-    using System.Reflection;
+    using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Net.Http.Headers;
-    using Newtonsoft.Json.Serialization;
     using Xunit;
+    using MediaTypeHeaderValue = Microsoft.Net.Http.Headers.MediaTypeHeaderValue;
 
     public class ResponseNegotiatorTests
     {
@@ -24,19 +22,16 @@ namespace Botwin.Tests
         public ResponseNegotiatorTests()
         {
             this.server = new TestServer(new WebHostBuilder()
-                            .ConfigureServices(x =>
-                            {
-                                x.AddBotwin();
-                            })
-                            .Configure(x => x.UseBotwin())
-                        );
+                .ConfigureServices(x => { x.AddBotwin(); })
+                .Configure(x => x.UseBotwin())
+            );
             this.httpClient = this.server.CreateClient();
         }
 
         [Fact]
         public async Task Should_use_appropriate_response_negotiator()
         {
-            this.httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("foo/bar"));
+            this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("foo/bar"));
             var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
             Assert.Equal("FOOBAR", body);
@@ -45,7 +40,7 @@ namespace Botwin.Tests
         [Fact]
         public async Task Should_fallback_to_json()
         {
-            this.httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("not/known"));
+            this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("not/known"));
             var response = await this.httpClient.GetAsync("/negotiate");
             Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
         }
@@ -60,23 +55,70 @@ namespace Botwin.Tests
         [Fact]
         public async Task Should_camelCase_json()
         {
-            this.httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
             Assert.Equal("{\"firstName\":\"Jim\"}", body);
+        }
+
+        [Fact]
+        public async Task Should_pick_correctly_weighted_processor()
+        {
+            this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml", 0.5));
+            this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html", 0.3));
+            var response = await this.httpClient.GetAsync("/negotiate");
+            var body = await response.Content.ReadAsStringAsync();
+            Assert.Equal("XML Response", body);
+        }
+        
+        [Fact]
+        public async Task Should_pick_non_weighted_over_weighted()
+        {
+            this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml", 0.5));
+            this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html", 0.3));
+            this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("foo/bar"));
+            var response = await this.httpClient.GetAsync("/negotiate");
+            var body = await response.Content.ReadAsStringAsync();
+            Assert.Equal("FOOBAR", body);
         }
     }
 
     internal class TestResponseNegotiator : IResponseNegotiator
     {
-        public bool CanHandle(IList<MediaTypeHeaderValue> accept)
+        public bool CanHandle(MediaTypeHeaderValue accept)
         {
-            return accept.Any(x => x.MediaType.ToString().IndexOf("foo/bar", StringComparison.OrdinalIgnoreCase) >= 0);
+            return accept.MediaType.ToString().IndexOf("foo/bar", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken))
         {
             await res.WriteAsync("FOOBAR", cancellationToken);
+        }
+    }
+    
+    internal class TestHtmlResponseNegotiator : IResponseNegotiator
+    {
+        public bool CanHandle(MediaTypeHeaderValue accept)
+        {
+            return accept.MediaType.ToString().IndexOf("text/html", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            await res.WriteAsync("HTML Response", cancellationToken);
+        }
+    }
+    
+    internal class TestXmlResponseNegotiator : IResponseNegotiator
+    {
+        public bool CanHandle(MediaTypeHeaderValue accept)
+        {
+            return accept.MediaType.ToString().IndexOf("application/xml", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            await res.WriteAsync("XML Response", cancellationToken);
         }
     }
 }
