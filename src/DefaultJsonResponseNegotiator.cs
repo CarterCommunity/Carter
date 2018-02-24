@@ -1,8 +1,6 @@
 ﻿namespace Botwin
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
@@ -23,9 +21,9 @@
             this.jsonSettings = new JsonSerializerSettings { ContractResolver = contractResolver };
         }
 
-        public bool CanHandle(IList<MediaTypeHeaderValue> accept)
+        public bool CanHandle(MediaTypeHeaderValue accept)
         {
-            return accept.Any(x => x.MediaType.ToString().IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0);
+            return accept.MediaType.ToString().IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken)

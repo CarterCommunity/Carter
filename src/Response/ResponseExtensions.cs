@@ -1,6 +1,5 @@
 namespace Botwin.Response
 {
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -17,13 +16,29 @@ namespace Botwin.Response
         /// <param name="obj">View model</param>
         /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
         /// <returns><see cref="Task"/></returns>
-        public static async Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
         {
             var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
 
-            var accept = response.HttpContext.Request.GetTypedHeaders().Accept ?? new List<MediaTypeHeaderValue>();
+            var accept = response.HttpContext.Request.GetTypedHeaders().Accept ?? Enumerable.Empty<MediaTypeHeaderValue>();
 
-            var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(accept)) ?? negotiators.FirstOrDefault(x => x.CanHandle(new List<MediaTypeHeaderValue>() { new MediaTypeHeaderValue("application/json") }));
+            var ordered = accept.OrderByDescending(x => x.Quality ?? 1);
+
+            IResponseNegotiator negotiator = null;
+
+            foreach (var acceptHeader in ordered)
+            {
+                negotiator = negotiators.FirstOrDefault(x => x.CanHandle(acceptHeader));
+                if (negotiator != null)
+                {
+                    break;
+                }
+            }
+
+            if (negotiator == null)
+            {
+                negotiator = negotiators.FirstOrDefault(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
+            }
 
             await negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
         }
@@ -35,11 +50,11 @@ namespace Botwin.Response
         /// <param name="obj">View model</param>
         /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
         /// <returns><see cref="Task"/></returns>
-        public static async Task AsJson(this HttpResponse response, object obj, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task AsJson(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
         {
             var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
 
-            var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(new List<MediaTypeHeaderValue>() { new MediaTypeHeaderValue("application/json") }));
+            var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
 
             await negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
         }
