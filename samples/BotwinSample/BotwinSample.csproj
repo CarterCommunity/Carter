@@ -12,5 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/Botwin.csproj" />
+    <ProjectReference Include="../ValidatorOnlyProject/ValidatorOnlyProject.csproj" />
   </ItemGroup>
 </Project>

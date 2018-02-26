@@ -4,11 +4,14 @@ namespace Botwin
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using FluentValidation;
     using Microsoft.Extensions.DependencyModel;
 
     public class DependencyContextAssemblyCatalog
     {
         private static readonly Assembly BotwinAssembly = typeof(BotwinExtensions).Assembly;
+
+        private static readonly Assembly FluentValidationAssembly = typeof(IValidator).Assembly;
 
         private readonly DependencyContext dependencyContext;
 
@@ -38,12 +41,12 @@ namespace Botwin
         {
             var results = new HashSet<Assembly>
             {
-                typeof(DependencyContextAssemblyCatalog).GetTypeInfo().Assembly
+                typeof(DependencyContextAssemblyCatalog).Assembly
             };
 
             foreach (var library in this.dependencyContext.RuntimeLibraries)
             {
-                if (IsReferencingBotwin(library))
+                if (IsReferencingBotwin(library) || IsReferencingFluentValidation(library))
                 {
                     foreach (var assemblyName in library.GetDefaultAssemblyNames(this.dependencyContext))
                     {
@@ -70,6 +73,11 @@ namespace Botwin
         private static bool IsReferencingBotwin(Library library)
         {
             return library.Dependencies.Any(dependency => dependency.Name.Equals(BotwinAssembly.GetName().Name));
+        }
+
+        private static bool IsReferencingFluentValidation(Library library)
+        {
+            return library.Dependencies.Any(dependency => dependency.Name.Equals(FluentValidationAssembly.GetName().Name));
         }
     }
 }
