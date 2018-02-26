@@ -5,10 +5,11 @@ namespace Botwin.ModelBinding
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using Botwin.Request;
     using FluentValidation.Results;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     public static class BindExtensions
     {
@@ -28,7 +29,7 @@ namespace Botwin.ModelBinding
                 model = Activator.CreateInstance<T>();
             }
 
-            var validationResult = request.Validate(model);            
+            var validationResult = request.Validate(model);
             return (validationResult, model);
         }
 
@@ -40,6 +41,30 @@ namespace Botwin.ModelBinding
         /// <returns>Bound model</returns>
         public static T Bind<T>(this HttpRequest request)
         {
+            if (request.HasFormContentType)
+            {
+                var res = JObject.FromObject(request.Form.ToDictionary(key => key.Key, val =>
+                {
+                    var type = typeof(T);
+                    var propertyType = type.GetProperty(val.Key).PropertyType;
+
+                    if (propertyType.IsArray() || propertyType.IsCollection() || propertyType.IsEnumerable())
+                    {
+                        var colType = propertyType.GetElementType();
+                        if (colType == null)
+                        {
+                            colType = propertyType.GetGenericArguments().FirstOrDefault();
+                        }
+                        return val.Value.Select(y => Convert.ChangeType(y, colType));
+                    }
+                    //int, double etc
+                    return Convert.ChangeType(val.Value[0], propertyType);
+                }));
+                
+                var instance = res.ToObject<T>();
+                return instance;
+            }
+
             using (var streamReader = new StreamReader(request.Body))
             using (var jsonTextReader = new JsonTextReader(streamReader))
             {

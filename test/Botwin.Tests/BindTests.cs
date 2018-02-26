@@ -81,7 +81,8 @@ namespace Botwin.Tests
         [Fact]
         public async Task Should_throw_exception_when_multiple_validators_found()
         {
-            var ex = await Record.ExceptionAsync(async () => await this.httpClient.PostAsync("/duplicatevalidator", new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}", Encoding.UTF8, "application/json")));
+            var ex = await Record.ExceptionAsync(async () =>
+                await this.httpClient.PostAsync("/duplicatevalidator", new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}", Encoding.UTF8, "application/json")));
 
             Assert.IsType<InvalidOperationException>(ex);
         }
@@ -186,6 +187,41 @@ namespace Botwin.Tests
                 Directory.Delete(model.Path, true);
             }
         }
+
+        [Fact]
+        public async Task Should_bind_form_data()
+        {
+            //Given
+            var res = await this.httpClient.PostAsync("/bindandvalidate",
+                new FormUrlEncodedContent(
+                    new[]
+                    {
+                        new KeyValuePair<string, string>("MyIntProperty", "1"),
+                        new KeyValuePair<string, string>("MyStringProperty", "hi there"),
+                        new KeyValuePair<string, string>("MyDoubleProperty", "2.3"),
+                        new KeyValuePair<string, string>("MyArrayProperty", "1"),
+                        new KeyValuePair<string, string>("MyArrayProperty", "2"),
+                        new KeyValuePair<string, string>("MyArrayProperty", "3"),
+                        new KeyValuePair<string, string>("MyIntArrayProperty", "1"),
+                        new KeyValuePair<string, string>("MyIntArrayProperty", "2"),
+                        new KeyValuePair<string, string>("MyIntArrayProperty", "3"),
+                        new KeyValuePair<string, string>("MyIntListProperty", "1"),
+                        new KeyValuePair<string, string>("MyIntListProperty", "2"),
+                        new KeyValuePair<string, string>("MyIntListProperty", "3")
+                    }));
+
+            //When
+            var body = await res.Content.ReadAsStringAsync();
+            var model = JsonConvert.DeserializeObject<TestModel>(body);
+
+            //Then
+            Assert.Equal(1, model.MyIntProperty);
+            Assert.Equal("hi there", model.MyStringProperty);
+            Assert.Equal(2.3, model.MyDoubleProperty);
+            Assert.Equal(new[] { "1", "2", "3" }, model.MyArrayProperty);
+            Assert.Equal(Enumerable.Range(1,3), model.MyIntArrayProperty);
+            Assert.Equal(Enumerable.Range(1,3), model.MyIntListProperty);
+        }
     }
 
     public class TestModel
@@ -193,6 +229,14 @@ namespace Botwin.Tests
         public int MyIntProperty { get; set; }
 
         public string MyStringProperty { get; set; }
+
+        public double MyDoubleProperty { get; set; }
+
+        public string[] MyArrayProperty { get; set; }
+        
+        public IEnumerable<int> MyIntArrayProperty { get; set; }
+        
+        public IEnumerable<int> MyIntListProperty { get; set; }
     }
 
     public class TestModelValidator : AbstractValidator<TestModel>
@@ -246,6 +290,7 @@ namespace Botwin.Tests
                     await res.Negotiate(model.ValidationResult.Errors);
                     return;
                 }
+
                 await res.Negotiate(model.Data);
             });
 
@@ -257,6 +302,7 @@ namespace Botwin.Tests
                     await res.Negotiate(model.ValidationResult.Errors.Select(x => new { x.PropertyName, x.ErrorMessage }));
                     return;
                 }
+
                 await res.Negotiate(model);
             });
 
@@ -268,6 +314,7 @@ namespace Botwin.Tests
                     await res.Negotiate(model.ValidationResult.Errors.Select(x => new { x.PropertyName, x.ErrorMessage }));
                     return;
                 }
+
                 await res.Negotiate(model.Data);
             });
 
