@@ -8,13 +8,20 @@ namespace Botwin.Samples
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
 
     public class Startup
     {
+        private readonly ILoggerFactory loggerFactory;
+
+        public Startup(ILoggerFactory loggerFactory)
+        {
+            this.loggerFactory = loggerFactory;
+        }
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IActorProvider, ActorProvider>();
-            services.AddBotwin();
+            services.AddBotwin(this.loggerFactory);
         }
 
         public void Configure(IApplicationBuilder app, IConfiguration config)
@@ -24,7 +31,7 @@ namespace Botwin.Samples
 
             app.UseExceptionHandler("/errorhandler");
 
-            app.UseBotwin(this.GetOptions());
+            app.UseBotwin(this.GetOptions(), this.loggerFactory.CreateLogger(typeof(BotwinExtensions)));
         }
 
         private BotwinOptions GetOptions()

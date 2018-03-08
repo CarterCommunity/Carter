@@ -4,36 +4,31 @@ namespace Botwin
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Threading.Tasks;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
 
     public static class BotwinExtensions
     {
-        /// <summary>
-        /// Adds Botwin to the specified <see cref="IApplicationBuilder"/>.
-        /// </summary>
-        /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
-        /// <returns>A reference to this instance after the operation has completed.</returns>
-        public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder)
-        {
-            return UseBotwin(builder, null);
-        }
+        private static ILoggerFactory BotwinLoggerFactory { get; set; }
 
         /// <summary>
         /// Adds Botwin to the specified <see cref="IApplicationBuilder"/>.
         /// </summary>
         /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
         /// <param name="options">A <see cref="BotwinOptions"/> instance.</param>
+        /// <param name="logger">Optional <see cref="ILogger"/> to be passed for tracing of Botwin setup</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
-        public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options)
+        public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options = null, ILogger logger = null)
         {
-            ApplyGlobalBeforeHook(builder, options);
+            logger?.LogTrace("Adding Botwin to application");
 
-            ApplyGlobalAfterHook(builder, options);
+            ApplyGlobalBeforeHook(builder, options, logger);
+
+            ApplyGlobalAfterHook(builder, options, logger);
 
             var routeBuilder = new RouteBuilder(builder);
 
@@ -44,11 +39,16 @@ namespace Botwin
                 foreach (var module in scope.ServiceProvider.GetServices<BotwinModule>())
                 {
                     var moduleType = module.GetType();
-                    var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
+
+                    var distinctPaths = module.Routes.Keys.Select(route =>
+                    {
+                        logger?.LogTrace($"Found and adding {moduleType.Name} with {route.verb} /{route.path} to routing");
+                        return route.path;
+                    }).Distinct();
 
                     foreach (var path in distinctPaths)
                     {
-                        routeBuilder.MapRoute(path, CreateRouteHandler(path, moduleType));
+                        routeBuilder.MapRoute(path, CreateRouteHandler(path, moduleType, logger));
                     }
                 }
             }
@@ -56,7 +56,7 @@ namespace Botwin
             return builder.UseRouter(routeBuilder.Build());
         }
 
-        private static RequestDelegate CreateRouteHandler(string path, Type moduleType)
+        private static RequestDelegate CreateRouteHandler(string path, Type moduleType, ILogger logger)
         {
             return async ctx =>
             {
@@ -82,17 +82,20 @@ namespace Botwin
 
                 if (module.Before != null)
                 {
+                    logger?.LogTrace("Executing module before hook");
                     shouldContinue = await module.Before(ctx);
                 }
 
                 if (shouldContinue)
                 {
                     // run the route handler
+                    logger?.LogTrace($"Executing module route handler for {ctx.Request.Method} {path}");
                     await routeHandler(ctx);
 
                     // run after handler
                     if (module.After != null)
                     {
+                        logger?.LogTrace("Executing module after hook");
                         await module.After(ctx);
                     }
                 }
@@ -103,6 +106,7 @@ namespace Botwin
 
                 if (scHandler != null)
                 {
+                    logger?.LogTrace($"Executing {nameof(IStatusCodeHandler)} {scHandler.GetType().Name}");
                     await scHandler.Handle(ctx);
                 }
 
@@ -115,30 +119,43 @@ namespace Botwin
             };
         }
 
-        private static void ApplyGlobalAfterHook(IApplicationBuilder builder, BotwinOptions options)
+        private static void ApplyGlobalAfterHook(IApplicationBuilder builder, BotwinOptions options, ILogger logger)
         {
             if (options?.After != null)
             {
+                logger?.LogTrace("Applying global after hook");
                 builder.Use(async (ctx, next) =>
                 {
                     await next();
+                    logger?.LogTrace("Executing global after hook");
                     await options.After(ctx);
                 });
             }
+            else
+            {
+                logger?.LogTrace("No global after hook found");
+            }
         }
 
-        private static void ApplyGlobalBeforeHook(IApplicationBuilder builder, BotwinOptions options)
+        private static void ApplyGlobalBeforeHook(IApplicationBuilder builder, BotwinOptions options, ILogger logger)
         {
             if (options?.Before != null)
             {
+                logger?.LogTrace("Applying global before hook");
                 builder.Use(async (ctx, next) =>
                 {
+                    logger?.LogTrace("Executing global before hook");
                     var carryOn = await options.Before(ctx); //TODO Check if return Task.CompletedTask will it continue
                     if (carryOn)
                     {
+                        logger?.LogTrace("Executing next handler after global before hook");
                         await next();
                     }
                 });
+            }
+            else
+            {
+                logger?.LogTrace("No global before hook found");
             }
         }
 
@@ -147,10 +164,23 @@ namespace Botwin
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Botwin to.</param>
         /// <param name="assemblies">Optional array of <see cref="Assembly"/> to add to the services collection. If assemblies are not provided, Assembly.GetEntryAssembly is called.</param>
-        public static void AddBotwin(this IServiceCollection services)
+        /// <param name="loggerFactory">Optional <see cref="ILoggerFactory"/> to be passed for tracing of Botwin setup</param>
+        public static void AddBotwin(this IServiceCollection services, ILoggerFactory loggerFactory)
+        {
+            var logger = loggerFactory.CreateLogger(typeof(BotwinExtensions));
+            AddBotwin(services, logger);
+        }
+
+        /// <summary>
+        /// Adds Botwin to the specified <see cref="IServiceCollection"/>.
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to add Botwin to.</param>
+        /// <param name="assemblies">Optional array of <see cref="Assembly"/> to add to the services collection. If assemblies are not provided, Assembly.GetEntryAssembly is called.</param>
+        /// <param name="logger">Optional <see cref="ILogger"/> to be passed for tracing of Botwin setup</param>
+        public static void AddBotwin(this IServiceCollection services, ILogger logger = null)
         {
             var assemblyCatalog = new DependencyContextAssemblyCatalog();
-            
+
             var assemblies = assemblyCatalog.GetAssemblies();
 
             var validators = assemblies.SelectMany(ass => ass.GetTypes())
@@ -159,6 +189,7 @@ namespace Botwin
 
             foreach (var validator in validators)
             {
+                logger?.LogTrace($"Found {validator.FullName}");
                 services.AddSingleton(typeof(IValidator), validator);
             }
 
@@ -176,6 +207,7 @@ namespace Botwin
 
             foreach (var module in modules)
             {
+                logger?.LogTrace($"Found {module.FullName}");
                 services.AddScoped(module);
                 services.AddScoped(typeof(BotwinModule), module);
             }
@@ -183,12 +215,14 @@ namespace Botwin
             var schs = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler)));
             foreach (var sch in schs)
             {
+                logger?.LogTrace($"Found {sch.FullName}");
                 services.AddScoped(typeof(IStatusCodeHandler), sch);
             }
 
             var responseNegotiators = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator)));
             foreach (var negotiatator in responseNegotiators)
             {
+                logger?.LogTrace($"Found {negotiatator.FullName}");
                 services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
             }
 
