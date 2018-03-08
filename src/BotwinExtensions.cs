@@ -146,10 +146,10 @@ namespace Botwin
         /// Adds Botwin to the specified <see cref="IServiceCollection"/>.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Botwin to.</param>
-        /// <param name="assemblies">Optional array of <see cref="Assembly"/> to add to the services collection. If assemblies are not provided, Assembly.GetEntryAssembly is called.</param>
-        public static void AddBotwin(this IServiceCollection services)
+        /// <param name="assemblyCatalog">Optional <see cref="DependencyContextAssemblyCatalog"/> containing assemblies to add to the services collection. If not provided, the default catalog of assemblies is added, which includes Assembly.GetEntryAssembly.</param>
+        public static void AddBotwin(this IServiceCollection services, DependencyContextAssemblyCatalog assemblyCatalog = null)
         {
-            var assemblyCatalog = new DependencyContextAssemblyCatalog();
+            assemblyCatalog = assemblyCatalog ?? new DependencyContextAssemblyCatalog();
             
             var assemblies = assemblyCatalog.GetAssemblies();
 
