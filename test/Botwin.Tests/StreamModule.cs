@@ -1,0 +1,30 @@
+﻿namespace Botwin.Tests
+{
+    using System.IO;
+    using System.Net.Mime;
+    using System.Text;
+    using Botwin.Response;
+
+    public class StreamModule : BotwinModule
+    {
+        public StreamModule()
+        {
+            this.Get("/downloadwithcd", async (request, response, routeData) =>
+            {
+                using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("hi")))
+                {
+                    var cd = new ContentDisposition { FileName = "journal.csv" };
+                    await response.FromStream(mystream, "application/csv", cd);
+                }
+            });
+            
+            this.Get("/download", async (request, response, routeData) =>
+            {
+                using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("hi")))
+                {
+                    await response.FromStream(mystream, "application/csv");
+                }
+            });
+        }
+    }
+}

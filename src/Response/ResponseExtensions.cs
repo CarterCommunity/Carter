@@ -1,9 +1,12 @@
 namespace Botwin.Response
 {
+    using System.IO;
     using System.Linq;
+    using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.Extensions;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Net.Http.Headers;
 
@@ -57,6 +60,26 @@ namespace Botwin.Response
             var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
 
             await negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
+        }
+
+        /// <summary>
+        /// Copy a stream into the response body
+        /// </summary>
+        /// <param name="response">Current <see cref="HttpResponse"/></param>
+        /// <param name="stream">The <see cref="Stream"/> to copy from</param>
+        /// <param name="contentType">The content type for the response</param>
+        /// <param name="contentDisposition">The content disposition to allow file downloads</param>
+        /// <returns></returns>
+        public static async Task FromStream(this HttpResponse response, Stream stream, string contentType, ContentDisposition contentDisposition = null)
+        {
+            if (contentDisposition != null)
+            {
+                response.Headers.Add("Content-Disposition", contentDisposition.ToString());
+            }
+
+            response.ContentType = contentType;
+
+            await StreamCopyOperation.CopyToAsync(stream, response.Body, new long?(), 65536, response.HttpContext.RequestAborted);
         }
     }
 }
