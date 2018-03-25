@@ -7,7 +7,6 @@
         // GET
         public string Index()
         {
-new FileStreamResult()
             return "Hello from MVC";
         }
     }
