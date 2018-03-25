@@ -78,7 +78,7 @@ namespace Botwin.Response
             long rangeEnd;
             var contentLength = source.Length;
 
-            response.Headers["AcceptRanges"] = "bytes";
+            response.Headers["Accept-Ranges"] = "bytes";
             response.ContentType = contentType;
 
             if (contentDisposition != null)
@@ -94,81 +94,78 @@ namespace Botwin.Response
                 var rangeParts = rangeHeader.SplitOnFirst("=")[1].SplitOnFirst("-");
                 rangeStart = long.Parse(rangeParts[0]);
                 rangeEnd = rangeParts.Length == 2 && !string.IsNullOrEmpty(rangeParts[1])
-                    ? int.Parse(rangeParts[1]) // the client requested a chunk
+                    ? long.Parse(rangeParts[1]) // the client requested a chunk
                     : contentLength - 1;
 
                 if (rangeStart < 0 || rangeEnd > contentLength - 1)
                 {
                     response.StatusCode = (int)HttpStatusCode.RequestedRangeNotSatisfiable;
-                    await response.WriteAsync(string.Empty);
                 }
                 else
                 {
-                    response.Headers["ContentRange"] = $"bytes {rangeStart}-{rangeEnd}/{contentLength}";
+                    response.Headers["Content-Range"] = $"bytes {rangeStart}-{rangeEnd}/{contentLength}";
                     response.StatusCode = (int)HttpStatusCode.PartialContent;
-                    await GetResponseBodyDelegate(rangeStart, rangeEnd, contentLength, source, response.Body, response.HttpContext.RequestAborted);
+                    if (!source.CanSeek)
+                    {
+                        throw new InvalidOperationException("Sending Range Responses requires a seekable stream eg. FileStream or MemoryStream");
+                    }
+                    
+                    source.Seek(rangeStart, SeekOrigin.Begin);
+                    await StreamCopyOperation.CopyToAsync(source, response.Body, new long?(rangeEnd - rangeStart + 1), 65536, response.HttpContext.RequestAborted);
+                    
+                    //await WriteRangeToBodyAsync(rangeStart, rangeEnd, source, response.Body, response.HttpContext.RequestAborted);
                 }
             }
             else
             {
-                rangeStart = 0;
-                rangeEnd = contentLength - 1;
-                await GetResponseBodyDelegate(rangeStart, rangeEnd, contentLength, source, response.Body, response.HttpContext.RequestAborted);
+                await StreamCopyOperation.CopyToAsync(source, response.Body, new long?(), 65536, response.HttpContext.RequestAborted);
             }
         }
 
-        private static async Task GetResponseBodyDelegate(long rangeStart, long rangeEnd, long contentLength, Stream source, Stream destination, CancellationToken cancellationToken)
+        private static async Task WriteRangeToBodyAsync(long rangeStart, long rangeEnd, Stream source, Stream destination, CancellationToken cancellationToken)
         {
-            if (rangeStart == 0 && rangeEnd == contentLength - 1)
+            if (!source.CanSeek)
             {
-                await StreamCopyOperation.CopyToAsync(source, destination, new long?(), 65536, cancellationToken);
+                throw new InvalidOperationException("Sending Range Responses requires a seekable stream eg. FileStream or MemoryStream");
             }
-            else
+
+            var totalBytesToSend = rangeEnd - rangeStart + 1;
+            var buffer = new byte[65536];
+            var bytesRemaining = totalBytesToSend;
+
+            source.Seek(rangeStart, SeekOrigin.Begin);
+            while (bytesRemaining > 0)
             {
-                if (!source.CanSeek)
+                var count = bytesRemaining <= buffer.Length
+                    ? await source.ReadAsync(buffer, 0, (int)Math.Min(bytesRemaining, buffer.Length), cancellationToken)
+                    : await source.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+
+                try
                 {
-                    throw new InvalidOperationException("Sending Range Responses requires a seekable stream eg. FileStream or MemoryStream");
+                    await destination.WriteAsync(buffer, 0, count, cancellationToken);
+                    await destination.FlushAsync(cancellationToken);
+                    bytesRemaining -= count;
                 }
-
-                var totalBytesToSend = rangeEnd - rangeStart + 1;
-                const int BufferSize = 0x1000;
-                var buffer = new byte[BufferSize];
-                var bytesRemaining = totalBytesToSend;
-
-                source.Seek(rangeStart, SeekOrigin.Begin);
-                while (bytesRemaining > 0)
+                catch (Exception httpException)
                 {
-                    var count = bytesRemaining <= buffer.Length
-                        ? await source.ReadAsync(buffer, 0, (int)Math.Min(bytesRemaining, int.MaxValue), cancellationToken)
-                        : await source.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+                    /* in Asp.Net we can call HttpResponseBase.IsClientConnected
+                    * to see if the client broke off the connection
+                    * and avoid trying to flush the response stream.
+                    * instead I'll swallow the exception that IIS throws in this situation
+                    * and rethrow anything else.*/
+                    if (httpException.Message
+                        == "An error occurred while communicating with the remote host. The error code is 0x80070057.") return;
 
-                    try
-                    {
-                        await destination.WriteAsync(buffer, 0, count, cancellationToken);
-                        await destination.FlushAsync(cancellationToken);
-                        bytesRemaining -= count;
-                    }
-                    catch (Exception httpException)
-                    {
-                        /* in Asp.Net we can call HttpResponseBase.IsClientConnected
-                        * to see if the client broke off the connection
-                        * and avoid trying to flush the response stream.
-                        * instead I'll swallow the exception that IIS throws in this situation
-                        * and rethrow anything else.*/
-                        if (httpException.Message
-                            == "An error occurred while communicating with the remote host. The error code is 0x80070057.") return;
-
-                        throw;
-                    }
+                    throw;
                 }
             }
         }
 
-        public static string[] SplitOnFirst(this string strVal, string needle)
+        private static string[] SplitOnFirst(this string strVal, string needle)
         {
             if (strVal == null)
             {
-                return new string[0];
+                return Array.Empty<string>();
             }
 
             var pos = strVal.IndexOf(needle, StringComparison.OrdinalIgnoreCase);

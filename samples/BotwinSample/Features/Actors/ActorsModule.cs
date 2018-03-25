@@ -56,7 +56,7 @@ namespace Botwin.Samples
 
             this.Get("/actors/download", async (request, response, routeData) =>
             {
-                using (var video = new FileStream("earth.mp4", FileMode.Open))
+                using (var video = new FileStream("earth.mp4", FileMode.Open)) //24406813
                 {
                     await response.FromStream(video, "video/mp4");
                 }

@@ -25,6 +25,14 @@
                     await response.FromStream(mystream, "application/csv");
                 }
             });
+            
+            this.Get("/downloadrange", async (request, response, routeData) =>
+            {
+                using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("0123456789")))
+                {
+                    await response.FromStream(mystream, "application/csv");
+                }
+            });
         }
     }
 }
