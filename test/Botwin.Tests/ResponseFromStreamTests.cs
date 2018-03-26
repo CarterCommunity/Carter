@@ -1,6 +1,7 @@
 ﻿namespace Botwin.Tests
 {
     using System.Linq;
+    using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
@@ -78,19 +79,35 @@
         }
 
         [Theory]
-        [InlineData("0-2", "012")]
-        [InlineData("2-4", "234")]
-        [InlineData("4-6", "456")]
-        public async Task Should_return_range(string range, string expectedBody)
+        [InlineData("0-2", "0-2", "012")]
+        [InlineData("2-4", "2-4", "234")]
+        [InlineData("4-6", "4-6", "456")]
+        [InlineData("0-", "0-9", "0123456789")]
+        public async Task Should_return_range(string range, string expectedRange, string expectedBody)
         {
             //Given & When
             this.httpClient.DefaultRequestHeaders.Range = RangeHeaderValue.Parse($"bytes={range}");
             var response = await this.httpClient.GetAsync("/downloadrange");
 
             var body = await response.Content.ReadAsStringAsync();
+
             //Then
             Assert.Equal(expectedBody, body);
-            Assert.Equal($"bytes {range}/10", response.Content.Headers.ContentRange.ToString());
+            Assert.Equal(HttpStatusCode.PartialContent, response.StatusCode);
+            Assert.Equal($"bytes {expectedRange}/10", response.Content.Headers.ContentRange.ToString());
+        }
+
+        [Theory]
+        [InlineData("-1")]
+        [InlineData("0-9999999999")]
+        public async Task Should_return_requested_range_not_satisfiable(string range)
+        {
+            //Given & When
+            this.httpClient.DefaultRequestHeaders.Range = RangeHeaderValue.Parse($"bytes={range}");
+            var response = await this.httpClient.GetAsync("/downloadrange");
+
+            //Then
+            Assert.Equal(HttpStatusCode.RequestedRangeNotSatisfiable, response.StatusCode);
         }
     }
 }
