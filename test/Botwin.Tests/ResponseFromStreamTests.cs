@@ -25,46 +25,17 @@
         }
 
         [Fact]
-        public async Task Should_set_content_type()
+        public async Task Should_set_content_type_body_acceptrange_header_content_disposition()
         {
             //Given & When
             var response = await this.httpClient.GetAsync("/downloadwithcd");
-
-            //Then
-            Assert.Equal("application/csv", response.Content.Headers.ContentType.MediaType);
-        }
-
-        [Fact]
-        public async Task Should_set_accept_ranges()
-        {
-            //Given & When
-            var response = await this.httpClient.GetAsync("/downloadwithcd");
-
-            //Then
-            Assert.Equal("bytes", response.Headers.AcceptRanges.FirstOrDefault());
-        }
-
-        [Fact]
-        public async Task Should_copy_stream_to_body()
-        {
-            //Given & When
-            var response = await this.httpClient.GetAsync("/downloadwithcd");
-
             var body = await response.Content.ReadAsStringAsync();
-
-            //Then
-            Assert.Equal("hi", body);
-        }
-
-        [Fact]
-        public async Task Should_set_content_disposition_header_if_supplied()
-        {
-            //Given & When
-            var response = await this.httpClient.GetAsync("/downloadwithcd");
-
             var filename = response.Content.Headers.ContentDisposition.FileName;
 
             //Then
+            Assert.Equal("application/csv", response.Content.Headers.ContentType.MediaType);
+            Assert.Equal("hi", body);
+            Assert.Equal("bytes", response.Headers.AcceptRanges.FirstOrDefault());
             Assert.Equal("journal.csv", filename);
         }
 
