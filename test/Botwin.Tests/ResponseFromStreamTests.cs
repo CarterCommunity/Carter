@@ -44,9 +44,13 @@
         {
             //Given & When
             var response = await this.httpClient.GetAsync("/download");
+            var body = await response.Content.ReadAsStringAsync();
 
             //Then
             Assert.Null(response.Content.Headers.ContentDisposition);
+            Assert.Equal("application/csv", response.Content.Headers.ContentType.MediaType);
+            Assert.Equal("hi", body);
+            Assert.Equal("bytes", response.Headers.AcceptRanges.FirstOrDefault());
         }
 
         [Theory]
