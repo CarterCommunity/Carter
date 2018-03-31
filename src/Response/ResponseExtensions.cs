@@ -71,11 +71,9 @@ namespace Botwin.Response
         /// <param name="stream">The <see cref="Stream"/> to copy from</param>
         /// <param name="contentType">The content type for the response</param>
         /// <param name="contentDisposition">The content disposition to allow file downloads</param>
-        /// <returns><<see cref="Task"/>/returns>
+        /// <returns><see cref="Task"/></returns>
         public static async Task FromStream(this HttpResponse response, Stream source, string contentType, ContentDisposition contentDisposition = null)
         {
-            long? rangeStart;
-            long? rangeEnd;
             var contentLength = source.Length;
 
             response.Headers["Accept-Ranges"] = "bytes";
@@ -92,8 +90,8 @@ namespace Botwin.Response
             if (rangeHeader != null)
             {
                 //Server should return multipart/byteranges; if asking for more than one range but pfft...
-                rangeStart = rangeHeader.Ranges.First().From;
-                rangeEnd = rangeHeader.Ranges.First().To ?? contentLength -1;
+                var rangeStart = rangeHeader.Ranges.First().From;
+                var rangeEnd = rangeHeader.Ranges.First().To ?? contentLength - 1;
 
                 if (!rangeStart.HasValue || rangeEnd > contentLength - 1)
                 {
@@ -107,14 +105,14 @@ namespace Botwin.Response
                     {
                         throw new InvalidOperationException("Sending Range Responses requires a seekable stream eg. FileStream or MemoryStream");
                     }
-                    
+
                     source.Seek(rangeStart.Value, SeekOrigin.Begin);
-                    await StreamCopyOperation.CopyToAsync(source, response.Body, rangeEnd.Value - rangeStart.Value + 1, 65536, response.HttpContext.RequestAborted);
+                    await StreamCopyOperation.CopyToAsync(source, response.Body, rangeEnd - rangeStart.Value + 1, 65536, response.HttpContext.RequestAborted);
                 }
             }
             else
             {
-                await StreamCopyOperation.CopyToAsync(source, response.Body, new long?(), 65536, response.HttpContext.RequestAborted);
+                await StreamCopyOperation.CopyToAsync(source, response.Body, default, 65536, response.HttpContext.RequestAborted);
             }
         }
     }
