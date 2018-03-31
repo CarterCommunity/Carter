@@ -84,5 +84,23 @@
             //Then
             Assert.Equal(HttpStatusCode.RequestedRangeNotSatisfiable, response.StatusCode);
         }
+
+        [Theory]
+        [InlineData("3-1")]
+        [InlineData("1+2")]
+        public async Task Should_return_full_stream_on_invalid_headers(string range)
+        {
+            //Given
+            this.httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Range",$"bytes={range}");
+            
+            //When
+            var response = await this.httpClient.GetAsync("/downloadrange");
+
+            var body = await response.Content.ReadAsStringAsync();
+            
+            //Then
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal("0123456789", body);
+        }
     }
 }
