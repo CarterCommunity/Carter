@@ -1,9 +1,14 @@
 namespace Botwin.Response
 {
+    using System;
+    using System.IO;
     using System.Linq;
+    using System.Net;
+    using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.Extensions;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Net.Http.Headers;
 
@@ -57,6 +62,58 @@ namespace Botwin.Response
             var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
 
             await negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
+        }
+
+        /// <summary>
+        /// Copy a stream into the response body
+        /// </summary>
+        /// <param name="response">Current <see cref="HttpResponse"/></param>
+        /// <param name="stream">The <see cref="Stream"/> to copy from</param>
+        /// <param name="contentType">The content type for the response</param>
+        /// <param name="contentDisposition">The content disposition to allow file downloads</param>
+        /// <returns><see cref="Task"/></returns>
+        public static async Task FromStream(this HttpResponse response, Stream source, string contentType, ContentDisposition contentDisposition = null)
+        {
+            var contentLength = source.Length;
+
+            response.Headers["Accept-Ranges"] = "bytes";
+            response.ContentType = contentType;
+
+            if (contentDisposition != null)
+            {
+                response.Headers["Content-Disposition"] = contentDisposition.ToString();
+            }
+
+            // rangeHeader should be of the format "bytes=0-" or "bytes=0-12345" or "bytes=123-456"
+            var rangeHeader = response.HttpContext.Request.GetTypedHeaders().Range;
+
+            if (rangeHeader != null)
+            {
+                //Server should return multipart/byteranges; if asking for more than one range but pfft...
+                var rangeStart = rangeHeader.Ranges.First().From;
+                var rangeEnd = rangeHeader.Ranges.First().To ?? contentLength - 1;
+
+                if (!rangeStart.HasValue || rangeEnd > contentLength - 1)
+                {
+                    response.StatusCode = (int)HttpStatusCode.RequestedRangeNotSatisfiable;
+                }
+                else
+                {
+                    response.Headers["Content-Range"] = $"bytes {rangeStart}-{rangeEnd}/{contentLength}";
+                    response.StatusCode = (int)HttpStatusCode.PartialContent;
+                    if (!source.CanSeek)
+                    {
+                        throw new InvalidOperationException("Sending Range Responses requires a seekable stream eg. FileStream or MemoryStream");
+                    }
+
+                    source.Seek(rangeStart.Value, SeekOrigin.Begin);
+                    await StreamCopyOperation.CopyToAsync(source, response.Body, rangeEnd - rangeStart.Value + 1, 65536, response.HttpContext.RequestAborted);
+                }
+            }
+            else
+            {
+                await StreamCopyOperation.CopyToAsync(source, response.Body, default, 65536, response.HttpContext.RequestAborted);
+            }
         }
     }
 }

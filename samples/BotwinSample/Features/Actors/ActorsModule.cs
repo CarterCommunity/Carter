@@ -1,10 +1,9 @@
 namespace Botwin.Samples
 {
+    using System.IO;
     using Botwin.ModelBinding;
     using Botwin.Request;
     using Botwin.Response;
-    using Microsoft.AspNetCore.Http;
-    using Newtonsoft.Json;
 
     public class ActorsModule : BotwinModule
     {
@@ -55,6 +54,13 @@ namespace Botwin.Samples
                 await res.Negotiate(result.Data);
             });
 
+            this.Get("/actors/download", async (request, response, routeData) =>
+            {
+                using (var video = new FileStream("earth.mp4", FileMode.Open)) //24406813
+                {
+                    await response.FromStream(video, "video/mp4");
+                }
+            });
         }
     }
 }
