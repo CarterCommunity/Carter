@@ -29,7 +29,7 @@
         {
             //Given & When
             var response = await this.httpClient.GetAsync("/downloadwithcd");
-            var body = await response.Content.ReadAsStringAsync();
+            var body = await response.Content.ReadAsStringAsync(); 
             var filename = response.Content.Headers.ContentDisposition.FileName;
 
             //Then

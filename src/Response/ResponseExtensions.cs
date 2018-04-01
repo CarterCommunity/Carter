@@ -24,19 +24,20 @@ namespace Botwin.Response
         public static async Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
         {
             var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
-
-            var accept = response.HttpContext.Request.GetTypedHeaders().Accept ?? Enumerable.Empty<MediaTypeHeaderValue>();
-
-            var ordered = accept.OrderByDescending(x => x.Quality ?? 1);
-
             IResponseNegotiator negotiator = null;
 
-            foreach (var acceptHeader in ordered)
+            MediaTypeHeaderValue.TryParseList(response.HttpContext.Request.Headers["Accept"], out var accept);
+            if (accept != null)
             {
-                negotiator = negotiators.FirstOrDefault(x => x.CanHandle(acceptHeader));
-                if (negotiator != null)
+                var ordered = accept.OrderByDescending(x => x.Quality ?? 1);
+
+                foreach (var acceptHeader in ordered)
                 {
-                    break;
+                    negotiator = negotiators.FirstOrDefault(x => x.CanHandle(acceptHeader));
+                    if (negotiator != null)
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -77,6 +78,7 @@ namespace Botwin.Response
             var contentLength = source.Length;
 
             response.Headers["Accept-Ranges"] = "bytes";
+
             response.ContentType = contentType;
 
             if (contentDisposition != null)
@@ -84,10 +86,7 @@ namespace Botwin.Response
                 response.Headers["Content-Disposition"] = contentDisposition.ToString();
             }
 
-            // rangeHeader should be of the format "bytes=0-" or "bytes=0-12345" or "bytes=123-456"
-            var rangeHeader = response.HttpContext.Request.GetTypedHeaders().Range;
-
-            if (rangeHeader != null)
+            if (RangeHeaderValue.TryParse(response.HttpContext.Request.Headers["Range"].ToString(), out var rangeHeader))
             {
                 //Server should return multipart/byteranges; if asking for more than one range but pfft...
                 var rangeStart = rangeHeader.Ranges.First().From;
