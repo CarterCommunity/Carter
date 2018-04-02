@@ -1,7 +1,6 @@
 namespace Botwin.Samples
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using BotwinSample;
     using Microsoft.AspNetCore.Builder;
@@ -21,6 +20,8 @@ namespace Botwin.Samples
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IActorProvider, ActorProvider>();
+            
+            //If you want to log what Botwin finds you need to pass in a ILoggerFactory as ASP.Net Core does not offer a clean way to log extensions to IServiceCollection
             services.AddBotwin(this.loggerFactory);
         }
 
@@ -31,7 +32,7 @@ namespace Botwin.Samples
 
             app.UseExceptionHandler("/errorhandler");
 
-            app.UseBotwin(this.GetOptions(), this.loggerFactory.CreateLogger(typeof(BotwinExtensions)));
+            app.UseBotwin(this.GetOptions());
         }
 
         private BotwinOptions GetOptions()

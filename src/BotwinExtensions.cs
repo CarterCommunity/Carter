@@ -13,17 +13,18 @@ namespace Botwin
 
     public static class BotwinExtensions
     {
-        private static ILoggerFactory BotwinLoggerFactory { get; set; }
-
         /// <summary>
         /// Adds Botwin to the specified <see cref="IApplicationBuilder"/>.
         /// </summary>
         /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
         /// <param name="options">A <see cref="BotwinOptions"/> instance.</param>
-        /// <param name="logger">Optional <see cref="ILogger"/> to be passed for tracing of Botwin setup</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
-        public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options = null, ILogger logger = null)
+        public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options = null)
         {
+            var loggerFactory = builder.ApplicationServices.GetService<ILoggerFactory>();
+
+            var logger = loggerFactory?.CreateLogger(typeof(BotwinExtensions));
+
             logger?.LogTrace("Adding Botwin to application");
 
             ApplyGlobalBeforeHook(builder, options, logger);
