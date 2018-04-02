@@ -1,8 +1,6 @@
 namespace Botwin.Tests
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Threading;
@@ -37,10 +35,12 @@ namespace Botwin.Tests
             Assert.Equal("FOOBAR", body);
         }
 
-        [Fact]
-        public async Task Should_fallback_to_json()
+        [Theory]
+        [InlineData("not/known")]
+        [InlineData("utt$r-rubbish-9")]
+        public async Task Should_fallback_to_json(string accept)
         {
-            this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("not/known"));
+            this.httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept", accept);
             var response = await this.httpClient.GetAsync("/negotiate");
             Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
         }
@@ -70,7 +70,7 @@ namespace Botwin.Tests
             var body = await response.Content.ReadAsStringAsync();
             Assert.Equal("XML Response", body);
         }
-        
+
         [Fact]
         public async Task Should_pick_non_weighted_over_weighted()
         {
@@ -95,7 +95,7 @@ namespace Botwin.Tests
             await res.WriteAsync("FOOBAR", cancellationToken);
         }
     }
-    
+
     internal class TestHtmlResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept)
@@ -108,7 +108,7 @@ namespace Botwin.Tests
             await res.WriteAsync("HTML Response", cancellationToken);
         }
     }
-    
+
     internal class TestXmlResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept)
