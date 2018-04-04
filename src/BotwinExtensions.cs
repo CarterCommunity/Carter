@@ -21,15 +21,9 @@ namespace Botwin
         /// <returns>A reference to this instance after the operation has completed.</returns>
         public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options = null)
         {
-            var loggerFactory = builder.ApplicationServices.GetService<ILoggerFactory>();
+            ApplyGlobalBeforeHook(builder, options);
 
-            var logger = loggerFactory?.CreateLogger(typeof(BotwinExtensions));
-
-            logger?.LogTrace("Adding Botwin to application");
-
-            ApplyGlobalBeforeHook(builder, options, logger);
-
-            ApplyGlobalAfterHook(builder, options, logger);
+            ApplyGlobalAfterHook(builder, options);
 
             var routeBuilder = new RouteBuilder(builder);
 
@@ -41,15 +35,11 @@ namespace Botwin
                 {
                     var moduleType = module.GetType();
 
-                    var distinctPaths = module.Routes.Keys.Select(route =>
-                    {
-                        logger?.LogTrace($"Found and adding {moduleType.Name} with {route.verb} /{route.path} to routing");
-                        return route.path;
-                    }).Distinct();
+                    var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
 
                     foreach (var path in distinctPaths)
                     {
-                        routeBuilder.MapRoute(path, CreateRouteHandler(path, moduleType, logger));
+                        routeBuilder.MapRoute(path, CreateRouteHandler(path, moduleType));
                     }
                 }
             }
@@ -57,11 +47,13 @@ namespace Botwin
             return builder.UseRouter(routeBuilder.Build());
         }
 
-        private static RequestDelegate CreateRouteHandler(string path, Type moduleType, ILogger logger)
+        private static RequestDelegate CreateRouteHandler(string path, Type moduleType)
         {
             return async ctx =>
             {
                 var module = ctx.RequestServices.GetRequiredService(moduleType) as BotwinModule;
+                var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
+                var logger = loggerFactory.CreateLogger(moduleType);
 
                 if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
                 {
@@ -83,20 +75,18 @@ namespace Botwin
 
                 if (module.Before != null)
                 {
-                    logger?.LogTrace("Executing module before hook");
                     shouldContinue = await module.Before(ctx);
                 }
 
                 if (shouldContinue)
                 {
                     // run the route handler
-                    logger?.LogTrace($"Executing module route handler for {ctx.Request.Method} {path}");
+                    logger.LogTrace($"Executing module route handler for {ctx.Request.Method} /{path}");
                     await routeHandler(ctx);
 
                     // run after handler
                     if (module.After != null)
                     {
-                        logger?.LogTrace("Executing module after hook");
                         await module.After(ctx);
                     }
                 }
@@ -107,7 +97,6 @@ namespace Botwin
 
                 if (scHandler != null)
                 {
-                    logger?.LogTrace($"Executing {nameof(IStatusCodeHandler)} {scHandler.GetType().Name}");
                     await scHandler.Handle(ctx);
                 }
 
@@ -120,43 +109,38 @@ namespace Botwin
             };
         }
 
-        private static void ApplyGlobalAfterHook(IApplicationBuilder builder, BotwinOptions options, ILogger logger)
+        private static void ApplyGlobalAfterHook(IApplicationBuilder builder, BotwinOptions options)
         {
             if (options?.After != null)
             {
-                logger?.LogTrace("Applying global after hook");
                 builder.Use(async (ctx, next) =>
                 {
+                    var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger("Botwin.GlobalAfterHook");
                     await next();
-                    logger?.LogTrace("Executing global after hook");
+                    logger.LogTrace("Executing global after hook");
                     await options.After(ctx);
                 });
             }
-            else
-            {
-                logger?.LogTrace("No global after hook found");
-            }
         }
 
-        private static void ApplyGlobalBeforeHook(IApplicationBuilder builder, BotwinOptions options, ILogger logger)
+        private static void ApplyGlobalBeforeHook(IApplicationBuilder builder, BotwinOptions options)
         {
             if (options?.Before != null)
             {
-                logger?.LogTrace("Applying global before hook");
                 builder.Use(async (ctx, next) =>
                 {
-                    logger?.LogTrace("Executing global before hook");
-                    var carryOn = await options.Before(ctx); //TODO Check if return Task.CompletedTask will it continue
+                    var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger("Botwin.GlobalBeforeHook");
+                    logger.LogTrace("Executing global before hook");
+                    
+                    var carryOn = await options.Before(ctx); 
                     if (carryOn)
                     {
-                        logger?.LogTrace("Executing next handler after global before hook");
+                        logger.LogTrace("Executing next handler after global before hook");
                         await next();
                     }
                 });
-            }
-            else
-            {
-                logger?.LogTrace("No global before hook found");
             }
         }
 
@@ -209,6 +193,7 @@ namespace Botwin
             foreach (var module in modules)
             {
                 logger?.LogTrace($"Found {module.FullName}");
+            
                 services.AddScoped(module);
                 services.AddScoped(typeof(BotwinModule), module);
             }
