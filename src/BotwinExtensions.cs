@@ -81,7 +81,7 @@ namespace Botwin
                 if (shouldContinue)
                 {
                     // run the route handler
-                    logger.LogTrace($"Executing module route handler for {ctx.Request.Method} /{path}");
+                    logger.LogTrace("Executing module route handler for {Method} /{Path}", ctx.Request.Method, path);
                     await routeHandler(ctx);
 
                     // run after handler
@@ -192,7 +192,7 @@ namespace Botwin
 
             foreach (var module in modules)
             {
-                logger?.LogTrace($"Found {module.FullName}");
+                logger?.LogTrace("Found {ModuleName}", module.FullName);
             
                 services.AddScoped(module);
                 services.AddScoped(typeof(BotwinModule), module);
@@ -201,14 +201,14 @@ namespace Botwin
             var schs = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler)));
             foreach (var sch in schs)
             {
-                logger?.LogTrace($"Found {sch.FullName}");
+                logger?.LogTrace("Found {StatusCodeHandlerName}", sch.FullName);
                 services.AddScoped(typeof(IStatusCodeHandler), sch);
             }
 
             var responseNegotiators = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator)));
             foreach (var negotiatator in responseNegotiators)
             {
-                logger?.LogTrace($"Found {negotiatator.FullName}");
+                logger?.LogTrace("Found {ResponseNegotiatorName}", negotiatator.FullName);
                 services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
             }
 
