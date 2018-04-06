@@ -4,12 +4,12 @@ namespace Botwin
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Threading.Tasks;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
 
     public static class BotwinExtensions
     {
@@ -17,19 +17,9 @@ namespace Botwin
         /// Adds Botwin to the specified <see cref="IApplicationBuilder"/>.
         /// </summary>
         /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
-        /// <returns>A reference to this instance after the operation has completed.</returns>
-        public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder)
-        {
-            return UseBotwin(builder, null);
-        }
-
-        /// <summary>
-        /// Adds Botwin to the specified <see cref="IApplicationBuilder"/>.
-        /// </summary>
-        /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
         /// <param name="options">A <see cref="BotwinOptions"/> instance.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
-        public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options)
+        public static IApplicationBuilder UseBotwin(this IApplicationBuilder builder, BotwinOptions options = null)
         {
             ApplyGlobalBeforeHook(builder, options);
 
@@ -44,6 +34,7 @@ namespace Botwin
                 foreach (var module in scope.ServiceProvider.GetServices<BotwinModule>())
                 {
                     var moduleType = module.GetType();
+
                     var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
 
                     foreach (var path in distinctPaths)
@@ -61,6 +52,8 @@ namespace Botwin
             return async ctx =>
             {
                 var module = ctx.RequestServices.GetRequiredService(moduleType) as BotwinModule;
+                var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
+                var logger = loggerFactory.CreateLogger(moduleType);
 
                 if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
                 {
@@ -88,6 +81,7 @@ namespace Botwin
                 if (shouldContinue)
                 {
                     // run the route handler
+                    logger.LogTrace("Executing module route handler for {Method} /{Path}", ctx.Request.Method, path);
                     await routeHandler(ctx);
 
                     // run after handler
@@ -121,7 +115,10 @@ namespace Botwin
             {
                 builder.Use(async (ctx, next) =>
                 {
+                    var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger("Botwin.GlobalAfterHook");
                     await next();
+                    logger.LogTrace("Executing global after hook");
                     await options.After(ctx);
                 });
             }
@@ -133,9 +130,14 @@ namespace Botwin
             {
                 builder.Use(async (ctx, next) =>
                 {
-                    var carryOn = await options.Before(ctx); //TODO Check if return Task.CompletedTask will it continue
+                    var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger("Botwin.GlobalBeforeHook");
+                    logger.LogTrace("Executing global before hook");
+                    
+                    var carryOn = await options.Before(ctx); 
                     if (carryOn)
                     {
+                        logger.LogTrace("Executing next handler after global before hook");
                         await next();
                     }
                 });
@@ -147,10 +149,23 @@ namespace Botwin
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Botwin to.</param>
         /// <param name="assemblies">Optional array of <see cref="Assembly"/> to add to the services collection. If assemblies are not provided, Assembly.GetEntryAssembly is called.</param>
-        public static void AddBotwin(this IServiceCollection services)
+        /// <param name="loggerFactory">Optional <see cref="ILoggerFactory"/> to be passed for tracing of Botwin setup</param>
+        public static void AddBotwin(this IServiceCollection services, ILoggerFactory loggerFactory)
+        {
+            var logger = loggerFactory.CreateLogger(typeof(BotwinExtensions));
+            AddBotwin(services, logger);
+        }
+
+        /// <summary>
+        /// Adds Botwin to the specified <see cref="IServiceCollection"/>.
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to add Botwin to.</param>
+        /// <param name="assemblies">Optional array of <see cref="Assembly"/> to add to the services collection. If assemblies are not provided, Assembly.GetEntryAssembly is called.</param>
+        /// <param name="logger">Optional <see cref="ILogger"/> to be passed for tracing of Botwin setup</param>
+        public static void AddBotwin(this IServiceCollection services, ILogger logger = null)
         {
             var assemblyCatalog = new DependencyContextAssemblyCatalog();
-            
+
             var assemblies = assemblyCatalog.GetAssemblies();
 
             var validators = assemblies.SelectMany(ass => ass.GetTypes())
@@ -159,6 +174,7 @@ namespace Botwin
 
             foreach (var validator in validators)
             {
+                logger?.LogTrace($"Found {validator.FullName}");
                 services.AddSingleton(typeof(IValidator), validator);
             }
 
@@ -176,6 +192,8 @@ namespace Botwin
 
             foreach (var module in modules)
             {
+                logger?.LogTrace("Found {ModuleName}", module.FullName);
+            
                 services.AddScoped(module);
                 services.AddScoped(typeof(BotwinModule), module);
             }
@@ -183,12 +201,14 @@ namespace Botwin
             var schs = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler)));
             foreach (var sch in schs)
             {
+                logger?.LogTrace("Found {StatusCodeHandlerName}", sch.FullName);
                 services.AddScoped(typeof(IStatusCodeHandler), sch);
             }
 
             var responseNegotiators = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator)));
             foreach (var negotiatator in responseNegotiators)
             {
+                logger?.LogTrace("Found {ResponseNegotiatorName}", negotiatator.FullName);
                 services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
             }
 

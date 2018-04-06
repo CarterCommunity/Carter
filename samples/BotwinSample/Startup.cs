@@ -1,20 +1,28 @@
 namespace Botwin.Samples
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using BotwinSample;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
 
     public class Startup
     {
+        private readonly ILoggerFactory loggerFactory;
+
+        public Startup(ILoggerFactory loggerFactory)
+        {
+            this.loggerFactory = loggerFactory;
+        }
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IActorProvider, ActorProvider>();
-            services.AddBotwin();
+            
+            //If you want to log what Botwin finds you need to pass in a ILoggerFactory as ASP.Net Core does not offer a clean way to log extensions to IServiceCollection
+            services.AddBotwin(this.loggerFactory);
         }
 
         public void Configure(IApplicationBuilder app, IConfiguration config)
