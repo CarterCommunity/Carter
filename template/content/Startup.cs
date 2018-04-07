@@ -1,6 +1,6 @@
-namespace BotwinTemplate
+namespace CarterTemplate
 {
-    using Botwin;
+    using Carter;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -8,12 +8,12 @@ namespace BotwinTemplate
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddBotwin();
+            services.AddCarter();
         }
         
         public void Configure(IApplicationBuilder app)
         {
-            app.UseBotwin();
+            app.UseCarter();
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿namespace BotwinTemplate
+﻿namespace CarterTemplate
 {
-    using Botwin;
+    using Carter;
     using Microsoft.AspNetCore.Http;
 
-    public class HomeModule : BotwinModule
+    public class HomeModule : CarterModule
     {
         public HomeModule()
         {
