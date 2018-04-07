@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <VersionPrefix>3.4.0</VersionPrefix>
+    <VersionPrefix>3.5.0</VersionPrefix>
     <Authors>Jonathan Channon</Authors>
     <Description>Botwin is a library that allows Nancy-esque routing for use with ASP.Net Core.</Description>
     <PackageTags>asp.net core;nancy;.net core;routing;botwin</PackageTags>
     <PackageProjectUrl>https://github.com/jchannon/botwin</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/jchannon/Botwin/blob/master/LICENSE</PackageLicenseUrl>
     <LangVersion>latest</LangVersion>
+    <PackageReleaseNotes>Botwin 3.5.0 will be the last release under the name Botwin. Future releases will be known as Carter and found at https://www.nuget.org/packages/carter</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="7.2.0" />
