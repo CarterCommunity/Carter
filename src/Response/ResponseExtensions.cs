@@ -1,4 +1,4 @@
-namespace Botwin.Response
+namespace Carter.Response
 {
     using System;
     using System.IO;

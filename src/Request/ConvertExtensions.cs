@@ -1,4 +1,4 @@
-﻿namespace Botwin.Request
+﻿namespace Carter.Request
 {
     using System;
     using System.Collections.Generic;
