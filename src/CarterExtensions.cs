@@ -21,6 +21,13 @@ namespace Carter
         /// <returns>A reference to this instance after the operation has completed.</returns>
         public static IApplicationBuilder UseCarter(this IApplicationBuilder builder, CarterOptions options = null)
         {
+            var diagnostics = builder.ApplicationServices.GetService<CarterDiagnostics>();
+            if (diagnostics != null)
+            {
+                var logger = builder.ApplicationServices.GetService<ILoggerFactory>().CreateLogger(typeof(CarterDiagnostics));
+                diagnostics.LogDiscoveredModules(logger);
+            }
+
             ApplyGlobalBeforeHook(builder, options);
 
             ApplyGlobalAfterHook(builder, options);
@@ -133,8 +140,8 @@ namespace Carter
                     var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
                     var logger = loggerFactory.CreateLogger("Carter.GlobalBeforeHook");
                     logger.LogTrace("Executing global before hook");
-                    
-                    var carryOn = await options.Before(ctx); 
+
+                    var carryOn = await options.Before(ctx);
                     if (carryOn)
                     {
                         logger.LogTrace("Executing next handler after global before hook");
@@ -148,25 +155,19 @@ namespace Carter
         /// Adds Carter to the specified <see cref="IServiceCollection"/>.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
-        /// <param name="assemblies">Optional array of <see cref="Assembly"/> to add to the services collection. If assemblies are not provided, Assembly.GetEntryAssembly is called.</param>
-        /// <param name="loggerFactory">Optional <see cref="ILoggerFactory"/> to be passed for tracing of Carter setup</param>
-        public static void AddCarter(this IServiceCollection services, ILoggerFactory loggerFactory)
-        {
-            var logger = loggerFactory.CreateLogger(typeof(CarterExtensions));
-            AddCarter(services, logger);
-        }
-
-        /// <summary>
-        /// Adds Carter to the specified <see cref="IServiceCollection"/>.
-        /// </summary>
-        /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
-        /// <param name="assemblies">Optional array of <see cref="Assembly"/> to add to the services collection. If assemblies are not provided, Assembly.GetEntryAssembly is called.</param>
-        /// <param name="logger">Optional <see cref="ILogger"/> to be passed for tracing of Carter setup</param>
-        public static void AddCarter(this IServiceCollection services, ILogger logger = null)
+        /// <param name="enableDiagnostics">Whether to enable diagnostics at startup.</param>
+        public static void AddCarter(this IServiceCollection services, bool enableDiagnostics = false)
         {
             var assemblyCatalog = new DependencyContextAssemblyCatalog();
 
             var assemblies = assemblyCatalog.GetAssemblies();
+
+            CarterDiagnostics diagnostics = null;
+            if (enableDiagnostics)
+            {
+                diagnostics = new CarterDiagnostics();
+                services.AddSingleton(diagnostics);
+            }
 
             var validators = assemblies.SelectMany(ass => ass.GetTypes())
                 .Where(typeof(IValidator).IsAssignableFrom)
@@ -174,7 +175,7 @@ namespace Carter
 
             foreach (var validator in validators)
             {
-                logger?.LogTrace($"Found {validator.FullName}");
+                diagnostics?.AddValidator(validator);
                 services.AddSingleton(typeof(IValidator), validator);
             }
 
@@ -192,8 +193,7 @@ namespace Carter
 
             foreach (var module in modules)
             {
-                logger?.LogTrace("Found {ModuleName}", module.FullName);
-            
+                diagnostics?.AddModule(module);
                 services.AddScoped(module);
                 services.AddScoped(typeof(CarterModule), module);
             }
@@ -201,14 +201,14 @@ namespace Carter
             var schs = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler)));
             foreach (var sch in schs)
             {
-                logger?.LogTrace("Found {StatusCodeHandlerName}", sch.FullName);
+                diagnostics?.AddStatusCodeHandler(sch);
                 services.AddScoped(typeof(IStatusCodeHandler), sch);
             }
 
             var responseNegotiators = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator)));
             foreach (var negotiatator in responseNegotiators)
             {
-                logger?.LogTrace("Found {ResponseNegotiatorName}", negotiatator.FullName);
+                diagnostics?.AddResponseNegotiator(negotiatator);
                 services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
             }
 
