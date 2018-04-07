@@ -1,4 +1,4 @@
-namespace BotwinTemplate
+namespace CarterTemplate
 {
     using System.IO;
     using Microsoft.AspNetCore.Hosting;

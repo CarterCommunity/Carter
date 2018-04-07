@@ -1,4 +1,4 @@
-﻿namespace Botwin.Request
+﻿namespace Carter.Request
 {
     using System.IO;
     using System.Text;

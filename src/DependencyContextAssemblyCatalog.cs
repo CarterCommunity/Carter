@@ -1,4 +1,4 @@
-namespace Botwin
+namespace Carter
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,7 @@ namespace Botwin
 
     public class DependencyContextAssemblyCatalog
     {
-        private static readonly Assembly BotwinAssembly = typeof(BotwinExtensions).Assembly;
+        private static readonly Assembly CarterAssembly = typeof(CarterExtensions).Assembly;
 
         private static readonly Assembly FluentValidationAssembly = typeof(IValidator).Assembly;
 
@@ -46,7 +46,7 @@ namespace Botwin
 
             foreach (var library in this.dependencyContext.RuntimeLibraries)
             {
-                if (IsReferencingBotwin(library) || IsReferencingFluentValidation(library))
+                if (IsReferencingCarter(library) || IsReferencingFluentValidation(library))
                 {
                     foreach (var assemblyName in library.GetDefaultAssemblyNames(this.dependencyContext))
                     {
@@ -70,9 +70,9 @@ namespace Botwin
             }
         }
 
-        private static bool IsReferencingBotwin(Library library)
+        private static bool IsReferencingCarter(Library library)
         {
-            return library.Dependencies.Any(dependency => dependency.Name.Equals(BotwinAssembly.GetName().Name));
+            return library.Dependencies.Any(dependency => dependency.Name.Equals(CarterAssembly.GetName().Name));
         }
 
         private static bool IsReferencingFluentValidation(Library library)

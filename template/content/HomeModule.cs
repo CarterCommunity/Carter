@@ -1,13 +1,13 @@
-﻿namespace BotwinTemplate
+﻿namespace CarterTemplate
 {
-    using Botwin;
+    using Carter;
     using Microsoft.AspNetCore.Http;
 
-    public class HomeModule : BotwinModule
+    public class HomeModule : CarterModule
     {
         public HomeModule()
         {
-            Get("/", async(req, res, routeData) => await res.WriteAsync("Hello from Botwin!"));
+            Get("/", async(req, res, routeData) => await res.WriteAsync("Hello from Carter!"));
         }
     }
 }

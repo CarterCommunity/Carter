@@ -1,5 +1,0 @@
-  - service: app
-    command: bash -c "echo Done"
-  - service: app
-    tag: ^\d+.\d+.\d+(-.*|$)
-    command: bash -c "dotnet pack -c Release -o /code/artifacts src/Botwin.csproj && dotnet nuget push -s https://www.nuget.org/api/v2/package -k $NUGETAPIKEY /code/artifacts/Botwin.$CI_BRANCH.nupkg"

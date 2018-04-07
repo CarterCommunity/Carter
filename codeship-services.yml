@@ -1,6 +1,0 @@
-app:
-  build:
-    image: jchannon/botwin
-    dockerfile_path: Dockerfile
-  cached: true
-  encrypted_env_file: env.encrypted
