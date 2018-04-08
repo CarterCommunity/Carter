@@ -8,22 +8,14 @@ namespace CarterSample
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
 
     public class Startup
     {
-        private readonly ILoggerFactory loggerFactory;
-
-        public Startup(ILoggerFactory loggerFactory)
-        {
-            this.loggerFactory = loggerFactory;
-        }
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IActorProvider, ActorProvider>();
-            
-            //If you want to log what Carter finds you need to pass in a ILoggerFactory as ASP.Net Core does not offer a clean way to log extensions to IServiceCollection
-            services.AddCarter(this.loggerFactory);
+
+            services.AddCarter(enableDiagnostics: true);
         }
 
         public void Configure(IApplicationBuilder app, IConfiguration config)
