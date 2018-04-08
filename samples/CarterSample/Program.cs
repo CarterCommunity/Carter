@@ -2,7 +2,6 @@
 {
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Logging;
 
     class Program
     {
@@ -10,7 +9,6 @@
         {
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .ConfigureLogging(x=>x.AddDebug().SetMinimumLevel(LogLevel.Trace))
                 .Build()
                 .Run();
         }

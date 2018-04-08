@@ -22,11 +22,9 @@ namespace Carter
         public static IApplicationBuilder UseCarter(this IApplicationBuilder builder, CarterOptions options = null)
         {
             var diagnostics = builder.ApplicationServices.GetService<CarterDiagnostics>();
-            if (diagnostics != null)
-            {
-                var logger = builder.ApplicationServices.GetService<ILoggerFactory>().CreateLogger(typeof(CarterDiagnostics));
-                diagnostics.LogDiscoveredModules(logger);
-            }
+
+            var logger = builder.ApplicationServices.GetService<ILoggerFactory>().CreateLogger(typeof(CarterDiagnostics));
+            diagnostics.LogDiscoveredCarterTypes(logger);
 
             ApplyGlobalBeforeHook(builder, options);
 
@@ -88,7 +86,7 @@ namespace Carter
                 if (shouldContinue)
                 {
                     // run the route handler
-                    logger.LogTrace("Executing module route handler for {Method} /{Path}", ctx.Request.Method, path);
+                    logger.LogDebug("Executing module route handler for {Method} /{Path}", ctx.Request.Method, path);
                     await routeHandler(ctx);
 
                     // run after handler
@@ -125,7 +123,7 @@ namespace Carter
                     var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
                     var logger = loggerFactory.CreateLogger("Carter.GlobalAfterHook");
                     await next();
-                    logger.LogTrace("Executing global after hook");
+                    logger.LogDebug("Executing global after hook");
                     await options.After(ctx);
                 });
             }
@@ -139,12 +137,12 @@ namespace Carter
                 {
                     var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
                     var logger = loggerFactory.CreateLogger("Carter.GlobalBeforeHook");
-                    logger.LogTrace("Executing global before hook");
+                    logger.LogDebug("Executing global before hook");
 
                     var carryOn = await options.Before(ctx);
                     if (carryOn)
                     {
-                        logger.LogTrace("Executing next handler after global before hook");
+                        logger.LogDebug("Executing next handler after global before hook");
                         await next();
                     }
                 });
@@ -155,19 +153,14 @@ namespace Carter
         /// Adds Carter to the specified <see cref="IServiceCollection"/>.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
-        /// <param name="enableDiagnostics">Whether to enable diagnostics at startup.</param>
-        public static void AddCarter(this IServiceCollection services, bool enableDiagnostics = false)
+        public static void AddCarter(this IServiceCollection services)
         {
             var assemblyCatalog = new DependencyContextAssemblyCatalog();
 
             var assemblies = assemblyCatalog.GetAssemblies();
 
-            CarterDiagnostics diagnostics = null;
-            if (enableDiagnostics)
-            {
-                diagnostics = new CarterDiagnostics();
-                services.AddSingleton(diagnostics);
-            }
+            CarterDiagnostics diagnostics = new CarterDiagnostics();
+            services.AddSingleton(diagnostics);
 
             var validators = assemblies.SelectMany(ass => ass.GetTypes())
                 .Where(typeof(IValidator).IsAssignableFrom)
@@ -175,7 +168,7 @@ namespace Carter
 
             foreach (var validator in validators)
             {
-                diagnostics?.AddValidator(validator);
+                diagnostics.AddValidator(validator);
                 services.AddSingleton(typeof(IValidator), validator);
             }
 
@@ -193,7 +186,7 @@ namespace Carter
 
             foreach (var module in modules)
             {
-                diagnostics?.AddModule(module);
+                diagnostics.AddModule(module);
                 services.AddScoped(module);
                 services.AddScoped(typeof(CarterModule), module);
             }
@@ -201,14 +194,14 @@ namespace Carter
             var schs = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler)));
             foreach (var sch in schs)
             {
-                diagnostics?.AddStatusCodeHandler(sch);
+                diagnostics.AddStatusCodeHandler(sch);
                 services.AddScoped(typeof(IStatusCodeHandler), sch);
             }
 
             var responseNegotiators = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator)));
             foreach (var negotiatator in responseNegotiators)
             {
-                diagnostics?.AddResponseNegotiator(negotiatator);
+                diagnostics.AddResponseNegotiator(negotiatator);
                 services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
             }
 

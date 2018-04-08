@@ -6,43 +6,42 @@ namespace Carter
 
     public class CarterDiagnostics
     {
-        private List<Type> validators = new List<Type>();
-        private List<Type> modules = new List<Type>();
-        private List<Type> statusCodeHandlers = new List<Type>();
-        private List<Type> responseNegotiators = new List<Type>();
+        private readonly List<Type> modules = new List<Type>();
 
-        public void AddValidator(Type validatorType)
-            => validators.Add(validatorType);
+        private readonly List<Type> responseNegotiators = new List<Type>();
 
-        public void AddModule(Type moduleType)
-            => modules.Add(moduleType);
+        private readonly List<Type> statusCodeHandlers = new List<Type>();
 
-        public void AddStatusCodeHandler(Type handlerType)
-            => statusCodeHandlers.Add(handlerType);
+        private readonly List<Type> validators = new List<Type>();
 
-        public void AddResponseNegotiator(Type responseNegotiatorType)
-            => responseNegotiators.Add(responseNegotiatorType);
+        public void AddValidator(Type validatorType) => this.validators.Add(validatorType);
 
-        public void LogDiscoveredModules(ILogger logger)
+        public void AddModule(Type moduleType) => this.modules.Add(moduleType);
+
+        public void AddStatusCodeHandler(Type handlerType) => this.statusCodeHandlers.Add(handlerType);
+
+        public void AddResponseNegotiator(Type responseNegotiatorType) => this.responseNegotiators.Add(responseNegotiatorType);
+
+        public void LogDiscoveredCarterTypes(ILogger logger)
         {
-            foreach (var validator in validators)
+            foreach (var validator in this.validators)
             {
-                logger.LogTrace("Found validator {ValidatorName}", validator.Name);
+                logger.LogDebug("Found validator {ValidatorName}", validator.Name);
             }
 
-            foreach (var module in modules)
+            foreach (var module in this.modules)
             {
-                logger.LogTrace("Found module {ModuleName}", module.FullName);
+                logger.LogDebug("Found module {ModuleName}", module.FullName);
             }
 
-            foreach (var sch in statusCodeHandlers)
+            foreach (var sch in this.statusCodeHandlers)
             {
-                logger.LogTrace("Found status code handler {StatusCodeHandlerName}", sch.FullName);
+                logger.LogDebug("Found status code handler {StatusCodeHandlerName}", sch.FullName);
             }
 
-            foreach (var negotiatator in responseNegotiators)
+            foreach (var negotiatator in this.responseNegotiators)
             {
-                logger.LogTrace("Found response negotiator {ResponseNegotiatorName}", negotiatator.FullName);
+                logger.LogDebug("Found response negotiator {ResponseNegotiatorName}", negotiatator.FullName);
             }
         }
     }

@@ -15,7 +15,7 @@ namespace CarterSample
         {
             services.AddSingleton<IActorProvider, ActorProvider>();
 
-            services.AddCarter(enableDiagnostics: true);
+            services.AddCarter();
         }
 
         public void Configure(IApplicationBuilder app, IConfiguration config)
