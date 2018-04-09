@@ -4,7 +4,6 @@
         <Assembly Name="CarterNativeSample" Dynamic="Required All"/>
         <Assembly Name="Microsoft.AspNetCore.Diagnostics" Dynamic="Required All"/>
         <Assembly Name="Microsoft.AspNetCore" Dynamic="Required All"/>
-        <Assembly Name="SampleWebApi" Dynamic="Required All" />
         <Assembly Name="Microsoft.AspNetCore.Server.Kestrel.Core">
             <Type Name="Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServer" Dynamic="Required All" />
             <Type Name="Microsoft.AspNetCore.Server.Kestrel.Core.Internal.KestrelServerOptionsSetup" Dynamic="Required All" />
