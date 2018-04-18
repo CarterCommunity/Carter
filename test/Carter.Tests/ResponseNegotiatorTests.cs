@@ -81,6 +81,15 @@ namespace Carter.Tests
             var body = await response.Content.ReadAsStringAsync();
             Assert.Equal("FOOBAR", body);
         }
+
+        [Fact]
+        public async Task Should_pick_default_json_processor_last()
+        {
+            this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.badger+json"));
+            var response = await this.httpClient.GetAsync("/negotiate");
+            var body = await response.Content.ReadAsStringAsync();
+            Assert.Equal("Non default json Response", body);
+        }
     }
 
     internal class TestResponseNegotiator : IResponseNegotiator
@@ -110,6 +119,16 @@ namespace Carter.Tests
         public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken))
         {
             await res.WriteAsync("XML Response", cancellationToken);
+        }
+    }
+    
+    internal class TestJsonResponseNegotiator : IResponseNegotiator
+    {
+        public bool CanHandle(MediaTypeHeaderValue accept) => accept.MediaType.ToString().IndexOf("application/vnd.badger+json", StringComparison.OrdinalIgnoreCase) >= 0;
+
+        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            await res.WriteAsync("Non default json Response", cancellationToken);
         }
     }
 }
