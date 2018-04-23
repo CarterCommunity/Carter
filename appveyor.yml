@@ -21,7 +21,9 @@ build_script:
 test_script:
   - cmd: dotnet test test\Carter.Tests\Carter.Tests.csproj
 
+nuget:
+  disable_publish_on_pr: true
+  
 artifacts:
   - path: '**\*.nupkg'
     name: packages
-
