@@ -20,6 +20,9 @@ build:
 
 nuget:
   disable_publish_on_pr: true
+
+pull_requests:
+  do_not_increment_build_number: true
   
 artifacts:
   - path: '**\*.nupkg'
