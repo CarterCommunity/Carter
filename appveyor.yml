@@ -1,0 +1,30 @@
+image: ubuntu
+
+version: 3.6.0-{build}
+
+branches:
+  only:
+    - master
+
+max_jobs: 1
+
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+
+configuration: Release
+
+build:
+  verbosity: minimal
+
+nuget:
+  disable_publish_on_pr: true
+  
+artifacts:
+  - path: '**\*.nupkg'
+    name: packages
