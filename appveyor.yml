@@ -2,6 +2,10 @@ image: ubuntu
 
 version: 3.6.0-ci{build}
 
+branches:
+  only:
+    - master
+
 max_jobs: 1
 
 dotnet_csproj:
