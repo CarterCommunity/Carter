@@ -1,3 +1,5 @@
+image: ubuntu
+
 version: 3.6.0-{build}
 
 branches:
@@ -15,11 +17,10 @@ dotnet_csproj:
   file_version: '{version}'
   informational_version: '{version}'
 
-build_script:
-  - cmd: dotnet pack src\Carter.csproj -c Release -o nupkgs
+configuration: Release
 
-test_script:
-  - cmd: dotnet test test\Carter.Tests\Carter.Tests.csproj
+build:
+  verbosity: minimal
 
 nuget:
   disable_publish_on_pr: true

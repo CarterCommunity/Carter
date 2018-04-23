@@ -10,6 +10,7 @@
     <PackageLicenseUrl>https://github.com/CarterCommunity/Carter/blob/master/LICENSE</PackageLicenseUrl>
     <PackageIconUrl>https://github.com/CarterCommunity/Media/raw/master/carterlogo.png</PackageIconUrl>
     <LangVersion>latest</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="7.2.0" />
