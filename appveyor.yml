@@ -2,10 +2,6 @@ image: ubuntu
 
 version: 3.6.0-ci{build}
 
-branches:
-  only:
-    - master
-
 max_jobs: 1
 
 dotnet_csproj:
@@ -35,3 +31,5 @@ artifacts:
 environment:  
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+skip_branch_with_pr: true
