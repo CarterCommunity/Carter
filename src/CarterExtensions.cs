@@ -198,8 +198,13 @@ namespace Carter
                 services.AddScoped(typeof(IStatusCodeHandler), sch);
             }
 
-            var responseNegotiators = assemblies.SelectMany(x =>
-                x.GetTypes().Where(t => typeof(IResponseNegotiator).IsAssignableFrom(t) && t != typeof(IResponseNegotiator) && t != typeof(DefaultJsonResponseNegotiator)));
+            var responseNegotiators = assemblies.SelectMany(x => x.GetTypes()
+                .Where(t =>
+                    !t.IsAbstract &&
+                    typeof(IResponseNegotiator).IsAssignableFrom(t) &&
+                    t != typeof(IResponseNegotiator) &&
+                    t != typeof(DefaultJsonResponseNegotiator)
+                ));
 
             foreach (var negotiatator in responseNegotiators)
             {
