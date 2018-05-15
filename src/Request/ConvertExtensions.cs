@@ -2,44 +2,71 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Globalization;
     using System.Linq;
 
     internal static class ConvertExtensions
     {
-        public static T ConvertTo<T>(this object value)
+        public static T ConvertTo<T>(this object value, T defaultValue = default)
         {
-            var type = typeof(T);
-            var underlyingType = Nullable.GetUnderlyingType(type);
-
-            if (underlyingType != null)
+            if (value != null)
             {
-                if (value == null) return default;
+                try
+                {
+                    var currentType = value.GetType();
+                    var newType = typeof(T);
 
-                type = underlyingType;
+                    if (currentType.IsAssignableFrom(newType))
+                    {
+                        return (T)value;
+                    }
+
+                    var stringValue = value as string;
+
+                    if (newType == typeof(DateTime))
+                    {
+                        if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var dateResult))
+                        {
+                            return (T)(object)dateResult;
+                        }
+
+                        return defaultValue;
+                    }
+
+                    if (stringValue != null)
+                    {
+                        var converter = TypeDescriptor.GetConverter(newType);
+
+                        if (converter.CanConvertFrom(typeof(string)))
+                        {
+                            return (T)converter.ConvertFromInvariantString(stringValue);
+                        }
+
+                        return defaultValue;
+                    }
+
+                    var underlyingType = Nullable.GetUnderlyingType(newType) ?? newType;
+
+                    return (T)Convert.ChangeType(value, underlyingType, CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    return defaultValue;
+                }
             }
 
-            return (T)Convert.ChangeType(value, type);
+            return defaultValue;
         }
 
         public static IEnumerable<T> ConvertMultipleTo<T>(this IEnumerable<string> values)
         {
-            var type = typeof(T);
-            var underlyingType = Nullable.GetUnderlyingType(type);
-
-            if (underlyingType != null)
-            {
-                type = underlyingType;
-            }
-
             foreach (var value in values)
             {
-                if (value == null)
-                    yield return default;
-                else
-                    yield return (T)Convert.ChangeType(value, type);
+                yield return ConvertTo<T>(value);
             }
         }
-        
+
         public static bool IsArray(this Type source)
         {
             return source.BaseType == typeof(Array);

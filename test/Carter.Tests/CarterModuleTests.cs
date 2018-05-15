@@ -64,6 +64,9 @@
         [InlineData("/parameterized/bar", "Beforeecho barAfter")]
         [InlineData("/parameterized/e3c6af72-9cb7-4638-b3ea-4e4705f96cea", "Beforeecho e3c6af72-9cb7-4638-b3ea-4e4705f96ceaAfter")]
         [InlineData("/parameterized/911", "Beforeecho 911After")]
+        [InlineData("/parameterized/2018-05-15T04:23:14-05:00", "Beforeecho 15/05/2018 09:23:14After")]
+        [InlineData("/parameterized/2018-05-15T09:23:14Z", "Beforeecho 15/05/2018 09:23:14After")]
+        [InlineData("/parameterized/2018-05-15T09:23:14", "Beforeecho 15/05/2018 09:23:14After")]
         public async Task Should_parameterized_route_work(string route, string content)
         {
             var result = await this.httpClient.GetAsync(route);
