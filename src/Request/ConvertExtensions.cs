@@ -26,7 +26,7 @@
 
                     if (newType == typeof(DateTime))
                     {
-                        if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateResult))
+                        if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var dateResult))
                         {
                             return (T)(object)dateResult;
                         }
