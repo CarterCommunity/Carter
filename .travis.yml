@@ -1,9 +1,0 @@
-language: csharp
-mono: none
-dotnet: 2.0.0
-dist: trusty
-script:
- - dotnet build Carter.sln
- - dotnet test test/Carter.Samples.Tests/Carter.Samples.Tests.csproj
- - dotnet test test/Carter.Tests/Carter.Tests.csproj
-# - dotnet pack src
