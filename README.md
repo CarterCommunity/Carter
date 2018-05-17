@@ -2,7 +2,7 @@
 
 [![NuGet Version](http://img.shields.io/nuget/v/Carter.svg?style=flat)](https://www.nuget.org/packages/carter) 
 
-<a href="https://join.slack.com/t/cartercommunity/shared_invite/enQtMzQwNjIwODcwMTMxLWQwMjk5NDFlYWI3Yzg5Y2M4ODNmOTkwMzA2YjkxNmE0YjI3YWU4MjU2ZjI2NmQwMmE4NjVlODBlM2RlMDI1ZmY"><img src="./slack.svg" width="140px"/></a>
+<a href="https://join.slack.com/t/cartercommunity/shared_invite/enQtMzY2Nzc0NjU2MTgyLWRjYzJiNTljY2NiZjM1ZWVmODZhYjg3YjZhOTNiNzdkNzg4OThkNTY2MzJjY2ViMWMyZDJkMDFlNGRiZjY5MTQ"><img src="./slack.svg" width="140px"/></a>
 
 Carter is a library that allows [Nancy-esque](http://nancyfx.org) routing for use with ASP.Net Core. 
 
