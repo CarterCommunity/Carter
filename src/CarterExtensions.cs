@@ -40,6 +40,16 @@ namespace Carter
                 {
                     var moduleType = module.GetType();
 
+                    if (moduleType == typeof(DiagnosticsModule) && !options.EnableDiagnostics)
+                    {
+                        continue;
+                    }
+
+                    foreach (var route in module.Routes)
+                    {
+                        diagnostics.AddPath(moduleType, $"{route.Key.verb} /{route.Key.path}");
+                    }
+                    
                     var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
 
                     foreach (var path in distinctPaths)

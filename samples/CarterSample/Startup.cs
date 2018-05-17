@@ -30,7 +30,7 @@ namespace CarterSample
 
         private CarterOptions GetOptions()
         {
-            return new CarterOptions(ctx => this.GetBeforeHook(ctx), ctx => this.GetAfterHook(ctx));
+            return new CarterOptions(ctx => this.GetBeforeHook(ctx), ctx => this.GetAfterHook(ctx), true);
         }
 
         private Task<bool> GetBeforeHook(HttpContext ctx)

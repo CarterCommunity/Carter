@@ -2,18 +2,32 @@ namespace Carter
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
+    using System.Runtime.CompilerServices;
     using Microsoft.Extensions.Logging;
 
     public class CarterDiagnostics
     {
         private readonly List<Type> modules = new List<Type>();
 
+        internal IReadOnlyList<Type> RegisteredModules => this.modules;
+
         private readonly List<Type> responseNegotiators = new List<Type>();
+        
+        internal IReadOnlyList<Type> RegisteredResponseNegotiators => this.responseNegotiators;
 
         private readonly List<Type> statusCodeHandlers = new List<Type>();
+        
+        internal IReadOnlyList<Type> RegisteredStatusCodeHandlers => this.statusCodeHandlers;
 
         private readonly List<Type> validators = new List<Type>();
+        
+        internal IReadOnlyList<Type> RegisteredValidators => this.validators;
 
+        private readonly List<KeyValuePair<Type, string>> paths = new List<KeyValuePair<Type, string>>();
+
+        internal IReadOnlyList<KeyValuePair<Type, string>> RegisteredPaths => this.paths;
+        
         public void AddValidator(Type validatorType) => this.validators.Add(validatorType);
 
         public void AddModule(Type moduleType) => this.modules.Add(moduleType);
@@ -21,6 +35,8 @@ namespace Carter
         public void AddStatusCodeHandler(Type handlerType) => this.statusCodeHandlers.Add(handlerType);
 
         public void AddResponseNegotiator(Type responseNegotiatorType) => this.responseNegotiators.Add(responseNegotiatorType);
+        
+        public void AddPath(Type moduleType, string path) => this.paths.Add(new KeyValuePair<Type, string>(moduleType, path));
 
         public void LogDiscoveredCarterTypes(ILogger logger)
         {
