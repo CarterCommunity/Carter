@@ -16,6 +16,7 @@ namespace CarterSample
             services.AddSingleton<IActorProvider, ActorProvider>();
 
             services.AddCarter();
+            services.AddCarterDiagnostics();
         }
 
         public void Configure(IApplicationBuilder app, IConfiguration config)
@@ -30,7 +31,7 @@ namespace CarterSample
 
         private CarterOptions GetOptions()
         {
-            return new CarterOptions(ctx => this.GetBeforeHook(ctx), ctx => this.GetAfterHook(ctx), true);
+            return new CarterOptions(ctx => this.GetBeforeHook(ctx), ctx => this.GetAfterHook(ctx));
         }
 
         private Task<bool> GetBeforeHook(HttpContext ctx)

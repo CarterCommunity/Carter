@@ -40,12 +40,7 @@ namespace Carter
                 {
                     var moduleType = module.GetType();
 
-                    if (moduleType == typeof(DiagnosticsModule) && !options.EnableDiagnostics)
-                    {
-                        continue;
-                    }
-
-                    foreach (var route in module.Routes)
+                  foreach (var route in module.Routes)
                     {
                         diagnostics.AddPath(moduleType, $"{route.Key.verb} /{route.Key.path}");
                     }
@@ -60,6 +55,12 @@ namespace Carter
             }
 
             return builder.UseRouter(routeBuilder.Build());
+        }
+
+        public static void AddCarterDiagnostics(this IServiceCollection services)
+        {
+            services.AddScoped<DiagnosticsModule>();
+            services.AddScoped<CarterModule, DiagnosticsModule>();
         }
 
         private static RequestDelegate CreateRouteHandler(string path, Type moduleType)

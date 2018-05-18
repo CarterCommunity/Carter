@@ -2,11 +2,9 @@ namespace Carter
 {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
-    using System.Runtime.CompilerServices;
     using Microsoft.Extensions.Logging;
 
-    public class CarterDiagnostics
+    internal class CarterDiagnostics
     {
         private readonly List<Type> modules = new List<Type>();
 

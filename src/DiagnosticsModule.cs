@@ -4,7 +4,7 @@
     using System.Linq;
     using Carter.Response;
 
-    public class DiagnosticsModule : CarterModule
+    internal class DiagnosticsModule : CarterModule
     {
         public DiagnosticsModule(CarterDiagnostics diagnostics) : base("/_CarterDiagnostics")
         {

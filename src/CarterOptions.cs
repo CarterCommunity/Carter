@@ -14,11 +14,10 @@ namespace Carter
         /// </summary>
         /// <param name="before">A global before handler which is invoked before all routes</param>
         /// <param name="after">A global before handler which is invoked after all routes</param>
-        public CarterOptions(Func<HttpContext, Task<bool>> before = null, Func<HttpContext, Task> after = null, bool enableDiagnostics = false)
+        public CarterOptions(Func<HttpContext, Task<bool>> before = null, Func<HttpContext, Task> after = null)
         {
             this.Before = before;
             this.After = after;
-            this.EnableDiagnostics = enableDiagnostics;
         }
         
         /// <summary>
@@ -31,7 +30,5 @@ namespace Carter
         /// A global before handler which is invoked after all routes
         /// </summary>
         public Func<HttpContext, Task> After { get; }
-
-        public bool EnableDiagnostics { get; }
     }
 }
