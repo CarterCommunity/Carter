@@ -1,4 +1,4 @@
-namespace Carter
+namespace Carter.Diagnostics
 {
     using System;
     using System.Collections.Generic;
@@ -22,9 +22,9 @@ namespace Carter
         
         internal IReadOnlyList<Type> RegisteredValidators => this.validators;
 
-        private readonly List<KeyValuePair<Type, string>> paths = new List<KeyValuePair<Type, string>>();
+        private readonly List<KeyValuePair<Type, string>> routes = new List<KeyValuePair<Type, string>>();
 
-        internal IReadOnlyList<KeyValuePair<Type, string>> RegisteredPaths => this.paths;
+        internal IReadOnlyList<KeyValuePair<Type, string>> RegisteredRoutes => this.routes;
         
         public void AddValidator(Type validatorType) => this.validators.Add(validatorType);
 
@@ -34,7 +34,7 @@ namespace Carter
 
         public void AddResponseNegotiator(Type responseNegotiatorType) => this.responseNegotiators.Add(responseNegotiatorType);
         
-        public void AddPath(Type moduleType, string path) => this.paths.Add(new KeyValuePair<Type, string>(moduleType, path));
+        public void AddPath(Type moduleType, string path) => this.routes.Add(new KeyValuePair<Type, string>(moduleType, path));
 
         public void LogDiscoveredCarterTypes(ILogger logger)
         {

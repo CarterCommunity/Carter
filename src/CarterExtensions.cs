@@ -4,6 +4,7 @@ namespace Carter
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using Carter.Diagnostics;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
