@@ -2,7 +2,7 @@
 <package>
     <metadata>
         <id>CarterTemplate</id>
-        <version>3.6.0</version>
+        <version>3.7.0</version>
         <title>Carter Template for dotnet-new</title>
         <summary>A dotnet-new template for Carter applications.</summary>
         <description>A dotnet-new template for Carter applications.</description>

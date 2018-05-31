@@ -1,6 +1,6 @@
 image: ubuntu
 
-version: 3.6.0-ci{build}
+version: 3.7.0-ci{build}
 
 max_jobs: 1
 
