@@ -57,59 +57,71 @@ namespace Carter
             return async ctx =>
             {
                 var module = moduleFactory();
-                var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
-                var logger = loggerFactory.CreateLogger(module.GetType());
 
-                if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
+                try
                 {
-                    // if the path was registered but a handler matching the
-                    // current method was not found, return MethodNotFound
-                    ctx.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
-                    return;
-                }
+                    var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger(module.GetType());
 
-                // begin handling the request
-                if (HttpMethods.IsHead(ctx.Request.Method))
-                {
-                    //Cannot read the default stream once WriteAsync has been called on it
-                    ctx.Response.Body = new MemoryStream();
-                }
-
-                // run the module handlers
-                bool shouldContinue = true;
-
-                if (module.Before != null)
-                {
-                    shouldContinue = await module.Before(ctx);
-                }
-
-                if (shouldContinue)
-                {
-                    // run the route handler
-                    logger.LogDebug("Executing module route handler for {Method} /{Path}", ctx.Request.Method, path);
-                    await routeHandler(ctx);
-
-                    // run after handler
-                    if (module.After != null)
+                    if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
                     {
-                        await module.After(ctx);
+                        // if the path was registered but a handler matching the
+                        // current method was not found, return MethodNotFound
+                        ctx.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
+                        return;
+                    }
+
+                    // begin handling the request
+                    if (HttpMethods.IsHead(ctx.Request.Method))
+                    {
+                        //Cannot read the default stream once WriteAsync has been called on it
+                        ctx.Response.Body = new MemoryStream();
+                    }
+
+                    // run the module handlers
+                    bool shouldContinue = true;
+
+                    if (module.Before != null)
+                    {
+                        shouldContinue = await module.Before(ctx);
+                    }
+
+                    if (shouldContinue)
+                    {
+                        // run the route handler
+                        logger.LogDebug("Executing module route handler for {Method} /{Path}", ctx.Request.Method,
+                            path);
+                        await routeHandler(ctx);
+
+                        // run after handler
+                        if (module.After != null)
+                        {
+                            await module.After(ctx);
+                        }
+                    }
+
+                    // run status code handler
+                    var statusCodeHandlers = ctx.RequestServices.GetServices<IStatusCodeHandler>();
+                    var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(ctx.Response.StatusCode));
+
+                    if (scHandler != null)
+                    {
+                        await scHandler.Handle(ctx);
+                    }
+
+                    if (HttpMethods.IsHead(ctx.Request.Method))
+                    {
+                        var length = ctx.Response.Body.Length;
+                        ctx.Response.Body.SetLength(0);
+                        ctx.Response.ContentLength = length;
                     }
                 }
-
-                // run status code handler
-                var statusCodeHandlers = ctx.RequestServices.GetServices<IStatusCodeHandler>();
-                var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(ctx.Response.StatusCode));
-
-                if (scHandler != null)
+                finally
                 {
-                    await scHandler.Handle(ctx);
-                }
-
-                if (HttpMethods.IsHead(ctx.Request.Method))
-                {
-                    var length = ctx.Response.Body.Length;
-                    ctx.Response.Body.SetLength(0);
-                    ctx.Response.ContentLength = length;
+                    if (module is IDisposable d)
+                    {
+                        d.Dispose();
+                    }
                 }
             };
         }
