@@ -9,6 +9,7 @@ namespace Carter
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
 
     public static class CarterExtensions
@@ -165,10 +166,8 @@ namespace Carter
         /// Adds Carter to the specified <see cref="IServiceCollection"/>.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
-        public static void AddCarter(this IServiceCollection services, CarterServiceOptions options = null)
+        public static void AddCarter(this IServiceCollection services)
         {
-            options = options ?? new CarterServiceOptions();
-            
             var assemblyCatalog = new DependencyContextAssemblyCatalog();
 
             var assemblies = assemblyCatalog.GetAssemblies();
@@ -189,8 +188,8 @@ namespace Carter
             services.AddSingleton<IValidatorLocator, DefaultValidatorLocator>();
 
             services.AddRouting();
-
-            services.AddSingleton(typeof(ICarterModuleProvider), options.CarterModuleProvider);
+            
+            services.TryAddSingleton(typeof(ICarterModuleProvider), typeof(DefaultCarterModuleProvider));
 
             var modules = assemblies.SelectMany(x => x.GetTypes()
                 .Where(t =>
