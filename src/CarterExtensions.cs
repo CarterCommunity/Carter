@@ -30,35 +30,35 @@ namespace Carter
 
             ApplyGlobalAfterHook(builder, options);
 
-            var routeBuilder = new RouteBuilder(builder);
-
-            //Create a "startup scope" to resolve modules from
-            using (var scope = builder.ApplicationServices.CreateScope())
-            {
-                //Get all instances of CarterModule to fetch and register declared routes
-                foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
+            var moduleProvider = builder.ApplicationServices.GetRequiredService<ICarterModuleProvider>();
+            
+            return builder
+                .UseRouter(moduleProvider.GetModuleFactories()
+                .Aggregate((IRouteBuilder)new RouteBuilder(builder), (routeBuilder, moduleFactory) =>
+                
                 {
-                    var moduleType = module.GetType();
-
+                    var module = moduleFactory();
+                    
                     var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
 
-                    foreach (var path in distinctPaths)
+                    if (module is IDisposable d)
                     {
-                        routeBuilder.MapRoute(path, CreateRouteHandler(path, moduleType));
+                        d.Dispose();
                     }
-                }
-            }
 
-            return builder.UseRouter(routeBuilder.Build());
+                    return distinctPaths.Aggregate(
+                        routeBuilder,
+                        (b, path) => b.MapRoute(path, CreateRouteHandler(path, moduleFactory)));
+                }).Build());
         }
 
-        private static RequestDelegate CreateRouteHandler(string path, Type moduleType)
+        private static RequestDelegate CreateRouteHandler(string path, Func<CarterModule> moduleFactory)
         {
             return async ctx =>
             {
-                var module = ctx.RequestServices.GetRequiredService(moduleType) as CarterModule;
+                var module = moduleFactory();
                 var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
-                var logger = loggerFactory.CreateLogger(moduleType);
+                var logger = loggerFactory.CreateLogger(module.GetType());
 
                 if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
                 {
@@ -153,8 +153,10 @@ namespace Carter
         /// Adds Carter to the specified <see cref="IServiceCollection"/>.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
-        public static void AddCarter(this IServiceCollection services)
+        public static void AddCarter(this IServiceCollection services, CarterServiceOptions options = null)
         {
+            options = options ?? new CarterServiceOptions();
+            
             var assemblyCatalog = new DependencyContextAssemblyCatalog();
 
             var assemblies = assemblyCatalog.GetAssemblies();
@@ -175,6 +177,8 @@ namespace Carter
             services.AddSingleton<IValidatorLocator, DefaultValidatorLocator>();
 
             services.AddRouting();
+
+            services.AddSingleton(typeof(ICarterModuleProvider), options.CarterModuleProvider);
 
             var modules = assemblies.SelectMany(x => x.GetTypes()
                 .Where(t =>
