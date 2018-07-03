@@ -36,7 +36,7 @@ Other extensions include:
   {
       var person = actorProvider.Get(ctx.GetRouteData().As<int>("id"));
       await ctx.Response.Negotiate(person);
-  };
+  });
   ```
 
 
