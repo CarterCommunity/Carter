@@ -39,7 +39,6 @@ Other extensions include:
   });
   ```
 
-
 ### Where does the name "Carter" come from?
 
 I have been a huge fan of, and core contributor to [Nancy](http://nancyfx.org), the best .Net web framework, for many years, and the name "Nancy" came about due to it being inspired from Sinatra the Ruby web framework.  Frank Sinatra had a daughter called Nancy and so that's where it came from.
@@ -48,17 +47,58 @@ I was also trying to think of a derivative name, and I had recently listened to 
 
 ### Getting Started
 
-A template for Carter is out!
+You can get started using either the template or by adding the package manually to a new or existing application
 
-`dotnet new -i CarterTemplate`
-
-`dotnet new Carter -n MyCarterApp`
-
-`dotnet run`
-
-Enjoy!
+#### Template
 
 [https://www.nuget.org/packages/CarterTemplate/](https://www.nuget.org/packages/CarterTemplate/)
+
+1. Install the template - `dotnet new -i CarterTemplate`
+
+2. Create a new application using template - `dotnet new Carter -n MyCarterApp`
+
+3. Run the application - `dotnet run`
+
+#### Package
+
+[https://www.nuget.org/packages/Carter](https://www.nuget.org/packages/Carter)
+
+1. Create a new empty ASP.NET Core application - `dotnet new web -n MyCarterApp`
+
+2. Change into the new project location - `cd ./MyCarterApp`
+
+2. Add Carter package - `dotnet add package carter`
+
+3. Modify your Startup.cs to use Carter
+
+```csharp
+public class Startup
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddCarter();
+    }
+
+    public void Configure(IApplicationBuilder app)
+    {
+        app.UseCarter();
+    }
+}
+```
+
+4. Create a new Module
+
+```csharp
+    public class HomeModule : CarterModule
+    {
+        public HomeModule()
+        {
+            Get("/", async (req, res, routeData) => await res.WriteAsync("Hello from Carter!"));
+        }
+    }
+```
+
+5. Run the application - `dotnet run`
 
 ### Sample
 
@@ -129,3 +169,5 @@ public class ActorsModule : CarterModule
     }
 }
 ```
+
+[More samples](https://github.com/CarterCommunity/Carter/tree/master/samples)
