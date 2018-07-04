@@ -67,9 +67,9 @@ You can get started using either the template or by adding the package manually 
 
 2. Change into the new project location - `cd ./MyCarterApp`
 
-2. Add Carter package - `dotnet add package carter`
+3. Add Carter package - `dotnet add package carter`
 
-3. Modify your Startup.cs to use Carter
+4. Modify your Startup.cs to use Carter
 
 ```csharp
 public class Startup
@@ -86,7 +86,7 @@ public class Startup
 }
 ```
 
-4. Create a new Module
+5. Create a new Module
 
 ```csharp
     public class HomeModule : CarterModule
@@ -98,7 +98,7 @@ public class Startup
     }
 ```
 
-5. Run the application - `dotnet run`
+6. Run the application - `dotnet run`
 
 ### Sample
 
