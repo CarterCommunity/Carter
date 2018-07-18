@@ -1,47 +1,29 @@
 namespace Carter
 {
-    using System;
-    using System.Collections.Generic;
     using Microsoft.Extensions.Logging;
 
     public class CarterDiagnostics
     {
-        private readonly List<Type> modules = new List<Type>();
-
-        private readonly List<Type> responseNegotiators = new List<Type>();
-
-        private readonly List<Type> statusCodeHandlers = new List<Type>();
-
-        private readonly List<Type> validators = new List<Type>();
-
-        public void AddValidator(Type validatorType) => this.validators.Add(validatorType);
-
-        public void AddModule(Type moduleType) => this.modules.Add(moduleType);
-
-        public void AddStatusCodeHandler(Type handlerType) => this.statusCodeHandlers.Add(handlerType);
-
-        public void AddResponseNegotiator(Type responseNegotiatorType) => this.responseNegotiators.Add(responseNegotiatorType);
-
-        public void LogDiscoveredCarterTypes(ILogger logger)
+        public static void LogDiscoveredCarterTypes(ICarterBootstrapper bootstrapper, ILogger logger)
         {
-            foreach (var validator in this.validators)
+            foreach (var validator in bootstrapper.Validators)
             {
-                logger.LogDebug("Found validator {ValidatorName}", validator.Name);
+                logger.LogDebug("Found validator {ValidatorName}", validator.GetType().Name);
             }
 
-            foreach (var module in this.modules)
+            foreach (var module in bootstrapper.Routes.Values)
             {
-                logger.LogDebug("Found module {ModuleName}", module.FullName);
+                logger.LogDebug("Found module {ModuleName}", module.Module.FullName);
             }
 
-            foreach (var sch in this.statusCodeHandlers)
+            foreach (var sch in bootstrapper.StatusCodeHandlers)
             {
-                logger.LogDebug("Found status code handler {StatusCodeHandlerName}", sch.FullName);
+                logger.LogDebug("Found status code handler {StatusCodeHandlerName}", sch.GetType().FullName);
             }
 
-            foreach (var negotiatator in this.responseNegotiators)
+            foreach (var negotiator in bootstrapper.ResponseNegotiators)
             {
-                logger.LogDebug("Found response negotiator {ResponseNegotiatorName}", negotiatator.FullName);
+                logger.LogDebug("Found response negotiator {ResponseNegotiatorName}", negotiator.GetType().FullName);
             }
         }
     }

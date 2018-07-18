@@ -9,18 +9,21 @@ namespace Carter.Tests
 
     public class StatusCodeHandlerTests
     {
+        private readonly HttpClient httpClient;
+
         public StatusCodeHandlerTests()
         {
-            this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(); })
+            var server = new TestServer(new WebHostBuilder()
+                .ConfigureServices(x =>  x.AddCarter(bootstrapper =>
+                {
+                    bootstrapper
+                        .RegisterModules(new StatusCodeHandlerModule())
+                        .RegisterStatusCodeHandlers(new TeapotStatusCodeHandler());
+                }) )
                 .Configure(x => x.UseCarter())
             );
-            this.httpClient = this.server.CreateClient();
+            this.httpClient = server.CreateClient();
         }
-
-        private readonly TestServer server;
-
-        private readonly HttpClient httpClient;
 
         [Fact]
         public async Task Should_use_status_code_handlers()

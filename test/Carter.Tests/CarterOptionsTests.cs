@@ -9,21 +9,23 @@ namespace Carter.Tests
 
     public class CarterOptionsTests
     {
-        private TestServer server;
-
         private HttpClient httpClient;
 
         private void ConfigureServer(bool continueRequest = true)
         {
-            this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(); })
+            var server = new TestServer(new WebHostBuilder()
+                .ConfigureServices(x =>  x.AddCarter(bootstrapper =>
+                {
+                    bootstrapper
+                        .RegisterModules(new ShortCircuitModule());
+                }) )
                 .Configure(x => x.UseCarter(new CarterOptions(async ctx =>
                 {
                     await ctx.Response.WriteAsync("GlobalBefore");
                     return continueRequest;
                 }, async ctx => await ctx.Response.WriteAsync("GlobalAfter"))))
             );
-            this.httpClient = this.server.CreateClient();
+            this.httpClient = server.CreateClient();
         }
 
         [Fact]

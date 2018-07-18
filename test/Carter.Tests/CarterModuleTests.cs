@@ -10,15 +10,24 @@
     {
         public CarterModuleTests()
         {
-            this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(); })
+            var server = new TestServer(new WebHostBuilder()
+                .ConfigureServices(x =>  x.AddCarter(bootstrapper =>
+                {
+                    bootstrapper
+                        .RegisterModules(
+                            new TestModuleBaseClass(),
+                            new TestModule(),
+                            new StreamModule(),
+                            new ShortCircuitModule(),
+                            new SecurityModule(),
+                            new SecurityClaimsModule(),
+                            new NegotiatorModule());
+                }) )
                 .Configure(x => x.UseCarter())
             );
-            this.httpClient = this.server.CreateClient();
+            this.httpClient = server.CreateClient();
         }
-
-        private readonly TestServer server;
-
+        
         private readonly HttpClient httpClient;
 
         [Theory]

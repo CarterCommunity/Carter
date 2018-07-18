@@ -11,7 +11,7 @@ namespace Carter
     /// </summary>
     public class CarterModule
     {
-        public readonly Dictionary<(string verb, string path), RequestDelegate> Routes;
+        public readonly Dictionary<(string verb, string path), CarterRoute> Routes;
 
         private readonly string basePath;
 
@@ -38,9 +38,8 @@ namespace Carter
         /// <param name="basePath">A base path to group routes in your <see cref="CarterModule"/></param>
         protected CarterModule(string basePath)
         {
-            this.Routes = new Dictionary<(string verb, string path), RequestDelegate>(RouteComparer.Comparer);
-            var cleanPath = this.RemoveStartingSlash(basePath);
-            this.basePath = this.RemoveEndingSlash(cleanPath);
+            this.Routes = new Dictionary<(string verb, string path), CarterRoute>(RouteComparer.Comparer);
+            this.basePath = RemoveEndingSlash(RemoveStartingSlash(basePath));
         }
 
         /// <summary>
@@ -48,184 +47,149 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Get(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
-        {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Get(path, RequestDelegate);
-        }
+        protected void Get(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) 
+            => this.Get(path, ctx => handler(ctx.Request, ctx.Response, ctx.GetRouteData()));
 
         /// <summary>
         /// Declares a route for GET requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Get(string path, RequestDelegate handler)
-        {
-            path = this.RemoveStartingSlash(path);
-            path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Get, path), handler);
-            this.Routes.Add((HttpMethods.Head, path), handler);
-        }
+        protected void Get(string path, RequestDelegate handler) 
+            => this.AddRoute(path, handler, HttpMethods.Get, HttpMethods.Head);
 
         /// <summary>
         /// Declares a route for POST requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Post(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
-        {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Post(path, RequestDelegate);
-        }
+        protected void Post(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) 
+            => this.Post(path, ctx => handler(ctx.Request, ctx.Response, ctx.GetRouteData()));
 
         /// <summary>
         /// Declares a route for POST requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-
-        protected void Post(string path, RequestDelegate handler)
-        {
-            path = this.RemoveStartingSlash(path);
-            path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Post, path), handler);
-        }
+        protected void Post(string path, RequestDelegate handler) 
+            => this.AddRoute(path, handler, HttpMethods.Post);
 
         /// <summary>
         /// Declares a route for DELETE requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Delete(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
-        {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Delete(path, RequestDelegate);
-        }
+        protected void Delete(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) 
+            => this.Delete(path, ctx => handler(ctx.Request, ctx.Response, ctx.GetRouteData()));
 
         /// <summary>
         /// Declares a route for DELETE requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Delete(string path, RequestDelegate handler)
-        {
-            path = this.RemoveStartingSlash(path);
-            path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Delete, path), handler);
-        }
+        protected void Delete(string path, RequestDelegate handler) 
+            => this.AddRoute(path, handler, HttpMethods.Delete);
 
         /// <summary>
         /// Declares a route for PUT requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Put(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
-        {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Put(path, RequestDelegate);
-        }
+        protected void Put(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) 
+            => this.Put(path, ctx => handler(ctx.Request, ctx.Response, ctx.GetRouteData()));
 
         /// <summary>
         /// Declares a route for PUT requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Put(string path, RequestDelegate handler)
-        {
-            path = this.RemoveStartingSlash(path);
-            path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Put, path), handler);
-        }
+        protected void Put(string path, RequestDelegate handler) => this.AddRoute(path, handler, HttpMethods.Put);
 
         /// <summary>
         /// Declares a route for HEAD requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Head(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
-        {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Head(path, RequestDelegate);
-        }
+        protected void Head(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) 
+            => this.Head(path, ctx => handler(ctx.Request, ctx.Response, ctx.GetRouteData()));
 
         /// <summary>
         /// Declares a route for HEAD requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Head(string path, RequestDelegate handler)
-        {
-            path = this.RemoveStartingSlash(path);
-            path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Head, path), handler);
-        }
+        protected void Head(string path, RequestDelegate handler) 
+            => this.AddRoute(path, handler, HttpMethods.Head);
 
         /// <summary>
         /// Declares a route for PATCH requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Patch(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
-        {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-
-            this.Patch(path, RequestDelegate);
-        }
+        protected void Patch(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) 
+            => this.Patch(path, ctx => handler(ctx.Request, ctx.Response, ctx.GetRouteData()));
 
         /// <summary>
         /// Declares a route for PATCH requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Patch(string path, RequestDelegate handler)
-        {
-            path = this.RemoveStartingSlash(path);
-            path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Patch, path), handler);
-        }
+        protected void Patch(string path, RequestDelegate handler) 
+            => this.AddRoute(path, handler, HttpMethods.Patch);
 
         /// <summary>
         /// Declares a route for OPTIONS requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Options(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
-        {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Options(path, RequestDelegate);
-        }
+        protected void Options(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) 
+            => this.Options(path, ctx => handler(ctx.Request, ctx.Response, ctx.GetRouteData()));
 
         /// <summary>
         /// Declares a route for OPTIONS requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Options(string path, RequestDelegate handler)
-        {
-            path = this.RemoveStartingSlash(path);
-            path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Options, path), handler);
-        }
+        protected void Options(string path, RequestDelegate handler) 
+            => this.AddRoute(path, handler, HttpMethods.Options);
 
-        private string RemoveStartingSlash(string path)
+        private void AddRoute(string path, RequestDelegate handler, params string[] verbs)
         {
-            return path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
-        }
-
-        private string RemoveEndingSlash(string path)
-        {
-            return path.EndsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Remove(path.Length - 1) : path;
-        }
-
-        private string PrependBasePath(string path)
-        {
-            if (string.IsNullOrEmpty(this.basePath))
+            path = this.PrependBasePath(RemoveStartingSlash(path));
+            foreach (var verb in verbs)
             {
-                return path;
-            }
+                async Task CompositeHandler(HttpContext ctx)
+                {
+                    var shouldContinue = true;
 
-            return $"{this.basePath}/{path}";
+                    if (this.Before != null)
+                    {
+                        shouldContinue = await this.Before(ctx);
+                    }
+
+                    if (shouldContinue)
+                    {
+                        await handler(ctx);
+
+                        if (this.After != null)
+                        {
+                            await this.After(ctx);
+                        }
+                    }
+                }
+
+                this.Routes.Add((verb, path), new CarterRoute(verb, path, this.GetType(), CompositeHandler));
+            }
         }
+
+        private static string RemoveStartingSlash(string path) 
+            => path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
+
+        private static string RemoveEndingSlash(string path) 
+            => path.EndsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Remove(path.Length - 1) : path;
+
+        private string PrependBasePath(string path) 
+            => string.IsNullOrEmpty(this.basePath) ? path : $"{this.basePath}/{path}";
 
         /// <summary>
         /// Case-insensitive comparer for routes.
@@ -235,7 +199,7 @@ namespace Carter
             /// <summary>
             /// Shared comparer instance.
             /// </summary>
-            public static RouteComparer Comparer = new RouteComparer();
+            public static readonly RouteComparer Comparer = new RouteComparer();
 
             public bool Equals((string verb, string path) x, (string verb, string path) y)
                 => StringComparer.OrdinalIgnoreCase.Equals(x.verb, y.verb) && StringComparer.OrdinalIgnoreCase.Equals(x.path, y.path);

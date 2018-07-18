@@ -4,6 +4,10 @@ namespace CarterSample
     using System.Threading.Tasks;
     using Carter;
     using CarterSample.Features.Actors;
+    using CarterSample.Features.CastMembers;
+    using CarterSample.Features.Errors;
+    using CarterSample.Features.FunctionalProgramming;
+    using CarterSample.Features.Home;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
@@ -13,9 +17,18 @@ namespace CarterSample
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IActorProvider, ActorProvider>();
-
-            services.AddCarter();
+            services.AddCarter(bootstrapper => 
+                bootstrapper
+                    .RegisterModules(
+                        new FunctionalProgrammingModule(),
+                        new ActorsModule(new ActorProvider()),
+                        new CastMemberModule(),
+                        new HomeModule(),
+                        new ErrorModule())
+                    .RegisterValidators(new ActorValidator(), new DirectorValidator())
+                    .RegisterResponseNegotiators(new DefaultJsonResponseNegotiator())
+                    .RegisterStatusCodeHandlers(new ConflictStatusCodeHandler())
+            );
         }
 
         public void Configure(IApplicationBuilder app, IConfiguration config)

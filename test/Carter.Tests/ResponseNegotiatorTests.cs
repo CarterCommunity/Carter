@@ -12,19 +12,27 @@ namespace Carter.Tests
     using MediaTypeHeaderValue = Microsoft.Net.Http.Headers.MediaTypeHeaderValue;
 
     public class ResponseNegotiatorTests
-    {
+    {      
+        private readonly HttpClient httpClient;
+
         public ResponseNegotiatorTests()
         {
-            this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(); })
+            var server = new TestServer(new WebHostBuilder()
+                .ConfigureServices(x =>  x.AddCarter(bootstrapper =>
+                {
+                    bootstrapper
+                        .RegisterModules(
+                            new NegotiatorModule())
+                        .RegisterResponseNegotiators(
+                            new TestResponseNegotiator(),
+                            new TestHtmlResponseNegotiator(),
+                            new TestXmlResponseNegotiator(),
+                            new TestJsonResponseNegotiator());
+                }))
                 .Configure(x => x.UseCarter())
             );
-            this.httpClient = this.server.CreateClient();
+            this.httpClient = server.CreateClient();
         }
-
-        private readonly TestServer server;
-
-        private readonly HttpClient httpClient;
 
         [Theory]
         [InlineData("not/known")]

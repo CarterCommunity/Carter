@@ -10,19 +10,21 @@
     using Xunit;
 
     public class ResponseFromStreamTests
-    {
+    {      
+        private readonly HttpClient httpClient;
+
         public ResponseFromStreamTests()
         {
-            this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(); })
+            var server = new TestServer(new WebHostBuilder()
+                .ConfigureServices(x =>  x.AddCarter(bootstrapper =>
+                {
+                    bootstrapper
+                        .RegisterModules(new StreamModule());
+                }) )
                 .Configure(x => x.UseCarter())
             );
-            this.httpClient = this.server.CreateClient();
+            this.httpClient = server.CreateClient();
         }
-
-        private readonly TestServer server;
-
-        private readonly HttpClient httpClient;
 
         [Theory]
         [InlineData("0-2", "0-2", "012")]

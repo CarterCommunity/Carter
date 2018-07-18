@@ -1,10 +1,9 @@
 namespace Carter
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
-    using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
@@ -21,48 +20,41 @@ namespace Carter
         /// <returns>A reference to this instance after the operation has completed.</returns>
         public static IApplicationBuilder UseCarter(this IApplicationBuilder builder, CarterOptions options = null)
         {
-            var diagnostics = builder.ApplicationServices.GetService<CarterDiagnostics>();
-
-            var loggerFactory = builder.ApplicationServices.GetService<ILoggerFactory>();        
-            var logger = loggerFactory.CreateLogger(typeof(CarterDiagnostics));
+            var loggerFactory = builder.ApplicationServices.GetService<ILoggerFactory>();      
             
-            diagnostics.LogDiscoveredCarterTypes(logger);
-
             ApplyGlobalBeforeHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalBeforeHook"));
-
             ApplyGlobalAfterHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalAfterHook"));
 
-            var routeBuilder = new RouteBuilder(builder);
-
-            //Create a "startup scope" to resolve modules from
-            using (var scope = builder.ApplicationServices.CreateScope())
+            var bootstrapper = builder.ApplicationServices.GetService<CarterBootstrapper>();
+            if (bootstrapper == null)
             {
-                var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>();
+                throw new ApplicationException("Carter bootstrapper not found. Please configure Carter dependencies.");
+            }
 
-                //Get all instances of CarterModule to fetch and register declared routes
-                foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
-                {
-                    var moduleLogger = scope.ServiceProvider
-                        .GetService<ILoggerFactory>()
-                        .CreateLogger(module.GetType());
-                    
-                    var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
-                    foreach (var path in distinctPaths)
-                    {
-                        routeBuilder.MapRoute(path, CreateRouteHandler(path, module, statusCodeHandlers, moduleLogger));
-                    }
-                }
+            CarterDiagnostics.LogDiscoveredCarterTypes(bootstrapper, loggerFactory.CreateLogger("CarterDiagnostics"));
+            
+            var routeBuilder = new RouteBuilder(builder);
+            
+            foreach (var route in bootstrapper.Routes.Values)
+            {
+                var moduleLogger = builder.ApplicationServices
+                    .GetService<ILoggerFactory>()
+                    .CreateLogger(route.Module);
+                
+                routeBuilder.MapRoute(route.Path, 
+                    HandleRequest(route.Path, bootstrapper.Routes, bootstrapper.StatusCodeHandlers, moduleLogger));
             }
 
             return builder.UseRouter(routeBuilder.Build());
         }
 
-        private static RequestDelegate CreateRouteHandler(
-            string path, CarterModule module, IEnumerable<IStatusCodeHandler> statusCodeHandlers, ILogger logger)
+        private static RequestDelegate HandleRequest(
+            string path, Dictionary<(string verb, string path), CarterRoute> routes, 
+            IEnumerable<IStatusCodeHandler> statusCodeHandlers,ILogger logger)
         {
             return async ctx =>
             {
-                if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
+                if (!routes.TryGetValue((ctx.Request.Method, path), out var route))
                 {
                     // if the path was registered but a handler matching the
                     // current method was not found, return MethodNotFound
@@ -70,33 +62,13 @@ namespace Carter
                     return;
                 }
 
-                // begin handling the request
                 if (HttpMethods.IsHead(ctx.Request.Method))
                 {
-                    //Cannot read the default stream once WriteAsync has been called on it
                     ctx.Response.Body = new MemoryStream();
                 }
-
-                // run the module handlers
-                bool shouldContinue = true;
-
-                if (module.Before != null)
-                {
-                    shouldContinue = await module.Before(ctx);
-                }
-
-                if (shouldContinue)
-                {
-                    // run the route handler
-                    logger.LogDebug("Executing module route handler for {Method} /{Path}", ctx.Request.Method, path);
-                    await routeHandler(ctx);
-
-                    // run after handler
-                    if (module.After != null)
-                    {
-                        await module.After(ctx);
-                    }
-                }
+                   
+                logger.LogDebug("Executing module route handler for {Method} /{Path}", ctx.Request.Method, route.Path);
+                await route.Handler(ctx);
 
                 // run status code handler
                 var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(ctx.Response.StatusCode));
@@ -149,66 +121,17 @@ namespace Carter
         /// Adds Carter to the specified <see cref="IServiceCollection"/>.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
-        public static void AddCarter(this IServiceCollection services)
+        /// <param name="configure">Allows <see cref="CarterBootstrapper"/> to be configured.</param>
+        public static void AddCarter(this IServiceCollection services, Action<CarterBootstrapper> configure)
         {
-            var assemblyCatalog = new DependencyContextAssemblyCatalog();
-
-            var assemblies = assemblyCatalog.GetAssemblies();
-
-            CarterDiagnostics diagnostics = new CarterDiagnostics();
-            services.AddSingleton(diagnostics);
-
-            var validators = assemblies.SelectMany(ass => ass.GetTypes())
-                .Where(typeof(IValidator).IsAssignableFrom)
-                .Where(t => !t.GetTypeInfo().IsAbstract);
-
-            foreach (var validator in validators)
+            var bootstrapper = new CarterBootstrapper();
+            configure(bootstrapper);
+            if (!bootstrapper.ResponseNegotiators.Exists(x => x.GetType() != typeof(DefaultJsonResponseNegotiator)))
             {
-                diagnostics.AddValidator(validator);
-                services.AddSingleton(typeof(IValidator), validator);
+                bootstrapper.RegisterResponseNegotiators(new DefaultJsonResponseNegotiator());    
             }
-
-            services.AddSingleton<IValidatorLocator, DefaultValidatorLocator>();
-
+            services.AddSingleton(typeof(CarterBootstrapper), bootstrapper);
             services.AddRouting();
-
-            var modules = assemblies.SelectMany(x => x.GetTypes()
-                .Where(t =>
-                    !t.IsAbstract &&
-                    typeof(CarterModule).IsAssignableFrom(t) &&
-                    t != typeof(CarterModule) &&
-                    t.IsPublic
-                ));
-
-            foreach (var module in modules)
-            {
-                diagnostics.AddModule(module);
-                services.AddScoped(module);
-                services.AddScoped(typeof(CarterModule), module);
-            }
-
-            var schs = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler)));
-            foreach (var sch in schs)
-            {
-                diagnostics.AddStatusCodeHandler(sch);
-                services.AddScoped(typeof(IStatusCodeHandler), sch);
-            }
-
-            var responseNegotiators = assemblies.SelectMany(x => x.GetTypes()
-                .Where(t =>
-                    !t.IsAbstract &&
-                    typeof(IResponseNegotiator).IsAssignableFrom(t) &&
-                    t != typeof(IResponseNegotiator) &&
-                    t != typeof(DefaultJsonResponseNegotiator)
-                ));
-
-            foreach (var negotiatator in responseNegotiators)
-            {
-                diagnostics.AddResponseNegotiator(negotiatator);
-                services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
-            }
-
-            services.AddSingleton<IResponseNegotiator, DefaultJsonResponseNegotiator>();
         }
     }
 }

@@ -23,7 +23,12 @@ namespace Carter.Tests
         public BindTests()
         {
             var server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(); })
+                .ConfigureServices(x =>  x.AddCarter(bootstrapper =>
+                {
+                    bootstrapper
+                        .RegisterModules(new BindModule())
+                        .RegisterValidators(new TestModelValidator());
+                }) )
                 .Configure(x => x.UseCarter())
             );
             this.httpClient = server.CreateClient();
@@ -212,7 +217,7 @@ namespace Carter.Tests
             Assert.Equal("TestModelNoValidator", first.propertyName);
         }
 
-        [Fact]
+        [Fact(Skip = "No valid anymore...")]
         public async Task Should_throw_exception_when_multiple_validators_found()
         {
             var ex = await Record.ExceptionAsync(async () =>
@@ -257,13 +262,13 @@ namespace Carter.Tests
     {
     }
 
-    public class DuplicateTestModelOne : AbstractValidator<DuplicateTestModel>
-    {
-    }
-
-    public class DuplicateTestModelTwo : AbstractValidator<DuplicateTestModel>
-    {
-    }
+    // public class DuplicateTestModelOne : AbstractValidator<DuplicateTestModel>
+    // {
+    // }
+    //
+    // public class DuplicateTestModelTwo : AbstractValidator<DuplicateTestModel>
+    // {
+    // }
 
     public class PathTestModel
     {

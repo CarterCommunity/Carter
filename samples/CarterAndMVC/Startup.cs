@@ -8,7 +8,7 @@ namespace CarterAndMVC
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCarter();
+            services.AddCarter(bootstrapper => bootstrapper.RegisterModules(new HomeModule()));
             services.AddMvcCore();
         }
 

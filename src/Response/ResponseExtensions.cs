@@ -23,7 +23,8 @@ namespace Carter.Response
         /// <returns><see cref="Task"/></returns>
         public static async Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
         {
-            var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
+            var negotiators = response.HttpContext.RequestServices.GetService<CarterBootstrapper>().ResponseNegotiators;
+            
             IResponseNegotiator negotiator = null;
 
             MediaTypeHeaderValue.TryParseList(response.HttpContext.Request.Headers["Accept"], out var accept);
@@ -58,7 +59,7 @@ namespace Carter.Response
         /// <returns><see cref="Task"/></returns>
         public static async Task AsJson(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
         {
-            var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
+            var negotiators = response.HttpContext.RequestServices.GetService<CarterBootstrapper>().ResponseNegotiators;
 
             var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
 
