@@ -23,15 +23,14 @@ namespace Carter
         {
             var diagnostics = builder.ApplicationServices.GetService<CarterDiagnostics>();
 
-            var logger = builder.ApplicationServices
-                .GetService<ILoggerFactory>()
-                .CreateLogger(typeof(CarterDiagnostics));
+            var loggerFactory = builder.ApplicationServices.GetService<ILoggerFactory>();        
+            var logger = loggerFactory.CreateLogger(typeof(CarterDiagnostics));
             
             diagnostics.LogDiscoveredCarterTypes(logger);
 
-            ApplyGlobalBeforeHook(builder, options);
+            ApplyGlobalBeforeHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalBeforeHook"));
 
-            ApplyGlobalAfterHook(builder, options);
+            ApplyGlobalAfterHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalAfterHook"));
 
             var routeBuilder = new RouteBuilder(builder);
 
@@ -115,14 +114,12 @@ namespace Carter
             };
         }
 
-        private static void ApplyGlobalAfterHook(IApplicationBuilder builder, CarterOptions options)
+        private static void ApplyGlobalAfterHook(IApplicationBuilder builder, CarterOptions options, ILogger logger)
         {
             if (options?.After != null)
             {
                 builder.Use(async (ctx, next) =>
                 {
-                    var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
-                    var logger = loggerFactory.CreateLogger("Carter.GlobalAfterHook");
                     await next();
                     logger.LogDebug("Executing global after hook");
                     await options.After(ctx);
@@ -130,14 +127,12 @@ namespace Carter
             }
         }
 
-        private static void ApplyGlobalBeforeHook(IApplicationBuilder builder, CarterOptions options)
+        private static void ApplyGlobalBeforeHook(IApplicationBuilder builder, CarterOptions options, ILogger logger)
         {
             if (options?.Before != null)
             {
                 builder.Use(async (ctx, next) =>
                 {
-                    var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
-                    var logger = loggerFactory.CreateLogger("Carter.GlobalBeforeHook");
                     logger.LogDebug("Executing global before hook");
 
                     var carryOn = await options.Before(ctx);
