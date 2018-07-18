@@ -104,39 +104,31 @@ namespace Carter.Tests
     {
         public bool CanHandle(MediaTypeHeaderValue accept) => accept.MediaType.ToString().IndexOf("foo/bar", StringComparison.OrdinalIgnoreCase) >= 0;
 
-        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            await res.WriteAsync("FOOBAR", cancellationToken);
-        }
+        public Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken)) 
+            => res.WriteAsync("FOOBAR", cancellationToken);
     }
 
     internal class TestHtmlResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept) => accept.MediaType.ToString().IndexOf("text/html", StringComparison.OrdinalIgnoreCase) >= 0;
 
-        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            await res.WriteAsync("HTML Response", cancellationToken);
-        }
+        public Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken)) 
+            => res.WriteAsync("HTML Response", cancellationToken);
     }
 
     internal class TestXmlResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept) => accept.MediaType.ToString().IndexOf("application/xml", StringComparison.OrdinalIgnoreCase) >= 0;
 
-        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            await res.WriteAsync("XML Response", cancellationToken);
-        }
+        public Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken)) 
+            => res.WriteAsync("XML Response", cancellationToken);
     }
     
     internal class TestJsonResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept) => accept.MediaType.ToString().IndexOf("application/vnd.badger+json", StringComparison.OrdinalIgnoreCase) >= 0;
 
-        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            await res.WriteAsync("Non default json Response", cancellationToken);
-        }
+        public Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken = default(CancellationToken)) 
+            => res.WriteAsync("Non default json Response", cancellationToken);
     }
 }

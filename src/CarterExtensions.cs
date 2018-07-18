@@ -126,7 +126,7 @@ namespace Carter
         {
             var bootstrapper = new CarterBootstrapper();
             configure(bootstrapper);
-            if (!bootstrapper.ResponseNegotiators.Exists(x => x.GetType() != typeof(DefaultJsonResponseNegotiator)))
+            if (!bootstrapper.ResponseNegotiators.Exists(x => x.GetType() == typeof(DefaultJsonResponseNegotiator)))
             {
                 bootstrapper.RegisterResponseNegotiators(new DefaultJsonResponseNegotiator());    
             }
