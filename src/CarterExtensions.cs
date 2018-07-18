@@ -1,6 +1,6 @@
 namespace Carter
 {
-    using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -23,7 +23,10 @@ namespace Carter
         {
             var diagnostics = builder.ApplicationServices.GetService<CarterDiagnostics>();
 
-            var logger = builder.ApplicationServices.GetService<ILoggerFactory>().CreateLogger(typeof(CarterDiagnostics));
+            var logger = builder.ApplicationServices
+                .GetService<ILoggerFactory>()
+                .CreateLogger(typeof(CarterDiagnostics));
+            
             diagnostics.LogDiscoveredCarterTypes(logger);
 
             ApplyGlobalBeforeHook(builder, options);
@@ -35,16 +38,19 @@ namespace Carter
             //Create a "startup scope" to resolve modules from
             using (var scope = builder.ApplicationServices.CreateScope())
             {
+                var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>();
+
                 //Get all instances of CarterModule to fetch and register declared routes
                 foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
                 {
-                    var moduleType = module.GetType();
-
+                    var moduleLogger = scope.ServiceProvider
+                        .GetService<ILoggerFactory>()
+                        .CreateLogger(module.GetType());
+                    
                     var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
-
                     foreach (var path in distinctPaths)
                     {
-                        routeBuilder.MapRoute(path, CreateRouteHandler(path, moduleType));
+                        routeBuilder.MapRoute(path, CreateRouteHandler(path, module, statusCodeHandlers, moduleLogger));
                     }
                 }
             }
@@ -52,14 +58,11 @@ namespace Carter
             return builder.UseRouter(routeBuilder.Build());
         }
 
-        private static RequestDelegate CreateRouteHandler(string path, Type moduleType)
+        private static RequestDelegate CreateRouteHandler(
+            string path, CarterModule module, IEnumerable<IStatusCodeHandler> statusCodeHandlers, ILogger logger)
         {
             return async ctx =>
             {
-                var module = ctx.RequestServices.GetRequiredService(moduleType) as CarterModule;
-                var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
-                var logger = loggerFactory.CreateLogger(moduleType);
-
                 if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
                 {
                     // if the path was registered but a handler matching the
@@ -97,9 +100,7 @@ namespace Carter
                 }
 
                 // run status code handler
-                var statusCodeHandlers = ctx.RequestServices.GetServices<IStatusCodeHandler>();
                 var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(ctx.Response.StatusCode));
-
                 if (scHandler != null)
                 {
                     await scHandler.Handle(ctx);
