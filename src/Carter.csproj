@@ -14,10 +14,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="7.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
   </ItemGroup>
 </Project>

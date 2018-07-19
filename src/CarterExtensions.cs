@@ -4,6 +4,8 @@ namespace Carter
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
+    using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
@@ -12,6 +14,66 @@ namespace Carter
 
     public static class CarterExtensions
     {
+        /// <summary>
+        /// Adds Carter to the specified <see cref="IServiceCollection"/>.
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
+        /// <param name="configure">Allows <see cref="CarterBootstrapper"/> to be configured.</param>
+        public static void AddCarter(this IServiceCollection services, Action<CarterBootstrapper> configure)
+        {
+            // hack to test without changing all tests
+            // AddCarterScoped(services);
+            // return;
+            
+            var bootstrapper = new CarterBootstrapper();
+            configure(bootstrapper);
+            if (bootstrapper.ResponseNegotiators.All(x => x.GetType() != typeof(DefaultJsonResponseNegotiator)))
+            {
+                bootstrapper.RegisterResponseNegotiators(new DefaultJsonResponseNegotiator());    
+            }            
+            services.AddSingleton<IValidatorLocator>(new CarterValidatorLocator(bootstrapper.Validators));
+            services.AddSingleton<IEnumerable<IResponseNegotiator>>(bootstrapper.ResponseNegotiators);
+            services.AddSingleton<ICarterBootstrapper>(bootstrapper);
+            services.AddRouting();
+        }
+
+        /// <summary>
+        /// Adds Carter to the specified <see cref="IServiceCollection"/>.
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
+        /// <param name="configure">Allows <see cref="CarterBootstrapper"/> to be configured.</param>
+        public static void AddCarterScoped(this IServiceCollection services)
+        {
+            var scanner = new CarterDependencyScanner();
+
+            foreach (var validator in scanner.ScanValidators())
+            {
+                services.AddSingleton(typeof(IValidator), validator);
+            }
+
+            services.AddSingleton<IValidatorLocator, CarterValidatorLocator>();
+
+            services.AddRouting();
+
+            foreach (var module in scanner.ScanModules())
+            {
+                services.AddScoped(module);
+                services.AddScoped(typeof(CarterModule), module);
+            }
+
+            foreach (var statusCodeHandler in scanner.ScanStatusCodeHandlers())
+            {
+                services.AddScoped(typeof(IStatusCodeHandler), statusCodeHandler);
+            }
+
+            foreach (var negotiator in scanner.ScanResponseNegotiators())
+            {
+                services.AddSingleton(typeof(IResponseNegotiator), negotiator);
+            }
+
+            services.AddSingleton<IResponseNegotiator, DefaultJsonResponseNegotiator>();
+        }
+    
         /// <summary>
         /// Adds Carter to the specified <see cref="IApplicationBuilder"/>.
         /// </summary>
@@ -25,36 +87,60 @@ namespace Carter
             ApplyGlobalBeforeHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalBeforeHook"));
             ApplyGlobalAfterHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalAfterHook"));
 
-            var bootstrapper = builder.ApplicationServices.GetService<CarterBootstrapper>();
-            if (bootstrapper == null)
-            {
-                throw new ApplicationException("Carter bootstrapper not found. Please configure Carter dependencies.");
-            }
-
-            CarterDiagnostics.LogDiscoveredCarterTypes(bootstrapper, loggerFactory.CreateLogger("CarterDiagnostics"));
-            
             var routeBuilder = new RouteBuilder(builder);
-            
-            foreach (var route in bootstrapper.Routes.Values)
+            var bootstrapper = builder.ApplicationServices.GetService<ICarterBootstrapper>();
+            if (bootstrapper != null)
             {
-                var moduleLogger = builder.ApplicationServices
-                    .GetService<ILoggerFactory>()
-                    .CreateLogger(route.Module);
+                CarterDiagnostics.LogDiscoveredCarterTypes(
+                    bootstrapper, loggerFactory.CreateLogger("CarterDiagnostics"));
+
+                foreach (var route in bootstrapper.Routes.Values)
+                {
+                    var moduleLogger = builder.ApplicationServices
+                        .GetService<ILoggerFactory>()
+                        .CreateLogger(route.Module);
                 
-                routeBuilder.MapRoute(route.Path, 
-                    HandleRequest(route.Path, bootstrapper.Routes, bootstrapper.StatusCodeHandlers, moduleLogger));
+                    routeBuilder.MapRoute(route.Path, 
+                        HandleRequest(route.Path, bootstrapper.Routes, bootstrapper.StatusCodeHandlers, moduleLogger));
+                }
+            }
+            else
+            {
+                CarterDiagnostics.LogDiscoveredCarterTypes(
+                    builder.ApplicationServices, loggerFactory.CreateLogger("CarterDiagnostics"));
+
+                // create a "startup scope" to resolve modules from
+                using (var scope = builder.ApplicationServices.CreateScope())
+                {
+                    var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>();
+
+                    // get all instances of CarterModule to fetch and register declared routes
+                    foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
+                    {
+                        var moduleLogger = scope.ServiceProvider
+                            .GetService<ILoggerFactory>()
+                            .CreateLogger(module.GetType());
+                    
+                        var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
+                        foreach (var path in distinctPaths)
+                        {
+                            routeBuilder.MapRoute(path, 
+                                HandleRequest(path, module.Routes, statusCodeHandlers, moduleLogger));
+                        }
+                    }
+                }
             }
 
             return builder.UseRouter(routeBuilder.Build());
         }
 
         private static RequestDelegate HandleRequest(
-            string path, Dictionary<(string verb, string path), CarterRoute> routes, 
+            string path, IReadOnlyDictionary<(string verb, string path), CarterRoute> routes, 
             IEnumerable<IStatusCodeHandler> statusCodeHandlers,ILogger logger)
         {
             return async ctx =>
             {
-                if (!routes.TryGetValue((ctx.Request.Method, path), out var route))
+                if (!routes.TryGetValue((ctx.Request.Method, path), out var carterRoute))
                 {
                     // if the path was registered but a handler matching the
                     // current method was not found, return MethodNotFound
@@ -64,13 +150,13 @@ namespace Carter
 
                 if (HttpMethods.IsHead(ctx.Request.Method))
                 {
+                    // cannot read the default stream once WriteAsync has been called on it
                     ctx.Response.Body = new MemoryStream();
                 }
                    
-                logger.LogDebug("Executing module route handler for {Method} /{Path}", ctx.Request.Method, route.Path);
-                await route.Handler(ctx);
+                logger.LogDebug("Executing module route handler for {Method} /{Path}", ctx.Request.Method, carterRoute.Path);
+                await carterRoute.Handler(ctx);
 
-                // run status code handler
                 var scHandler = statusCodeHandlers.FirstOrDefault(x => x.CanHandle(ctx.Response.StatusCode));
                 if (scHandler != null)
                 {
@@ -115,23 +201,6 @@ namespace Carter
                     }
                 });
             }
-        }
-
-        /// <summary>
-        /// Adds Carter to the specified <see cref="IServiceCollection"/>.
-        /// </summary>
-        /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
-        /// <param name="configure">Allows <see cref="CarterBootstrapper"/> to be configured.</param>
-        public static void AddCarter(this IServiceCollection services, Action<CarterBootstrapper> configure)
-        {
-            var bootstrapper = new CarterBootstrapper();
-            configure(bootstrapper);
-            if (!bootstrapper.ResponseNegotiators.Exists(x => x.GetType() == typeof(DefaultJsonResponseNegotiator)))
-            {
-                bootstrapper.RegisterResponseNegotiators(new DefaultJsonResponseNegotiator());    
-            }
-            services.AddSingleton(typeof(CarterBootstrapper), bootstrapper);
-            services.AddRouting();
         }
     }
 }

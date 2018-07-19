@@ -17,7 +17,7 @@ namespace Carter.ModelBinding
         /// <returns><see cref="ValidationResult"/></returns>
         public static ValidationResult Validate<T>(this HttpRequest request, T model)
         {
-            var validator = request.HttpContext.RequestServices.GetService<CarterBootstrapper>().GetValidator<T>();
+            var validator = request.HttpContext.RequestServices.GetService<IValidatorLocator>().GetValidator<T>();
 
             return validator == null
                 ? new ValidationResult(new[] { new ValidationFailure(typeof(T).Name, "No validator found") })

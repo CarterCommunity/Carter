@@ -23,7 +23,7 @@ namespace Carter.Response
         /// <returns><see cref="Task"/></returns>
         public static async Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
         {
-            var negotiators = response.HttpContext.RequestServices.GetService<CarterBootstrapper>().ResponseNegotiators;
+            var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
             
             IResponseNegotiator negotiator = null;
 
@@ -59,7 +59,7 @@ namespace Carter.Response
         /// <returns><see cref="Task"/></returns>
         public static async Task AsJson(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
         {
-            var negotiators = response.HttpContext.RequestServices.GetService<CarterBootstrapper>().ResponseNegotiators;
+            var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
 
             var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
 

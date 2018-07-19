@@ -3,7 +3,7 @@ namespace Carter
     using FluentValidation;
 
     /// <summary>
-    /// An interface to provide functionaity on locating a <see cref="IValidator"/>
+    /// An interface to provide functionality on locating a <see cref="IValidator"/>
     /// </summary>
     public interface IValidatorLocator
     {

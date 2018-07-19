@@ -10,9 +10,8 @@ namespace Carter
     public class DependencyContextAssemblyCatalog
     {
         private static readonly Assembly CarterAssembly = typeof(CarterExtensions).Assembly;
-
         private static readonly Assembly FluentValidationAssembly = typeof(IValidator).Assembly;
-
+        
         private readonly DependencyContext dependencyContext;
 
         /// <summary>
@@ -28,10 +27,8 @@ namespace Carter
         /// Initializes a new instance of the <see cref="DependencyContextAssemblyCatalog"/> class,
         /// using <paramref name="entryAssembly"/>.
         /// </summary>
-        public DependencyContextAssemblyCatalog(Assembly entryAssembly)
-        {
-            this.dependencyContext = DependencyContext.Load(entryAssembly);
-        }
+        public DependencyContextAssemblyCatalog(Assembly entryAssembly) 
+            => this.dependencyContext = DependencyContext.Load(entryAssembly);
 
         /// <summary>
         /// Gets all <see cref="Assembly"/> instances in the catalog.
@@ -70,14 +67,10 @@ namespace Carter
             }
         }
 
-        private static bool IsReferencingCarter(Library library)
-        {
-            return library.Dependencies.Any(dependency => dependency.Name.Equals(CarterAssembly.GetName().Name));
-        }
+        private static bool IsReferencingCarter(Library library) 
+            => library.Dependencies.Any(dependency => dependency.Name.Equals(CarterAssembly.GetName().Name));
 
-        private static bool IsReferencingFluentValidation(Library library)
-        {
-            return library.Dependencies.Any(dependency => dependency.Name.Equals(FluentValidationAssembly.GetName().Name));
-        }
+        private static bool IsReferencingFluentValidation(Library library) 
+            => library.Dependencies.Any(dependency => dependency.Name.Equals(FluentValidationAssembly.GetName().Name));
     }
 }

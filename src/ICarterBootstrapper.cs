@@ -8,13 +8,13 @@ namespace Carter
 
     public interface ICarterBootstrapper
     {
-        Dictionary<(string verb, string path), CarterRoute> Routes { get; }
+        IReadOnlyDictionary<(string verb, string path), CarterRoute> Routes { get; }
 
-        List<IStatusCodeHandler> StatusCodeHandlers { get; }
+        IReadOnlyList<IStatusCodeHandler> StatusCodeHandlers { get; }
 
-        Dictionary<Type, IValidator> Validators { get; }
+        IReadOnlyList<IValidator> Validators { get; }
 
-        List<IResponseNegotiator> ResponseNegotiators { get; }
+        IReadOnlyList<IResponseNegotiator> ResponseNegotiators { get; }
 
         /// <summary>
         /// A global before handler which is invoked before all routes

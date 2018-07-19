@@ -29,6 +29,8 @@ namespace CarterSample
                     .RegisterResponseNegotiators(new DefaultJsonResponseNegotiator())
                     .RegisterStatusCodeHandlers(new ConflictStatusCodeHandler())
             );
+            
+            services.AddSingleton<IActorProvider, ActorProvider>(); // only required to test carted scoped
         }
 
         public void Configure(IApplicationBuilder app, IConfiguration config)

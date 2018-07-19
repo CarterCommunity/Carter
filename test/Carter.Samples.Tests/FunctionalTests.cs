@@ -20,17 +20,15 @@ namespace Carter.Samples.Tests
 
     public class FunctionalTests
     {
-        private TestServer server;
-
         private HttpClient client;
 
         public FunctionalTests()
         {
-            this.server = new TestServer(WebHost.CreateDefaultBuilder()
+            var server = new TestServer(WebHost.CreateDefaultBuilder()
                 .UseStartup<Startup>()
             );
 
-            this.client = this.server.CreateClient();
+            this.client = server.CreateClient();
         }
 
         [Fact]
