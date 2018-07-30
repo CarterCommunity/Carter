@@ -59,6 +59,8 @@ namespace Carter
                 var module = ctx.RequestServices.GetRequiredService(moduleType) as CarterModule;
                 var loggerFactory = ctx.RequestServices.GetService<ILoggerFactory>();
                 var logger = loggerFactory.CreateLogger(moduleType);
+                
+                ctx.Request.HttpContext.Items.Add("ModuleType", module.GetType());
 
                 if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
                 {
