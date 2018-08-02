@@ -169,7 +169,7 @@ namespace Carter
             foreach (var validator in validators)
             {
                 diagnostics.AddValidator(validator);
-                services.AddSingleton(typeof(IValidator), validator);
+                services.AddScoped(typeof(IValidator), validator);
             }
 
             services.AddSingleton<IValidatorLocator, DefaultValidatorLocator>();
