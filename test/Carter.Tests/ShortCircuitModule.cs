@@ -6,7 +6,7 @@ namespace Carter.Tests
     {
         public ShortCircuitModule()
         {
-            this.Before = async ctx =>
+            this.Before += async ctx =>
             {
                 await ctx.Response.WriteAsync("NoAccessBefore");
                 return false;
