@@ -4,6 +4,7 @@ namespace Carter
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
@@ -80,7 +81,15 @@ namespace Carter
 
                 if (module.Before != null)
                 {
-                    shouldContinue = await module.Before(ctx);
+                    foreach (var beforeDelegate in module.Before.GetInvocationList())
+                    {
+                        var beforeTask = (Task<bool>)beforeDelegate.DynamicInvoke(ctx);
+                        shouldContinue = await beforeTask;
+                        if (!shouldContinue)
+                        {
+                            break;
+                        }
+                    }
                 }
 
                 if (shouldContinue)

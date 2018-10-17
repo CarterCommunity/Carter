@@ -1,8 +1,12 @@
 ﻿namespace Carter.Tests
 {
+    using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Carter.Request;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
     using Microsoft.AspNetCore.TestHost;
     using Xunit;
 
@@ -97,6 +101,22 @@
             var response = await this.httpClient.GetAsync("/noaccess");
             var body = await response.Content.ReadAsStringAsync();
             Assert.Equal("NoAccessBefore", body);
+        }
+
+        [Fact]
+        public async Task Should_handle_multiple_short_circuit_response_in_before_hook()
+        {
+            var response = await this.httpClient.GetAsync("/multipleshortcircuits");
+            var body = await response.Content.ReadAsStringAsync();
+            Assert.Equal("FirstBeforeSecondBeforeMultiple", body);
+        }
+
+        [Fact]
+        public async Task Should_handle_abort_short_circuit_if_one_returns_false()
+        {
+            var response = await this.httpClient.GetAsync("/multipleonoff");
+            var body = await response.Content.ReadAsStringAsync();
+            Assert.Equal("OffBefore", body);
         }
 
         [Fact]

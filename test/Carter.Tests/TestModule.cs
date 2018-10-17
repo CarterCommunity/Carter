@@ -10,7 +10,7 @@ namespace Carter.Tests
     {
         public TestModule()
         {
-            this.Before = async ctx =>
+            this.Before += async ctx =>
             {
                 await ctx.Response.WriteAsync("Before");
                 return true;
