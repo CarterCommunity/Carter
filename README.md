@@ -19,7 +19,7 @@ Other extensions include:
 * Routes to use in common ASP.Net Core middleware eg. `app.UseExceptionHandler("/errorhandler");`.
 * `IStatusCodeHandler`s are also an option as the ASP.Net Core `UseStatusCodePages` middleware is not elegant enough IMO. `IStatusCodeHandler`s allow you to define what happens when one of your routes returns a specific status code.  An example usage is shown in the sample.
 * `IResponseNegotiator`s allow you to define how the response should look on a certain Accept header.  Handling JSON is built in and the default response but implementing an interface allows the user to choose how they want to represent resources.
-* All interface implementations are registered into ASP.Net Core DI automatically, implement the interface and off you go.
+* All interface implementations for Carter components are registered into ASP.Net Core DI automatically, implement the interface and off you go.
 * Supports two different routing APIs.
 
   (i)
