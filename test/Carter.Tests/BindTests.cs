@@ -303,7 +303,7 @@ namespace Carter.Tests
                 var model = req.BindAndValidate<TestModel>();
                 if (!model.ValidationResult.IsValid)
                 {
-                    await res.Negotiate(model.ValidationResult.Errors);
+                    await res.Negotiate(model.ValidationResult.GetFormattedErrors());
                     return;
                 }
 
@@ -315,7 +315,7 @@ namespace Carter.Tests
                 var model = req.BindAndValidate<TestModelNoValidator>();
                 if (!model.ValidationResult.IsValid)
                 {
-                    await res.Negotiate(model.ValidationResult.Errors.Select(x => new { x.PropertyName, x.ErrorMessage }));
+                    await res.Negotiate(model.ValidationResult.GetFormattedErrors());
                     return;
                 }
 
@@ -327,7 +327,7 @@ namespace Carter.Tests
                 var model = req.BindAndValidate<DuplicateTestModel>();
                 if (!model.ValidationResult.IsValid)
                 {
-                    await res.Negotiate(model.ValidationResult.Errors.Select(x => new { x.PropertyName, x.ErrorMessage }));
+                    await res.Negotiate(model.ValidationResult.GetFormattedErrors());
                     return;
                 }
 
