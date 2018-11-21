@@ -148,6 +148,24 @@ namespace Carter.Tests
         }
 
         [Fact]
+        public async Task Should_return_default_value_of_property_if_property_not_found_on_binding_form()
+        {
+            var res = await this.httpClient.PostAsync("/bind",
+                new FormUrlEncodedContent(
+                    new[]
+                    {
+                        new KeyValuePair<string, string>("\"MyIntProperty\"", "1"),
+                        new KeyValuePair<string, string>("MyStringProperty", "Vincent Vega")
+                    }));
+
+            var body = await res.Content.ReadAsStringAsync();
+            var model = JsonConvert.DeserializeObject<TestModel>(body);
+
+            Assert.Equal(0, model.MyIntProperty);
+            Assert.Equal("Vincent Vega", model.MyStringProperty);
+        }
+
+        [Fact]
         public async Task Should_return_instance_of_T_on_successful_validation()
         {
             var res = await this.httpClient.PostAsync("/bindandvalidate", new StringContent("{\"MyIntProperty\":\"911\",\"MyStringProperty\":\"Vincent Vega\"}", Encoding.UTF8, "application/json"));
