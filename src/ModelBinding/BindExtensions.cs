@@ -46,8 +46,13 @@ namespace Carter.ModelBinding
                 var res = JObject.FromObject(request.Form.ToDictionary(key => key.Key, val =>
                 {
                     var type = typeof(T);
-                    var propertyType = type.GetProperty(val.Key).PropertyType;
-
+                    var propertyType = type.GetProperty(val.Key)?.PropertyType;
+                    
+                    if (propertyType == null)
+                    {
+                        return null;
+                    }
+                    
                     if (propertyType.IsArray() || propertyType.IsCollection() || propertyType.IsEnumerable())
                     {
                         var colType = propertyType.GetElementType();
