@@ -162,9 +162,10 @@ namespace Carter
         /// Adds Carter to the specified <see cref="IServiceCollection"/>.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
-        public static void AddCarter(this IServiceCollection services)
+        /// <param name="assemblyCatalog">Optional <see cref="DependencyContextAssemblyCatalog"/> containing assemblies to add to the services collection. If not provided, the default catalog of assemblies is added, which includes Assembly.GetEntryAssembly.</param>
+        public static void AddCarter(this IServiceCollection services, DependencyContextAssemblyCatalog assemblyCatalog = null)
         {
-            var assemblyCatalog = new DependencyContextAssemblyCatalog();
+            assemblyCatalog = assemblyCatalog ?? new DependencyContextAssemblyCatalog();
 
             var assemblies = assemblyCatalog.GetAssemblies();
 
