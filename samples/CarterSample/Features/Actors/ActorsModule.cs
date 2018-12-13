@@ -1,6 +1,7 @@
 namespace CarterSample.Features.Actors
 {
     using System.IO;
+    using System.Threading.Tasks;
     using Carter;
     using Carter.ModelBinding;
     using Carter.Request;
@@ -10,19 +11,19 @@ namespace CarterSample.Features.Actors
     {
         public ActorsModule(IActorProvider actorProvider)
         {
-            this.Get("/actors", async (req, res, routeData) =>
+            this.Get<GetActors>("/actors", async (req, res, routeData) =>
             {
                 var people = actorProvider.Get();
                 await res.AsJson(people);
             });
 
-            this.Get("/actors/{id:int}", async (req, res, routeData) =>
+            this.Get<GetActorById>("/actors/{id:int}", async (req, res, routeData) =>
             {
                 var person = actorProvider.Get(routeData.As<int>("id"));
                 await res.Negotiate(person);
             });
 
-            this.Put("/actors/{id:int}", async (req, res, routeData) =>
+            this.Put<UpdateActor>("/actors/{id:int}", async (req, res, routeData) =>
             {
                 var result = req.BindAndValidate<Actor>();
 
@@ -38,7 +39,7 @@ namespace CarterSample.Features.Actors
                 res.StatusCode = 204;
             });
 
-            this.Post("/actors", async (req, res, routeData) =>
+            this.Post<AddActor>("/actors", async (req, res, routeData) =>
             {
                 var result = req.BindAndValidate<Actor>();
 
@@ -53,6 +54,13 @@ namespace CarterSample.Features.Actors
 
                 res.StatusCode = 201;
                 await res.Negotiate(result.Data);
+            });
+
+            this.Delete<DeleteActor>("/actors/{id:int}", (req, res, routeData) =>
+            {
+                actorProvider.Delete(routeData.As<int>("id"));
+                res.StatusCode = 204;
+                return Task.CompletedTask;
             });
 
             this.Get("/actors/download", async (request, response, routeData) =>

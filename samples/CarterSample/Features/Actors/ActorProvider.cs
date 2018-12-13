@@ -16,5 +16,10 @@ namespace CarterSample.Features.Actors
         {
             return database.FirstOrDefault(x => x.Id == id);
         }
+
+        public void Delete(int id)
+        {
+           
+        }
     }
 }

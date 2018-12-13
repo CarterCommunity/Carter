@@ -11,6 +11,7 @@ namespace Carter
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using static OpenApi.CarterOpenApi;
 
     public static class CarterExtensions
     {
@@ -35,6 +36,8 @@ namespace Carter
 
             var routeBuilder = new RouteBuilder(builder);
 
+            var routeMetaData = new Dictionary<(string verb, string path), RouteMetaData>();
+
             //Create a "startup scope" to resolve modules from
             using (var scope = builder.ApplicationServices.CreateScope())
             {
@@ -47,6 +50,8 @@ namespace Carter
                         .GetService<ILoggerFactory>()
                         .CreateLogger(module.GetType());
                     
+                    routeMetaData = routeMetaData.Concat(module.RouteMetaData).ToDictionary(x => x.Key, x => x.Value);
+
                     var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
                     foreach (var path in distinctPaths)
                     {
@@ -54,6 +59,8 @@ namespace Carter
                     }
                 }
             }
+
+            routeBuilder.MapRoute("openapi", BuildOpenApiResponse(options, routeMetaData));
 
             return builder.UseRouter(routeBuilder.Build());
         }
