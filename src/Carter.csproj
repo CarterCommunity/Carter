@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <Version>3.10.0</Version>
-        <VersionPrefix>3.10.0</VersionPrefix>
+        <Version>3.11.0</Version>
+        <VersionPrefix>3.11.0</VersionPrefix>
         <Authors>Jonathan Channon</Authors>
         <Description>Carter is a library that allows Nancy-esque routing for use with ASP.Net Core.</Description>
         <PackageTags>asp.net core;nancy;.net core;routing;carter</PackageTags>
