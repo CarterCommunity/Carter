@@ -3,6 +3,7 @@ namespace Carter.OpenApi
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Carter.Request;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing.Template;
@@ -15,7 +16,7 @@ namespace Carter.OpenApi
     {
         public static RequestDelegate BuildOpenApiResponse(CarterOptions options, Dictionary<(string verb, string path), RouteMetaData> metaDatas)
         {
-            return async context =>
+            return context =>
             {
                 var document = new OpenApiDocument
                 {
@@ -62,6 +63,7 @@ namespace Carter.OpenApi
 
                 context.Response.ContentType = "application/json; charset=utf-8";
                 document.SerializeAsJson(context.Response.Body, OpenApiSpecVersion.OpenApi3_0);
+                return Task.CompletedTask;
             };
         }
 
