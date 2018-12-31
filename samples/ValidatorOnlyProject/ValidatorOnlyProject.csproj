@@ -3,6 +3,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="7.2.0" />
+    <PackageReference Include="FluentValidation" Version="8.1.2" />
   </ItemGroup>
 </Project>
