@@ -5,6 +5,9 @@ namespace CarterSample.Features.Actors
     public interface IActorProvider
     {
         IEnumerable<Actor> Get();
+
         Actor Get(int id);
+
+        void Delete(int id);
     }
 }

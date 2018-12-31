@@ -14,6 +14,8 @@ namespace Carter.Samples.Tests
     using CarterSample.Features.FunctionalProgramming.UpdateDirector;
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Hosting.Server.Features;
+    using Microsoft.AspNetCore.Http.Features;
     using Microsoft.AspNetCore.TestHost;
     using Newtonsoft.Json;
     using Xunit;
@@ -26,8 +28,10 @@ namespace Carter.Samples.Tests
 
         public FunctionalTests()
         {
+            var featureCollection = new FeatureCollection();
+            featureCollection.Set<IServerAddressesFeature>(new ServerAddressesFeature());
             this.server = new TestServer(WebHost.CreateDefaultBuilder()
-                .UseStartup<Startup>()
+                    .UseStartup<Startup>(), featureCollection
             );
 
             this.client = this.server.CreateClient();
