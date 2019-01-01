@@ -32,7 +32,7 @@ namespace Carter.Tests
             this.ConfigureServer();
             var response = await this.httpClient.GetAsync("/");
             var body = await response.Content.ReadAsStringAsync();
-            Assert.True(body.Contains("GlobalAfter"));
+            Assert.Contains("GlobalAfter", body);
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace Carter.Tests
             this.ConfigureServer();
             var response = await this.httpClient.GetAsync("/");
             var body = await response.Content.ReadAsStringAsync();
-            Assert.True(body.Contains("GlobalBefore"));
+            Assert.Contains("GlobalBefore", body);
         }
 
         [Fact]

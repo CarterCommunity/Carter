@@ -35,7 +35,7 @@
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(200, (int)response.StatusCode);
-            Assert.True(body.Contains("Managed to parse multiple ints 2"));
+            Assert.Contains("Managed to parse multiple ints 2", body);
         }
 
         [Theory]
@@ -48,7 +48,7 @@
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(200, (int)response.StatusCode);
-            Assert.True(body.Contains("Managed to parse multiple Nullable<int>s 2"));
+            Assert.Contains("Managed to parse multiple Nullable<int>s 2", body);
         }
 
         [Theory]
@@ -84,7 +84,7 @@
         {
             var response = await this.httpClient.GetAsync("/");
             var body = await response.Content.ReadAsStringAsync();
-            Assert.True(body.Contains("After"));
+            Assert.Contains("After", body);
         }
 
         [Fact]
@@ -92,7 +92,7 @@
         {
             var response = await this.httpClient.GetAsync("/");
             var body = await response.Content.ReadAsStringAsync();
-            Assert.True(body.Contains("Before"));
+            Assert.Contains("Before", body);
         }
 
         [Fact]
@@ -189,7 +189,7 @@
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(200, (int)response.StatusCode);
-            Assert.True(body.Contains("Managed to parse default int 69"));
+            Assert.Contains("Managed to parse default int 69", body);
         }
 
         [Fact]
@@ -201,7 +201,7 @@
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(200, (int)response.StatusCode);
-            Assert.True(body.Contains($"Managed to parse an int {idToTest}"));
+            Assert.Contains($"Managed to parse an int {idToTest}", body);
         }
 
         [Fact]
@@ -213,7 +213,7 @@
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(200, (int)response.StatusCode);
-            Assert.True(body.Contains($"Managed to parse a Nullable<int> {idToTest}"));
+            Assert.Contains($"Managed to parse a Nullable<int> {idToTest}", body);
         }
 
         [Fact]
@@ -288,7 +288,7 @@
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(200, (int)response.StatusCode);
-            Assert.True(body.Contains(content));
+            Assert.Contains(content, body);
         }
 
         [Fact]
@@ -301,7 +301,7 @@
             var body = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(200, (int)response.StatusCode);
-            Assert.True(body.Contains(content));
+            Assert.Contains(content, body);
         }
 
         [Fact]
