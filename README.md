@@ -38,6 +38,41 @@ Other extensions include:
       await ctx.Response.Negotiate(person);
   });
   ```
+  
+### OpenApi
+
+Carter supports OpenApi out of the box.  Simply call `/openapi` from your API and you will get a OpenApi json response.
+
+To configure your routes for OpenApi simply supply the meta data class on your routes for example:
+
+```csharp
+this.Get<GetActors>("/actors", async (req, res, routeData) =>
+{
+    var people = actorProvider.Get();
+    await res.AsJson(people);
+});
+```
+
+The meta data class is the way to document your routes and looks something like this:
+
+```csharp
+public class GetActors : RouteMetaData
+{
+    public override string Description { get; } = "Returns a list of actors";
+
+    public override RouteMetaDataResponse[] Responses { get; } =
+    {
+        new RouteMetaDataResponse
+        {
+            Code = 200,
+            Description = $"A list of {nameof(Actor)}s",
+            Response = typeof(IEnumerable<Actor>)
+        }
+    };
+
+    public override string Tag { get; } = "Actors";
+}
+```
 
 ### Where does the name "Carter" come from?
 
