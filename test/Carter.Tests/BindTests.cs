@@ -225,7 +225,7 @@ namespace Carter.Tests
             var body = await res.Content.ReadAsStringAsync();
             var model = JsonConvert.DeserializeObject<List<ExpandoObject>>(body);
             dynamic first = model.First();
-            Assert.Equal(1, model.Count);
+            Assert.Single(model);
             Assert.Equal("No validator found", first.errorMessage);
             Assert.Equal("TestModelNoValidator", first.propertyName);
         }
