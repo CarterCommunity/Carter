@@ -196,7 +196,7 @@ namespace Carter.OpenApi
                     requestType = keyValuePair.Value.Request.GetElementType();
                     if (requestType == null)
                     {
-                        requestType = keyValuePair.Value.Request.GetGenericArguments().FirstOrDefault();
+                        requestType = keyValuePair.Value.Request.GetGenericArguments().First();
                     }
                 }
                 else
