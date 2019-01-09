@@ -8,7 +8,7 @@
     public static class StreamExtensions
     {
         /// <summary>
-        /// Gets the <see cref="HttpRequest"/> Body <see cref="Stream"/> as <see cref="String"/> in the optional <see cref="Encoding"/>
+        /// Gets the <see cref="HttpRequest"/> Body <see cref="Stream"/> as <see cref="string"/> in the optional <see cref="Encoding"/>
         /// </summary>
         /// <param name="stream">Current <see cref="Stream"/></param>
         /// <param name="encoding">The character encoding to use or <see cref="Encoding.UTF8"/> by default</param>
@@ -29,7 +29,7 @@
         }
 
         /// <summary>
-        /// Gets the <see cref="HttpRequest" /> Body <see cref="Stream"/> as <see cref="String"/> asynchronously in the optional <see cref="Encoding"/>
+        /// Gets the <see cref="HttpRequest" /> Body <see cref="Stream"/> as <see cref="string"/> asynchronously in the optional <see cref="Encoding"/>
         /// </summary>
         /// <param name="stream">Current <see cref="Stream"/></param>
         /// <param name="encoding">The character encoding to use or <see cref="Encoding.UTF8"/> by default</param>

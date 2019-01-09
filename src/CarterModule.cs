@@ -96,7 +96,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Get<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
         {
             Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
@@ -108,7 +108,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Get<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
             path = this.RemoveStartingSlash(path);
@@ -147,7 +147,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Post<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
         {
             Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
@@ -159,7 +159,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Post<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
             path = this.RemoveStartingSlash(path);
@@ -197,7 +197,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Delete<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
         {
             Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
@@ -209,7 +209,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Delete<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
             path = this.RemoveStartingSlash(path);
@@ -247,7 +247,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Put<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
         {
             Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
@@ -259,7 +259,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Put<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
             path = this.RemoveStartingSlash(path);
@@ -297,7 +297,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Head<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
         {
             Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
@@ -309,7 +309,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Head<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
             path = this.RemoveStartingSlash(path);
@@ -348,7 +348,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Patch<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
         {
             Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
@@ -360,7 +360,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Patch<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
             path = this.RemoveStartingSlash(path);
@@ -398,7 +398,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Options<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
         {
             Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
@@ -410,7 +410,7 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        /// <typeparam name="T">The <see cref="Carter.RouteMetaData" implementation for OpenApi use/></typeparam>
+        /// <typeparam name="T">The <see cref="Carter.RouteMetaData"/> implementation for OpenApi use</typeparam>
         protected void Options<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
             path = this.RemoveStartingSlash(path);
