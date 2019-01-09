@@ -7,7 +7,6 @@ namespace Carter.Response
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Xml;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Extensions;
     using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +43,7 @@ namespace Carter.Response
 
             if (negotiator == null)
             {
-                negotiator = negotiators.FirstOrDefault(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
+                negotiator = negotiators.First(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
             }
 
             return negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
@@ -61,7 +60,7 @@ namespace Carter.Response
         {
             var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
 
-            var negotiator = negotiators.FirstOrDefault(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
+            var negotiator = negotiators.First(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
 
             return negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
         }
