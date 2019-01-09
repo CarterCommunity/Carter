@@ -1,12 +1,8 @@
 ﻿namespace Carter.Tests
 {
-    using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using Carter.Request;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Routing;
     using Microsoft.AspNetCore.TestHost;
     using Xunit;
 

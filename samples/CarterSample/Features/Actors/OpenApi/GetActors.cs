@@ -1,6 +1,5 @@
 namespace CarterSample.Features.Actors
 {
-    using System;
     using System.Collections.Generic;
     using Carter;
 
