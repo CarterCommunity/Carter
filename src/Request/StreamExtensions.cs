@@ -35,7 +35,7 @@
         /// <param name="encoding">The character encoding to use or <see cref="Encoding.UTF8"/> by default</param>
         /// <param name="cancellationToken">The cancellation instruction if required</param>
         /// <returns>Awaited <see cref="Task{String}"/></returns>
-        public static async Task<string> AsStringAsync(this Stream stream, Encoding encoding = null, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task<string> AsStringAsync(this Stream stream, Encoding encoding = null, CancellationToken cancellationToken = default)
         {
             using (var reader = new StreamReader(stream, encoding ?? Encoding.UTF8))
             {
