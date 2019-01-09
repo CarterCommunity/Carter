@@ -126,7 +126,7 @@ namespace Carter.OpenApi
                             responseType = valueStatusCode.Response.GetElementType();
                             if (responseType == null)
                             {
-                                responseType = valueStatusCode.Response.GetGenericArguments().FirstOrDefault();
+                                responseType = valueStatusCode.Response.GetGenericArguments().First();
                             }
                         }
                         else
