@@ -9,11 +9,15 @@ namespace Carter
 
     public class DependencyContextAssemblyCatalog
     {
-        private static readonly Assembly CarterAssembly = typeof(CarterExtensions).Assembly;
-
-        private static readonly Assembly FluentValidationAssembly = typeof(IValidator).Assembly;
-
         private readonly DependencyContext dependencyContext;
+        private static readonly string fluentValidationAssemblyName;
+        private static readonly string carterAssemblyName;
+
+        static DependencyContextAssemblyCatalog()
+        {
+            fluentValidationAssemblyName = typeof(IValidator).Assembly.GetName().Name;
+            carterAssemblyName = typeof(CarterExtensions).Assembly.GetName().Name;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DependencyContextAssemblyCatalog"/> class,
@@ -72,12 +76,12 @@ namespace Carter
 
         private static bool IsReferencingCarter(Library library)
         {
-            return library.Dependencies.Any(dependency => dependency.Name.Equals(CarterAssembly.GetName().Name));
+            return library.Dependencies.Any(dependency => dependency.Name.Equals(carterAssemblyName));
         }
 
         private static bool IsReferencingFluentValidation(Library library)
         {
-            return library.Dependencies.Any(dependency => dependency.Name.Equals(FluentValidationAssembly.GetName().Name));
+            return library.Dependencies.Any(dependency => dependency.Name.Equals(fluentValidationAssemblyName));
         }
     }
 }
