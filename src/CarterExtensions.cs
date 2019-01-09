@@ -25,9 +25,9 @@ namespace Carter
         {
             var diagnostics = builder.ApplicationServices.GetService<CarterDiagnostics>();
 
-            var loggerFactory = builder.ApplicationServices.GetService<ILoggerFactory>();        
+            var loggerFactory = builder.ApplicationServices.GetService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger(typeof(CarterDiagnostics));
-            
+
             diagnostics.LogDiscoveredCarterTypes(logger);
 
             ApplyGlobalBeforeHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalBeforeHook"));
@@ -41,7 +41,7 @@ namespace Carter
             //Create a "startup scope" to resolve modules from
             using (var scope = builder.ApplicationServices.CreateScope())
             {
-                var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>();
+                var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>().ToList();
 
                 //Get all instances of CarterModule to fetch and register declared routes
                 foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
@@ -49,7 +49,7 @@ namespace Carter
                     var moduleLogger = scope.ServiceProvider
                         .GetService<ILoggerFactory>()
                         .CreateLogger(module.GetType());
-                    
+
                     routeMetaData = routeMetaData.Concat(module.RouteMetaData).ToDictionary(x => x.Key, x => x.Value);
 
                     var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
