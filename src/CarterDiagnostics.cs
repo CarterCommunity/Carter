@@ -39,9 +39,9 @@ namespace Carter
                 logger.LogDebug("Found status code handler {StatusCodeHandlerName}", sch.FullName);
             }
 
-            foreach (var negotiatator in this.responseNegotiators)
+            foreach (var negotiator in this.responseNegotiators)
             {
-                logger.LogDebug("Found response negotiator {ResponseNegotiatorName}", negotiatator.FullName);
+                logger.LogDebug("Found response negotiator {ResponseNegotiatorName}", negotiator.FullName);
             }
         }
     }
