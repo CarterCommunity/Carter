@@ -47,8 +47,7 @@
             {
                 Predicate<object> newShouldSerialize = obj =>
                 {
-                    var collection = property.ValueProvider.GetValue(obj) as ICollection;
-                    return collection == null || collection.Count != 0;
+                    return !(property.ValueProvider.GetValue(obj) is ICollection collection) || collection.Count != 0;
                 };
 
                 Predicate<object> oldShouldSerialize = property.ShouldSerialize;
