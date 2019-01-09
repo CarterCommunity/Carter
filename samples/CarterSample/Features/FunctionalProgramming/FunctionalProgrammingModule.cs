@@ -11,7 +11,7 @@
     {
         public FunctionalProgrammingModule() : base("/functional")
         {
-            this.Get("/directors", async (req, res, routeData) =>
+            this.Get("/directors", (req, res, routeData) =>
             {
                 var handler = RouteHandlers.ListDirectorsHandler;
 
@@ -20,13 +20,13 @@
                 if (directors == null)
                 {
                     res.StatusCode = 403;
-                    return;
+                    return Task.CompletedTask;
                 }
 
-                await res.AsJson(directors);
+                return res.AsJson(directors);
             });
 
-            this.Get("/directors/{id:int}", async (req, res, routeData) =>
+            this.Get("/directors/{id:int}", (req, res, routeData) =>
             {
                 var handler = RouteHandlers.GetDirectorByIdHandler;
 
@@ -35,10 +35,10 @@
                 if (director == null)
                 {
                     res.StatusCode = 404;
-                    return;
+                    return Task.CompletedTask;
                 }
 
-                await res.AsJson(director);
+                return res.AsJson(director);
             });
 
             this.Post("/directors", async (req, res, routeData) =>

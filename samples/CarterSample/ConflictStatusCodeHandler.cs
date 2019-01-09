@@ -11,9 +11,9 @@ namespace CarterSample
             return statusCode == 409;
         }
 
-        public async Task Handle(HttpContext ctx)
+        public Task Handle(HttpContext ctx)
         {
-            await ctx.Response.WriteAsync("409");
+            return ctx.Response.WriteAsync("409");
         }
     }
 }

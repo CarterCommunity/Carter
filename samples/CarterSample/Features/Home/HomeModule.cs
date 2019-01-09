@@ -9,10 +9,10 @@ namespace CarterSample.Features.Home
     {
         public HomeModule()
         {
-            this.Get("/", async (req, res, routeData) =>
+            this.Get("/", (req, res, routeData) =>
             {
                 res.StatusCode = 409;
-                await res.WriteAsync("There's no place like 127.0.0.1");
+                return res.WriteAsync("There's no place like 127.0.0.1");
             });
 
             this.After = (ctx) =>

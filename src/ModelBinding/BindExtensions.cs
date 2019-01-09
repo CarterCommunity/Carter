@@ -110,9 +110,9 @@ namespace Carter.ModelBinding
         /// </summary>
         /// <param name="request">Current <see cref="HttpRequest"/></param>
         /// <returns><see cref="IEnumerable{IFormFile}"/></returns>
-        public static async Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request)
+        public static Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request)
         {
-            return await request.BindFiles(returnOnFirst: false);
+            return request.BindFiles(returnOnFirst: false);
         }
 
         /// <summary>

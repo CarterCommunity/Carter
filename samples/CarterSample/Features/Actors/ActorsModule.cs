@@ -11,16 +11,16 @@ namespace CarterSample.Features.Actors
     {
         public ActorsModule(IActorProvider actorProvider)
         {
-            this.Get<GetActors>("/actors", async (req, res, routeData) =>
+            this.Get<GetActors>("/actors", (req, res, routeData) =>
             {
                 var people = actorProvider.Get();
-                await res.AsJson(people);
+                return res.AsJson(people);
             });
 
-            this.Get<GetActorById>("/actors/{id:int}", async (req, res, routeData) =>
+            this.Get<GetActorById>("/actors/{id:int}", (req, res, routeData) =>
             {
                 var person = actorProvider.Get(routeData.As<int>("id"));
-                await res.Negotiate(person);
+                return res.Negotiate(person);
             });
 
             this.Put<UpdateActor>("/actors/{id:int}", async (req, res, routeData) =>
