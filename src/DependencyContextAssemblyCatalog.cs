@@ -55,7 +55,7 @@ namespace Carter
                 }
             }
 
-            return results.ToArray();
+            return results;
         }
 
         private static Assembly SafeLoadAssembly(AssemblyName assemblyName)
