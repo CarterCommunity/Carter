@@ -13,7 +13,7 @@
         /// <summary>
         /// A way to require authentication for your <see cref="CarterModule"/>
         /// </summary>
-        /// <param name="module"><Current <see cref="CarterModule"/>/param>
+        /// <param name="module">Current <see cref="CarterModule"/></param>
         public static void RequiresAuthentication(this CarterModule module)
         {
             module.Before += context =>

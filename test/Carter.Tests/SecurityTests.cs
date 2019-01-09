@@ -46,7 +46,7 @@
         {
             //Given
             this.ConfigureServer(true);
-            //When 
+            //When
             var response = await this.httpClient.GetAsync("/secure");
             var body = response.StatusCode;
 
@@ -59,7 +59,7 @@
         {
             //Given
             this.ConfigureServer(true, new[] { new Claim(ClaimTypes.Actor, "Christian Slater") });
-            //When 
+            //When
             var response = await this.httpClient.GetAsync("/secureclaim");
             var body = response.StatusCode;
 
@@ -73,7 +73,7 @@
             //Given
             this.ConfigureServer();
 
-            //When 
+            //When
             var response = await this.httpClient.GetAsync("/secure");
             var body = response.StatusCode;
 
@@ -86,7 +86,7 @@
         {
             //Given
             this.ConfigureServer(true, new[] { new Claim(ClaimTypes.Thumbprint, "Zebra") });
-            //When 
+            //When
             var response = await this.httpClient.GetAsync("/secureclaim");
             var body = response.StatusCode;
 
@@ -99,7 +99,7 @@
         {
             //Given
             this.ConfigureServer(true);
-            //When 
+            //When
             var response = await this.httpClient.GetAsync("/secureclaim");
             var body = response.StatusCode;
 
@@ -108,11 +108,11 @@
         }
 
         [Fact]
-        public async Task Should_return_401_when_not_authed_user_but_module_reqiures_claims()
+        public async Task Should_return_401_when_not_authed_user_but_module_requires_claims()
         {
             //Given
             this.ConfigureServer();
-            //When 
+            //When
             var response = await this.httpClient.GetAsync("/secureclaim");
             var body = response.StatusCode;
 
