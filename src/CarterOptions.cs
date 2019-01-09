@@ -15,7 +15,7 @@ namespace Carter
         /// Initializes <see cref="CarterOptions"/>
         /// </summary>
         /// <param name="before">A global before handler which is invoked before all routes</param>
-        /// <param name="after">A global before handler which is invoked after all routes</param>
+        /// <param name="after">A global after handler which is invoked after all routes</param>
         public CarterOptions(Func<HttpContext, Task<bool>> before = null, Func<HttpContext, Task> after = null, OpenApiOptions openApiOptions = null)
         {
             this.Before = before;
@@ -29,7 +29,7 @@ namespace Carter
         public Func<HttpContext, Task<bool>> Before { get; }
 
         /// <summary>
-        /// A global before handler which is invoked after all routes
+        /// A global after handler which is invoked after all routes
         /// </summary>
         public Func<HttpContext, Task> After { get; }
 
