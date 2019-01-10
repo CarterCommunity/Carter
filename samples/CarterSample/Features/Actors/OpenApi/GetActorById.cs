@@ -1,6 +1,5 @@
 namespace CarterSample.Features.Actors
 {
-    using System;
     using Carter;
 
     public class GetActorById : RouteMetaData

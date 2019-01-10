@@ -126,7 +126,7 @@ namespace Carter.OpenApi
                             responseType = valueStatusCode.Response.GetElementType();
                             if (responseType == null)
                             {
-                                responseType = valueStatusCode.Response.GetGenericArguments().FirstOrDefault();
+                                responseType = valueStatusCode.Response.GetGenericArguments().First();
                             }
                         }
                         else
@@ -134,7 +134,9 @@ namespace Carter.OpenApi
                             responseType = valueStatusCode.Response;
                         }
 
-                        var propNames = responseType.GetProperties().Select(x => (Name: x.Name.ToLower(), Type: x.PropertyType.Name.ToLower()));
+                        var propNames = responseType.GetProperties()
+                            .Select(x => (Name: x.Name.ToLower(), Type: x.PropertyType.Name.ToLower()))
+                            .ToList();
 
                         var arrbj = new OpenApiArray();
                         var propObj = new OpenApiObject();
@@ -196,7 +198,7 @@ namespace Carter.OpenApi
                     requestType = keyValuePair.Value.Request.GetElementType();
                     if (requestType == null)
                     {
-                        requestType = keyValuePair.Value.Request.GetGenericArguments().FirstOrDefault();
+                        requestType = keyValuePair.Value.Request.GetGenericArguments().First();
                     }
                 }
                 else
@@ -204,7 +206,9 @@ namespace Carter.OpenApi
                     requestType = keyValuePair.Value.Request;
                 }
 
-                var propNames = requestType.GetProperties().Select(x => (Name: x.Name.ToLower(), Type: x.PropertyType.Name.ToLower()));
+                var propNames = requestType.GetProperties()
+                    .Select(x => (Name: x.Name.ToLower(), Type: x.PropertyType.Name.ToLower()))
+                    .ToList();
 
                 var arrbj = new OpenApiArray();
                 var propObj = new OpenApiObject();

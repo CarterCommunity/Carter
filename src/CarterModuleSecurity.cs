@@ -13,12 +13,12 @@
         /// <summary>
         /// A way to require authentication for your <see cref="CarterModule"/>
         /// </summary>
-        /// <param name="module"><Current <see cref="CarterModule"/>/param>
+        /// <param name="module">Current <see cref="CarterModule"/></param>
         public static void RequiresAuthentication(this CarterModule module)
         {
             module.Before += context =>
             {
-                var authenticated = context?.User?.Identity != null && context.User.Identity.IsAuthenticated;
+                var authenticated = context.User?.Identity != null && context.User.Identity.IsAuthenticated;
                 if (!authenticated)
                 {
                     context.Response.StatusCode = 401;

@@ -15,7 +15,7 @@
         /// <param name="key">Query param key</param>
         /// <param name="defaultValue">Default value if key not found</param>
         /// <returns>Query parameter value</returns>
-        public static T As<T>(this IQueryCollection query, string key, T defaultValue = default(T))
+        public static T As<T>(this IQueryCollection query, string key, T defaultValue = default)
         {
             var value = query[key].FirstOrDefault();
 

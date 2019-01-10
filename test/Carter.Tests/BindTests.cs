@@ -292,46 +292,43 @@ namespace Carter.Tests
     {
         public BindModule()
         {
-            this.Post("/bind", async (req, res, routeData) =>
+            this.Post("/bind", (req, res, routeData) =>
             {
                 var model = req.Bind<TestModel>();
-                await res.Negotiate(model);
+                return res.Negotiate(model);
             });
 
-            this.Post("/bindandvalidate", async (req, res, routeData) =>
+            this.Post("/bindandvalidate", (req, res, routeData) =>
             {
                 var model = req.BindAndValidate<TestModel>();
                 if (!model.ValidationResult.IsValid)
                 {
-                    await res.Negotiate(model.ValidationResult.GetFormattedErrors());
-                    return;
+                    return res.Negotiate(model.ValidationResult.GetFormattedErrors());
                 }
 
-                await res.Negotiate(model.Data);
+                return res.Negotiate(model.Data);
             });
 
-            this.Post("/novalidator", async (req, res, routeData) =>
+            this.Post("/novalidator", (req, res, routeData) =>
             {
                 var model = req.BindAndValidate<TestModelNoValidator>();
                 if (!model.ValidationResult.IsValid)
                 {
-                    await res.Negotiate(model.ValidationResult.GetFormattedErrors());
-                    return;
+                    return res.Negotiate(model.ValidationResult.GetFormattedErrors());
                 }
 
-                await res.Negotiate(model);
+                return res.Negotiate(model);
             });
 
-            this.Post("/duplicatevalidator", async (req, res, routeData) =>
+            this.Post("/duplicatevalidator", (req, res, routeData) =>
             {
                 var model = req.BindAndValidate<DuplicateTestModel>();
                 if (!model.ValidationResult.IsValid)
                 {
-                    await res.Negotiate(model.ValidationResult.GetFormattedErrors());
-                    return;
+                    return res.Negotiate(model.ValidationResult.GetFormattedErrors());
                 }
 
-                await res.Negotiate(model.Data);
+                return res.Negotiate(model.Data);
             });
 
             this.Post("/bindandsave", async (req, res, routeData) =>

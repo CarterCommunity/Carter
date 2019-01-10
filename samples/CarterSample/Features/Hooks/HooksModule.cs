@@ -14,9 +14,9 @@ namespace CarterSample.Features.Hooks
                 return false;
             };
 
-            this.Get("/hooks", async (req, res, routeData) => await res.WriteAsync("Can't catch me here"));
+            this.Get("/hooks", handler: (req, res, routeData) => res.WriteAsync("Can't catch me here"));
 
-            this.After = async (ctx) => await ctx.Response.WriteAsync("Don't forget you owe me big bucks!");
+            this.After = (ctx) => ctx.Response.WriteAsync("Don't forget you owe me big bucks!");
         }
     }
 }

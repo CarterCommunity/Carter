@@ -14,7 +14,7 @@ namespace CarterSample.Features.Errors
                 throw new Exception("oops");
             });
 
-            this.Get("/errorhandler", async (req, res, routeData) =>
+            this.Get("/errorhandler", (req, res, routeData) =>
             {
                 string error = string.Empty;
                 var feature = req.HttpContext.Features.Get<IExceptionHandlerFeature>();
@@ -26,7 +26,7 @@ namespace CarterSample.Features.Errors
                     }
                     error = feature.Error.ToString();
                 }
-                await res.WriteAsync($"There has been an error{Environment.NewLine}{error}");
+                return res.WriteAsync($"There has been an error{Environment.NewLine}{error}");
             });
         }
     }

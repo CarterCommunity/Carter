@@ -28,10 +28,10 @@
             return accept.MediaType.ToString().IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken)
+        public Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken)
         {
             res.ContentType = "application/json; charset=utf-8";
-            await res.WriteAsync(JsonConvert.SerializeObject(model, this.jsonSettings), cancellationToken);
+            return res.WriteAsync(JsonConvert.SerializeObject(model, this.jsonSettings), cancellationToken);
         }
     }
 
@@ -47,8 +47,7 @@
             {
                 Predicate<object> newShouldSerialize = obj =>
                 {
-                    var collection = property.ValueProvider.GetValue(obj) as ICollection;
-                    return collection == null || collection.Count != 0;
+                    return !(property.ValueProvider.GetValue(obj) is ICollection collection) || collection.Count != 0;
                 };
 
                 Predicate<object> oldShouldSerialize = property.ShouldSerialize;

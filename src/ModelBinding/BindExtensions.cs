@@ -47,25 +47,25 @@ namespace Carter.ModelBinding
                 {
                     var type = typeof(T);
                     var propertyType = type.GetProperty(val.Key)?.PropertyType;
-                    
+
                     if (propertyType == null)
                     {
                         return null;
                     }
-                    
+
                     if (propertyType.IsArray() || propertyType.IsCollection() || propertyType.IsEnumerable())
                     {
                         var colType = propertyType.GetElementType();
                         if (colType == null)
                         {
-                            colType = propertyType.GetGenericArguments().FirstOrDefault();
+                            colType = propertyType.GetGenericArguments().First();
                         }
                         return val.Value.Select(y => Convert.ChangeType(y, colType));
                     }
                     //int, double etc
                     return Convert.ChangeType(val.Value[0], propertyType);
                 }));
-                
+
                 var instance = res.ToObject<T>();
                 return instance;
             }
@@ -110,9 +110,9 @@ namespace Carter.ModelBinding
         /// </summary>
         /// <param name="request">Current <see cref="HttpRequest"/></param>
         /// <returns><see cref="IEnumerable{IFormFile}"/></returns>
-        public static async Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request)
+        public static Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request)
         {
-            return await request.BindFiles(returnOnFirst: false);
+            return request.BindFiles(returnOnFirst: false);
         }
 
         /// <summary>
