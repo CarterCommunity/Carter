@@ -219,10 +219,10 @@ namespace Carter
                     t != typeof(DefaultJsonResponseNegotiator)
                 ));
 
-            foreach (var negotiatator in responseNegotiators)
+            foreach (var negotiator in responseNegotiators)
             {
-                diagnostics.AddResponseNegotiator(negotiatator);
-                services.AddSingleton(typeof(IResponseNegotiator), negotiatator);
+                diagnostics.AddResponseNegotiator(negotiator);
+                services.AddSingleton(typeof(IResponseNegotiator), negotiator);
             }
 
             services.AddSingleton<IResponseNegotiator, DefaultJsonResponseNegotiator>();
