@@ -10,7 +10,6 @@ namespace Carter
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using static OpenApi.CarterOpenApi;
@@ -36,59 +35,43 @@ namespace Carter
 
             ApplyGlobalAfterHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalAfterHook"));
 
-            var routeBuilder = new RouteBuilder(builder);
-
-            var routeMetaData = new Dictionary<(string verb, string path), RouteMetaData>();
-
-            //Create a "startup scope" to resolve modules from so that they're cleaned up post-startup
-            using (var scope = builder.ApplicationServices.CreateScope())
+            return builder.UseRouting(endpointRouteBuilder =>
             {
-                var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>().ToList();
+                var routeMetaData = new Dictionary<(string verb, string path), RouteMetaData>();
 
-                //Get all instances of CarterModule to fetch and register declared routes
-                foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
+                //Create a "startup scope" to resolve modules from
+                using (var scope = builder.ApplicationServices.CreateScope())
                 {
-                    var moduleLogger = scope.ServiceProvider
-                        .GetService<ILoggerFactory>()
-                        .CreateLogger(module.GetType());
+                    var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>().ToList();
 
-                    routeMetaData = routeMetaData.Concat(module.RouteMetaData).ToDictionary(x => x.Key, x => x.Value);
-
-                    var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
-                    foreach (var path in distinctPaths)
+                    //Get all instances of CarterModule to fetch and register declared routes
+                    foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
                     {
-                        routeBuilder.MapRoute(path, CreateRouteHandler(path, module.GetType(), statusCodeHandlers, moduleLogger));
+                        var moduleLogger = scope.ServiceProvider
+                            .GetService<ILoggerFactory>()
+                            .CreateLogger(module.GetType());
+
+                        routeMetaData = routeMetaData.Concat(module.RouteMetaData).ToDictionary(x => x.Key, x => x.Value);
+
+                        foreach (var descriptor in module.Routes)
+                        {
+                            endpointRouteBuilder.MapVerbs(descriptor.Key.path, CreateRouteHandler(descriptor.Key.path, module.GetType(), statusCodeHandlers, moduleLogger, descriptor.Value),
+                                new List<string> { descriptor.Key.verb });
+                        }
                     }
                 }
-            }
 
-            routeBuilder.MapRoute("openapi", BuildOpenApiResponse(options, routeMetaData));
-
-            return builder.UseRouter(routeBuilder.Build());
+                endpointRouteBuilder.MapGet("openapi", BuildOpenApiResponse(options, routeMetaData));
+            });
         }
 
         private static RequestDelegate CreateRouteHandler(
-            string path, Type moduleType, IEnumerable<IStatusCodeHandler> statusCodeHandlers, ILogger logger)
+            string path, Type moduleType, IEnumerable<IStatusCodeHandler> statusCodeHandlers, ILogger logger, RequestDelegate routeHandler)
         {
             return async ctx =>
             {
                 // Now in per-request scope
                 var module = ctx.RequestServices.GetRequiredService(moduleType) as CarterModule;
-
-                if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
-                {
-                    // if the path was registered but a handler matching the
-                    // current method was not found, return MethodNotFound
-                    ctx.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
-                    return;
-                }
-
-                // begin handling the request
-                if (HttpMethods.IsHead(ctx.Request.Method))
-                {
-                    //Cannot read the default stream once WriteAsync has been called on it
-                    ctx.Response.Body = new MemoryStream();
-                }
 
                 // run the module handlers
                 bool shouldContinue = true;
@@ -97,6 +80,7 @@ namespace Carter
                 {
                     foreach (var beforeDelegate in module.Before.GetInvocationList())
                     {
+                        
                         var beforeTask = (Task<bool>)beforeDelegate.DynamicInvoke(ctx);
                         shouldContinue = await beforeTask;
                         if (!shouldContinue)
@@ -124,13 +108,6 @@ namespace Carter
                 if (scHandler != null)
                 {
                     await scHandler.Handle(ctx);
-                }
-
-                if (HttpMethods.IsHead(ctx.Request.Method))
-                {
-                    var length = ctx.Response.Body.Length;
-                    ctx.Response.Body.SetLength(0);
-                    ctx.Response.ContentLength = length;
                 }
             };
         }
