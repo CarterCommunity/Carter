@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.2</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <OutputType>Exe</OutputType>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <Compile Include="build.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Bullseye" Version="2.3.0" />
+      <PackageReference Include="SimpleExec" Version="4.2.0" />
+    </ItemGroup>
+
+</Project>
