@@ -23,7 +23,7 @@
                     return Task.CompletedTask;
                 }
 
-                return res.AsJson(directors);
+                return res.AsJsonAsync(directors);
             });
 
             this.Get("/directors/{id:int}", (req, res, routeData) =>
@@ -38,7 +38,7 @@
                     return Task.CompletedTask;
                 }
 
-                return res.AsJson(director);
+                return res.AsJsonAsync(director);
             });
 
             this.Post("/directors", async (req, res, routeData) =>

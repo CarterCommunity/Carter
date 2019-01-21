@@ -16,7 +16,7 @@
 
                 if (!result.ValidationResult.IsValid)
                 {
-                    return res.AsJson(result.ValidationResult.GetFormattedErrors());
+                    return res.AsJsonAsync(result.ValidationResult.GetFormattedErrors());
                 }
 
                 return res.WriteAsync("OK");

@@ -14,7 +14,7 @@ namespace CarterSample.Features.Actors
             this.Get<GetActors>("/actors", (req, res, routeData) =>
             {
                 var people = actorProvider.Get();
-                return res.AsJson(people);
+                return res.AsJsonAsync(people);
             });
 
             this.Get<GetActorById>("/actors/{id:int}", (req, res, routeData) =>
@@ -67,7 +67,7 @@ namespace CarterSample.Features.Actors
             {
                 using (var video = new FileStream("earth.mp4", FileMode.Open)) //24406813
                 {
-                    await response.FromStream(video, "video/mp4");
+                    await response.FromStreamAsync(video, "video/mp4");
                 }
             });
         }

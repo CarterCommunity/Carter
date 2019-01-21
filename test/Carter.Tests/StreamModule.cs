@@ -14,7 +14,7 @@
                 using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("hi")))
                 {
                     var cd = new ContentDisposition { FileName = "journal.csv" };
-                    await response.FromStream(mystream, "application/csv", cd);
+                    await response.FromStreamAsync(mystream, "application/csv", cd);
                 }
             });
 
@@ -22,7 +22,7 @@
             {
                 using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("hi")))
                 {
-                    await response.FromStream(mystream, "application/csv");
+                    await response.FromStreamAsync(mystream, "application/csv");
                 }
             });
 
@@ -30,7 +30,7 @@
             {
                 using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("0123456789")))
                 {
-                    await response.FromStream(mystream, "application/csv");
+                    await response.FromStreamAsync(mystream, "application/csv");
                 }
             });
         }

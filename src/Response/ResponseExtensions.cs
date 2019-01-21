@@ -56,7 +56,7 @@ namespace Carter.Response
         /// <param name="obj">View model</param>
         /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
         /// <returns><see cref="Task"/></returns>
-        public static Task AsJson(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
+        public static Task AsJsonAsync(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
         {
             var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
 
@@ -73,7 +73,7 @@ namespace Carter.Response
         /// <param name="contentType">The content type for the response</param>
         /// <param name="contentDisposition">The content disposition to allow file downloads</param>
         /// <returns><see cref="Task"/></returns>
-        public static Task FromStream(this HttpResponse response, Stream source, string contentType, ContentDisposition contentDisposition = null)
+        public static Task FromStreamAsync(this HttpResponse response, Stream source, string contentType, ContentDisposition contentDisposition = null)
         {
             var contentLength = source.Length;
 
