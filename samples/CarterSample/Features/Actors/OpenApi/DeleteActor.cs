@@ -9,5 +9,7 @@ namespace CarterSample.Features.Actors
         public override RouteMetaDataResponse[] Responses { get; } = { new RouteMetaDataResponse { Code = 204, Description = "Deleted Actor" } };
 
         public override string Tag { get; } = "Actors";
+
+        public override string OperationId { get; } = "Actors_DeleteActor";
     }
 }

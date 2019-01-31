@@ -18,5 +18,7 @@ namespace CarterSample.Features.Actors
         };
 
         public override string Tag { get; } = "Actors";
+
+        public override string OperationId { get; } = "Actors_GetActors";
     }
 }

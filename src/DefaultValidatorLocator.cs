@@ -15,7 +15,9 @@ namespace Carter
 
         public DefaultValidatorLocator(IEnumerable<IValidator> validators) => this.validators = validators;
 
-        public IValidator GetValidator<T>() => this.foundValidators.GetOrAdd(typeof(T), this.FindValidator);
+        public IValidator GetValidator<T>() => this.GetValidator(typeof(T));
+
+        public IValidator GetValidator(Type type) => this.foundValidators.GetOrAdd(type, this.FindValidator);
 
         private IValidator FindValidator(Type type)
         {

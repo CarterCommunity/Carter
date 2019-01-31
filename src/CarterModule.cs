@@ -15,6 +15,8 @@ namespace Carter
         public virtual Type Request { get; }
 
         public virtual RouteMetaDataResponse[] Responses { get; }
+        
+        public virtual string OperationId { get; }
     }
 
     public class RouteMetaDataResponse
