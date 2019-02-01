@@ -20,7 +20,7 @@
             {
                 NamingStrategy = new CamelCaseNamingStrategy()
             };
-            this.jsonSettings = new JsonSerializerSettings { ContractResolver = contractResolver, NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore };
+            this.jsonSettings = new JsonSerializerSettings { ContractResolver = contractResolver, NullValueHandling = NullValueHandling.Ignore };
         }
 
         public bool CanHandle(MediaTypeHeaderValue accept)
@@ -35,7 +35,7 @@
         }
     }
 
-    public class SkipEmptyContractResolver : DefaultContractResolver
+    internal class SkipEmptyContractResolver : DefaultContractResolver
     {
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {
