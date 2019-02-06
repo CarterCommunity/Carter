@@ -1,8 +1,6 @@
 ﻿namespace Carter
 {
     using System;
-    using System.Collections;
-    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
@@ -16,7 +14,7 @@
 
         public DefaultJsonResponseNegotiator()
         {
-            var contractResolver = new SkipEmptyContractResolver
+            var contractResolver = new DefaultContractResolver
             {
                 NamingStrategy = new CamelCaseNamingStrategy()
             };
@@ -32,30 +30,6 @@
         {
             res.ContentType = "application/json; charset=utf-8";
             return res.WriteAsync(JsonConvert.SerializeObject(model, this.jsonSettings), cancellationToken);
-        }
-    }
-
-    internal class SkipEmptyContractResolver : DefaultContractResolver
-    {
-        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
-        {
-            JsonProperty property = base.CreateProperty(member, memberSerialization);
-
-            bool isDefaultValueIgnored = ((property.DefaultValueHandling ?? DefaultValueHandling.Ignore) & DefaultValueHandling.Ignore) != 0;
-
-            if (isDefaultValueIgnored && !typeof(string).IsAssignableFrom(property.PropertyType) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
-            {
-                Predicate<object> newShouldSerialize = obj =>
-                {
-                    return !(property.ValueProvider.GetValue(obj) is ICollection collection) || collection.Count != 0;
-                };
-
-                Predicate<object> oldShouldSerialize = property.ShouldSerialize;
-
-                property.ShouldSerialize = oldShouldSerialize != null ? o => oldShouldSerialize(o) && newShouldSerialize(o) : newShouldSerialize;
-            }
-
-            return property;
         }
     }
 }
