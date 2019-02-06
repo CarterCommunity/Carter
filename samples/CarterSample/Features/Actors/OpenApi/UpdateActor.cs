@@ -12,5 +12,8 @@ namespace CarterSample.Features.Actors
         public override string Description { get; } = "Update an existing actor";
 
         public override RouteMetaDataResponse[] Responses { get; } = { new RouteMetaDataResponse { Code = 204, Description = "Updated Actor" } };
+        
+        public override string OperationId { get; } = "Actors_UpdateActor";
+
     }
 }

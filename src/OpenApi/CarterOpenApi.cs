@@ -5,8 +5,10 @@ namespace Carter.OpenApi
     using System.Linq;
     using System.Threading.Tasks;
     using Carter.Request;
+    using FluentValidation.Validators;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing.Template;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.OpenApi;
     using Microsoft.OpenApi.Any;
     using Microsoft.OpenApi.Extensions;
@@ -26,7 +28,8 @@ namespace Carter.OpenApi
                         Title = options.OpenApi.DocumentTitle
                     },
                     Servers = new List<OpenApiServer>(options.OpenApi.ServerUrls.Select(x => new OpenApiServer { Url = x })),
-                    Paths = new OpenApiPaths()
+                    Paths = new OpenApiPaths(),
+                    Components = new OpenApiComponents()
                 };
 
                 foreach (var routeMetaData in metaDatas.GroupBy(pair => pair.Key.path))
@@ -45,11 +48,14 @@ namespace Carter.OpenApi
 
                     foreach (var methodRoute in methodRoutes)
                     {
-                        var operation = new OpenApiOperation { Tags = new List<OpenApiTag> { new OpenApiTag { Name = methodRoute.Value.Tag } }, Description = methodRoute.Value.Description };
+                        var operation = new OpenApiOperation
+                        {
+                            Tags = new List<OpenApiTag> { new OpenApiTag { Name = methodRoute.Value.Tag } }, Description = methodRoute.Value.Description, OperationId = methodRoute.Value.OperationId
+                        };
 
-                        CreateOpenApiRequestBody(methodRoute, operation);
+                        CreateOpenApiRequestBody(document, methodRoute, operation, context);
 
-                        CreateOpenApiResponseBody(methodRoute, operation);
+                        CreateOpenApiResponseBody(document, methodRoute, operation);
 
                         CreateOpenApiRouteConstraints(template, operation);
 
@@ -104,7 +110,7 @@ namespace Carter.OpenApi
             }
         }
 
-        private static void CreateOpenApiResponseBody(KeyValuePair<(string verb, string path), RouteMetaData> methodRoute, OpenApiOperation operation)
+        private static void CreateOpenApiResponseBody(OpenApiDocument document, KeyValuePair<(string verb, string path), RouteMetaData> methodRoute, OpenApiOperation operation)
         {
             if (methodRoute.Value.Responses != null)
             {
@@ -119,6 +125,8 @@ namespace Carter.OpenApi
                     {
                         bool arrayType = false;
                         Type responseType;
+                        var responseTypeName = string.Empty;
+                        var singularTypeName = string.Empty;
 
                         if (valueStatusCode.Response.IsArray() || valueStatusCode.Response.IsCollection() || valueStatusCode.Response.IsEnumerable())
                         {
@@ -127,11 +135,14 @@ namespace Carter.OpenApi
                             if (responseType == null)
                             {
                                 responseType = valueStatusCode.Response.GetGenericArguments().First();
+                                responseTypeName = responseType.Name + "s";
+                                singularTypeName = responseType.Name;
                             }
                         }
                         else
                         {
                             responseType = valueStatusCode.Response;
+                            responseTypeName = responseType.Name;
                         }
 
                         var propNames = responseType.GetProperties()
@@ -173,11 +184,26 @@ namespace Carter.OpenApi
                                     new OpenApiMediaType
                                     {
                                         //Example = respObj
-                                        Schema = arrayType ? arrayschema : schema
+                                        Schema = new OpenApiSchema { Reference = new OpenApiReference { Id = responseTypeName, Type = ReferenceType.Schema } }
+                                        //Schema = arrayType ? arrayschema : schema
                                     }
                                 }
                             }
                         };
+
+                        if (!document.Components.Schemas.ContainsKey(responseTypeName))
+                        {
+                            if (!arrayType)
+                            {
+                                document.Components.Schemas.Add(responseTypeName, schema);
+                            }
+                            else
+                            {
+                                document.Components.Schemas.Add(responseTypeName,
+                                    new OpenApiSchema { Type = "array", Items = new OpenApiSchema { Reference = new OpenApiReference { Id = singularTypeName, Type = ReferenceType.Schema } } });
+                                //TODO Should we check that at the end that any components that are "array" types have a component registered of the  singularTypeName for example you could have IEnumerable<Foo> but Foo is not used in another route so won't be registered in components
+                            }
+                        }
                     }
 
                     operation.Responses.Add(valueStatusCode.Code.ToString(), openApiResponse);
@@ -185,7 +211,7 @@ namespace Carter.OpenApi
             }
         }
 
-        private static void CreateOpenApiRequestBody(KeyValuePair<(string verb, string path), RouteMetaData> keyValuePair, OpenApiOperation operation)
+        private static void CreateOpenApiRequestBody(OpenApiDocument document, KeyValuePair<(string verb, string path), RouteMetaData> keyValuePair, OpenApiOperation operation, HttpContext context)
         {
             if (keyValuePair.Value.Request != null)
             {
@@ -218,12 +244,108 @@ namespace Carter.OpenApi
                     propObj.Add(propertyInfo.Name, new OpenApiString("")); //TODO Could use Bogus to generate some data rather than empty string
                 }
 
+                var validatorLocator = context.RequestServices.GetRequiredService<IValidatorLocator>();
+
+                var validator = validatorLocator.GetValidator(requestType);
+
+                var validatorDescriptor = validator.CreateDescriptor();
+
                 var schema = new OpenApiSchema
                 {
                     Type = "object",
                     Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema { Type = GetOpenApiTypeMapping(value.Type) }),
-                    Example = propObj
+                    Example = propObj,
                 };
+
+                //Thanks for the pointers https://github.com/micro-elements/MicroElements.Swashbuckle.FluentValidation
+                //TODO Also need to look at request parameters that might be required from the header or querystring for example. MVC does binding on GETs from these sources
+                foreach (var key in schema.Properties.Keys)
+                {
+                    foreach (var propertyValidator in validatorDescriptor
+                        .GetValidatorsForMember(ToPascalCase(key)))
+                    {
+                        if (propertyValidator is INotNullValidator
+                            || propertyValidator is INotEmptyValidator)
+                        {
+                            if (!schema.Required.Contains(key))
+                            {
+                                schema.Required.Add(key);
+                            }
+
+                            if (propertyValidator is INotEmptyValidator)
+                            {
+                                schema.Properties[key].MinLength = 1;
+                            }
+                        }
+
+                        if (propertyValidator is ILengthValidator lengthValidator)
+                        {
+                            if (lengthValidator.Max > 0)
+                                schema.Properties[key].MaxLength = lengthValidator.Max;
+
+                            schema.Properties[key].MinLength = lengthValidator.Min;
+                        }
+
+                        if (propertyValidator is IComparisonValidator comparisonValidator)
+                        {
+                            //var comparisonValidator = (IComparisonValidator)context.PropertyValidator;
+                            if (comparisonValidator.ValueToCompare.IsNumeric())
+                            {
+                                var valueToCompare = comparisonValidator.ValueToCompare.NumericToDecimal();
+                                var schemaProperty = schema.Properties[key];
+
+                                if (comparisonValidator.Comparison == Comparison.GreaterThanOrEqual)
+                                {
+                                    schemaProperty.Minimum = valueToCompare;
+                                }
+                                else if (comparisonValidator.Comparison == Comparison.GreaterThan)
+                                {
+                                    schemaProperty.Minimum = valueToCompare;
+                                    schemaProperty.ExclusiveMinimum = true;
+                                }
+                                else if (comparisonValidator.Comparison == Comparison.LessThanOrEqual)
+                                {
+                                    schemaProperty.Maximum = valueToCompare;
+                                }
+                                else if (comparisonValidator.Comparison == Comparison.LessThan)
+                                {
+                                    schemaProperty.Maximum = valueToCompare;
+                                    schemaProperty.ExclusiveMaximum = true;
+                                }
+                            }
+                        }
+
+                        if (propertyValidator is RegularExpressionValidator expressionValidator)
+                        {
+                            schema.Properties[key].Pattern = expressionValidator.Expression;
+                        }
+
+                        if (propertyValidator is IBetweenValidator betweenValidator)
+                        {
+                            var schemaProperty = schema.Properties[key];
+
+                            if (betweenValidator.From.IsNumeric())
+                            {
+                                schemaProperty.Minimum = betweenValidator.From.NumericToDecimal();
+
+                                if (betweenValidator is ExclusiveBetweenValidator)
+                                {
+                                    schemaProperty.ExclusiveMinimum = true;
+                                }
+                            }
+
+                            if (betweenValidator.To.IsNumeric())
+                            {
+                                schemaProperty.Maximum = betweenValidator.To.NumericToDecimal();
+
+                                if (betweenValidator is ExclusiveBetweenValidator)
+                                {
+                                    schemaProperty.ExclusiveMaximum = true;
+                                }
+                            }
+                        }
+                    }
+                }
 
                 var arrayschema = new OpenApiSchema { Type = "array" };
 
@@ -240,11 +362,34 @@ namespace Carter.OpenApi
                     new OpenApiMediaType
                     {
                         //Example = reqObj,
-                        Schema = arrayType ? arrayschema : schema
+                        //Schema = arrayType ? arrayschema : schema
+                        Schema = new OpenApiSchema { Reference = new OpenApiReference { Id = requestType.Name, Type = ReferenceType.Schema } }
                     });
 
                 operation.RequestBody = requestBody;
+
+                //TODO Should we document array request bodies and if so the next line applies:
+                //TODO Should we check that at the end that any components that are "array" types have a component registered of the  singularTypeName for example you could have IEnumerable<Foo> but Foo is not used in another route so won't be registered in components
+                if (!document.Components.Schemas.ContainsKey(requestType.Name))
+                {
+                    document.Components.Schemas.Add(requestType.Name, schema);
+                }
             }
+        }
+
+        public static bool IsNumeric(this object value) => value is int || value is long || value is float || value is double || value is decimal;
+
+        /// <summary>
+        /// Convert numeric to double.
+        /// </summary>
+        public static decimal NumericToDecimal(this object value) => Convert.ToDecimal(value);
+
+        private static string ToPascalCase(string inputString)
+        {
+            // If there are 0 or 1 characters, just return the string.
+            if (inputString == null) return null;
+            if (inputString.Length < 2) return inputString.ToUpper();
+            return inputString.Substring(0, 1).ToUpper() + inputString.Substring(1);
         }
 
         private static string GetOpenApiTypeMapping(string constraint)

@@ -12,5 +12,7 @@ namespace CarterSample.Features.Actors
         public override RouteMetaDataResponse[] Responses { get; } = { new RouteMetaDataResponse { Code = 201, Description = "Created Actors" } };
 
         public override string Tag { get; } = "Actors";
+
+        public override string OperationId { get; } = "Actors_AddActor";
     }
 }
