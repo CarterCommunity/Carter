@@ -8,7 +8,7 @@
 
     internal static class ConvertExtensions
     {
-        public static T ConvertTo<T>(this object value, T defaultValue = default)
+        internal static T ConvertTo<T>(this object value, T defaultValue = default)
         {
             if (value != null)
             {
@@ -59,7 +59,7 @@
             return defaultValue;
         }
 
-        public static IEnumerable<T> ConvertMultipleTo<T>(this IEnumerable<string> values)
+        internal static IEnumerable<T> ConvertMultipleTo<T>(this IEnumerable<string> values)
         {
             foreach (var value in values)
             {
@@ -67,12 +67,12 @@
             }
         }
 
-        public static bool IsArray(this Type source)
+        internal static bool IsArray(this Type source)
         {
             return source.BaseType == typeof(Array);
         }
 
-        public static bool IsCollection(this Type source)
+        internal static bool IsCollection(this Type source)
         {
             var collectionType = typeof(ICollection<>);
 
@@ -81,7 +81,7 @@
                 .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == collectionType);
         }
 
-        public static bool IsEnumerable(this Type source)
+        internal static bool IsEnumerable(this Type source)
         {
             var enumerableType = typeof(IEnumerable<>);
 

@@ -4,7 +4,7 @@ namespace Carter
     using System.Collections.Generic;
     using Microsoft.Extensions.Logging;
 
-    public class CarterDiagnostics
+    internal class CarterDiagnostics
     {
         private readonly List<Type> modules = new List<Type>();
 
@@ -14,15 +14,15 @@ namespace Carter
 
         private readonly List<Type> validators = new List<Type>();
 
-        public void AddValidator(Type validatorType) => this.validators.Add(validatorType);
+        internal void AddValidator(Type validatorType) => this.validators.Add(validatorType);
 
-        public void AddModule(Type moduleType) => this.modules.Add(moduleType);
+        internal void AddModule(Type moduleType) => this.modules.Add(moduleType);
 
-        public void AddStatusCodeHandler(Type handlerType) => this.statusCodeHandlers.Add(handlerType);
+        internal void AddStatusCodeHandler(Type handlerType) => this.statusCodeHandlers.Add(handlerType);
 
-        public void AddResponseNegotiator(Type responseNegotiatorType) => this.responseNegotiators.Add(responseNegotiatorType);
+        internal void AddResponseNegotiator(Type responseNegotiatorType) => this.responseNegotiators.Add(responseNegotiatorType);
 
-        public void LogDiscoveredCarterTypes(ILogger logger)
+        internal void LogDiscoveredCarterTypes(ILogger logger)
         {
             foreach (var validator in this.validators)
             {

@@ -14,9 +14,9 @@ namespace Carter.OpenApi
     using Microsoft.OpenApi.Extensions;
     using Microsoft.OpenApi.Models;
 
-    public static class CarterOpenApi
+    internal static class CarterOpenApi
     {
-        public static RequestDelegate BuildOpenApiResponse(CarterOptions options, Dictionary<(string verb, string path), RouteMetaData> metaDatas)
+        internal static RequestDelegate BuildOpenApiResponse(CarterOptions options, Dictionary<(string verb, string path), RouteMetaData> metaDatas)
         {
             return context =>
             {

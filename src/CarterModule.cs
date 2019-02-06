@@ -6,36 +6,14 @@ namespace Carter
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
 
-    public abstract class RouteMetaData
-    {
-        public virtual string Description { get; }
-
-        public virtual string Tag { get; }
-
-        public virtual Type Request { get; }
-
-        public virtual RouteMetaDataResponse[] Responses { get; }
-        
-        public virtual string OperationId { get; }
-    }
-
-    public class RouteMetaDataResponse
-    {
-        public int Code { get; set; }
-
-        public string Description { get; set; }
-
-        public Type Response { get; set; }
-    }
-
     /// <summary>
     /// A class for defining routes in your Carter application
     /// </summary>
     public class CarterModule
     {
-        public readonly Dictionary<(string verb, string path), RequestDelegate> Routes;
+        internal readonly Dictionary<(string verb, string path), RequestDelegate> Routes;
 
-        public readonly Dictionary<(string verb, string path), RouteMetaData> RouteMetaData;
+        internal readonly Dictionary<(string verb, string path), RouteMetaData> RouteMetaData;
 
         private readonly string basePath;
 
