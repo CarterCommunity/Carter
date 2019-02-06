@@ -1,0 +1,173 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Carter <3 OpenApi",
+    "version": "3.0.0"
+  },
+  "paths": {
+    "/actors": {
+      "get": {
+        "tags": [
+          "Actors"
+        ],
+        "description": "Returns a list of actors",
+        "operationId": "Actors_GetActors",
+        "responses": {
+          "200": {
+            "description": "A list of Actors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Actors"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Actors"
+        ],
+        "description": "Create an actor in the system",
+        "operationId": "Actors_AddActor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Actor"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created Actors"
+          }
+        }
+      }
+    },
+    "/actors/{id}": {
+      "get": {
+        "tags": [
+          "Actors"
+        ],
+        "description": "Gets an actor by it's id",
+        "operationId": "Actors_GetActorById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An Actor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Actor"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Actor not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Actors"
+        ],
+        "description": "Update an existing actor",
+        "operationId": "Actors_UpdateActor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Actor"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Updated Actor"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Actors"
+        ],
+        "description": "Delete an actor",
+        "operationId": "Actors_DeleteActor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted Actor"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Actors": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Actor"
+        }
+      },
+      "Actor": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "age": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "integer"
+          }
+        },
+        "example": {
+          "name": "",
+          "id": "",
+          "age": ""
+        }
+      }
+    }
+  }
+}

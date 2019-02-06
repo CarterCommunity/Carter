@@ -10,4 +10,7 @@
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Shouldly" Version="4.0.0-beta0001" />
+  </ItemGroup>
 </Project>
