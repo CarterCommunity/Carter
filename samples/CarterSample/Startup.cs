@@ -40,7 +40,11 @@ namespace CarterSample
         {
             return new CarterOptions(ctx => this.GetBeforeHook(ctx), ctx => this.GetAfterHook(ctx),
                 new OpenApiOptions("Carter <3 OpenApi", addresses,
-                    new Dictionary<string, OpenApiSecurity> { { "BearerAuth", new OpenApiSecurity { BearerFormat = "JWT", Type = "http", Scheme = "Bearer" } } }));
+                    new Dictionary<string, OpenApiSecurity>
+                    {
+                        { "BearerAuth", new OpenApiSecurity { BearerFormat = "JWT", Type = "http", Scheme = "bearer" } },
+                        {"ApiKey", new OpenApiSecurity{Type = "apiKey", Name = "X-API-KEY", In = "header"}}
+                    }));
         }
 
         private Task<bool> GetBeforeHook(HttpContext ctx)

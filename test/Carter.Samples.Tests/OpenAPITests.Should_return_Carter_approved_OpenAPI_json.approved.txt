@@ -31,7 +31,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "BearerAuth": [ ]
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -180,14 +185,14 @@
     "securitySchemes": {
       "BearerAuth": {
         "type": "http",
-        "scheme": "Bearer",
+        "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "ApiKey": {
+        "type": "apiKey",
+        "name": "X-API-KEY",
+        "in": "header"
       }
     }
-  },
-  "security": [
-    {
-      "BearerAuth": [ ]
-    }
-  ]
+  }
 }

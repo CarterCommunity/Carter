@@ -64,5 +64,7 @@ namespace Carter
         public string Scheme { get; set; }
 
         public string BearerFormat { get; set; }
+
+        public string In { get; set; }
     }
 }
