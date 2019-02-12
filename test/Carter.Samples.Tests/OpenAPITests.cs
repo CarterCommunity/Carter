@@ -19,7 +19,10 @@ namespace Carter.Samples.Tests
         public OpenAPITests()
         {
             var featureCollection = new FeatureCollection();
-            featureCollection.Set<IServerAddressesFeature>(new ServerAddressesFeature());
+            var feature = new ServerAddressesFeature();
+            feature.Addresses.Add("http://localhost");
+            feature.Addresses.Add("https://localhost");
+            featureCollection.Set<IServerAddressesFeature>(feature);
 
             var server = new TestServer(WebHost.CreateDefaultBuilder()
                     .UseStartup<Startup>(), featureCollection
@@ -31,7 +34,8 @@ namespace Carter.Samples.Tests
         [Fact]
         public async Task Should_return_Carter_approved_OpenAPI_json()
         {
-            ShouldlyConfiguration.DiffTools.RegisterDiffTool(new DiffTool("diffmerge", new DiffToolConfig {LinuxPath = "/usr/local/bin", MacPath = "/usr/local/bin/diffmerge", WindowsPath = "/usr/local/bin"}, (received, approved, exists) => { return approved; }));
+            ShouldlyConfiguration.DiffTools.RegisterDiffTool(new DiffTool("diffmerge",
+                new DiffToolConfig { LinuxPath = "/usr/local/bin", MacPath = "/usr/local/bin/diffmerge", WindowsPath = "/usr/local/bin" }, (received, approved, exists) => { return approved; }));
 
             var res = await this.client.GetAsync("/openapi");
 

@@ -29,8 +29,25 @@ namespace Carter.OpenApi
                     },
                     Servers = new List<OpenApiServer>(options.OpenApi.ServerUrls.Select(x => new OpenApiServer { Url = x })),
                     Paths = new OpenApiPaths(),
-                    Components = new OpenApiComponents()
+                    Components = new OpenApiComponents(),
                 };
+
+                foreach (var apiSecurity in options.OpenApi.Securities)
+                {
+                    var scheme = new OpenApiSecurityScheme
+                    {
+                        Name = apiSecurity.Value.Name,
+                        Type = (SecuritySchemeType)Enum.Parse(typeof(SecuritySchemeType), apiSecurity.Value.Type, ignoreCase: true),
+                        Scheme = apiSecurity.Value.Scheme,
+                        BearerFormat = apiSecurity.Value.BearerFormat
+                    };
+
+                    document.Components.SecuritySchemes.Add(apiSecurity.Key, scheme);
+                    document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+                    {
+                        { new OpenApiSecurityScheme { Reference = new OpenApiReference { Id = apiSecurity.Key, Type = ReferenceType.SecurityScheme }, UnresolvedReference = true }, new List<string>() }
+                    });
+                }
 
                 foreach (var routeMetaData in metaDatas.GroupBy(pair => pair.Key.path))
                 {

@@ -4,6 +4,14 @@
     "title": "Carter <3 OpenApi",
     "version": "3.0.0"
   },
+  "servers": [
+    {
+      "url": "http://localhost"
+    },
+    {
+      "url": "https://localhost"
+    }
+  ],
   "paths": {
     "/actors": {
       "get": {
@@ -168,6 +176,18 @@
           "age": ""
         }
       }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "Bearer",
+        "bearerFormat": "JWT"
+      }
     }
-  }
+  },
+  "security": [
+    {
+      "BearerAuth": [ ]
+    }
+  ]
 }
