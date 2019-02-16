@@ -41,11 +41,12 @@ namespace Carter
 
     public class OpenApiOptions
     {
-        public OpenApiOptions(string documentTitle, IEnumerable<string> addresses, Dictionary<string, OpenApiSecurity> securityDefinitions)
+        public OpenApiOptions(string documentTitle, IEnumerable<string> addresses, Dictionary<string, OpenApiSecurity> securityDefinitions, IEnumerable<string> globalSecurityDefinitions = null)
         {
             this.DocumentTitle = documentTitle;
             this.ServerUrls = addresses;
             this.Securities = securityDefinitions;
+            this.GlobalSecurityDefinitions = globalSecurityDefinitions ?? Enumerable.Empty<string>();
         }
 
         public string DocumentTitle { get; }
@@ -53,6 +54,8 @@ namespace Carter
         public IEnumerable<string> ServerUrls { get; }
 
         public Dictionary<string, OpenApiSecurity> Securities { get; }
+        
+        public IEnumerable<string> GlobalSecurityDefinitions { get; }
     }
 
     public class OpenApiSecurity
