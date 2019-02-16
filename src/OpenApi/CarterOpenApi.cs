@@ -31,6 +31,18 @@ namespace Carter.OpenApi
                     Paths = new OpenApiPaths(),
                     Components = new OpenApiComponents()
                 };
+                foreach (var globalSecurity in options.OpenApi.GlobalSecurityDefinitions)
+                {
+                    var req = new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                                { Reference = new OpenApiReference { Id = globalSecurity, Type = ReferenceType.SecurityScheme }, UnresolvedReference = true },
+                            new List<string>()
+                        }
+                    };
+                    document.SecurityRequirements.Add(req);
+                }
 
                 foreach (var apiSecurity in options.OpenApi.Securities)
                 {

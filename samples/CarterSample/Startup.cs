@@ -43,8 +43,8 @@ namespace CarterSample
                     new Dictionary<string, OpenApiSecurity>
                     {
                         { "BearerAuth", new OpenApiSecurity { BearerFormat = "JWT", Type = "http", Scheme = "bearer" } },
-                        {"ApiKey", new OpenApiSecurity{Type = "apiKey", Name = "X-API-KEY", In = "header"}}
-                    }));
+                        { "ApiKey", new OpenApiSecurity { Type = "apiKey", Name = "X-API-KEY", In = "header" } }
+                    }, new[] { "BearerAuth" }));
         }
 
         private Task<bool> GetBeforeHook(HttpContext ctx)

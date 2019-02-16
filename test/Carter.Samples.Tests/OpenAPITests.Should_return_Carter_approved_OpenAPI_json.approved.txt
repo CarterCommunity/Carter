@@ -34,7 +34,7 @@
         },
         "security": [
           {
-            "BearerAuth": [ ]
+            "ApiKey": [ ]
           }
         ]
       },
@@ -194,5 +194,10 @@
         "in": "header"
       }
     }
-  }
+  },
+  "security": [
+    {
+      "BearerAuth": [ ]
+    }
+  ]
 }

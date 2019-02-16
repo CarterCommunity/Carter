@@ -21,6 +21,6 @@ namespace CarterSample.Features.Actors
 
         public override string OperationId { get; } = "Actors_GetActors";
 
-        public override string SecuritySchema { get; set; } = "BearerAuth";
+        public override string SecuritySchema { get; set; } = "ApiKey";
     }
 }
