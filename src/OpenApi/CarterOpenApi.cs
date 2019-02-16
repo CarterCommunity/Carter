@@ -32,6 +32,24 @@ namespace Carter.OpenApi
                     Components = new OpenApiComponents()
                 };
 
+                foreach (var apiSecurity in options.OpenApi.Securities)
+                {
+                    var scheme = new OpenApiSecurityScheme
+                    {
+                        Name = apiSecurity.Value.Name,
+                        Type = (SecuritySchemeType)Enum.Parse(typeof(SecuritySchemeType), apiSecurity.Value.Type, ignoreCase: true),
+                        Scheme = apiSecurity.Value.Scheme,
+                        BearerFormat = apiSecurity.Value.BearerFormat,
+                        In = apiSecurity.Value.In == null ? ParameterLocation.Query : (ParameterLocation)Enum.Parse(typeof(ParameterLocation), apiSecurity.Value.In, ignoreCase: true)
+                    };
+
+                    document.Components.SecuritySchemes.Add(apiSecurity.Key, scheme);
+                    // document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+                    // {
+                    //     { new OpenApiSecurityScheme { Reference = new OpenApiReference { Id = apiSecurity.Key, Type = ReferenceType.SecurityScheme }, UnresolvedReference = true }, new List<string>() }
+                    // });
+                }
+
                 foreach (var routeMetaData in metaDatas.GroupBy(pair => pair.Key.path))
                 {
                     var pathItem = new OpenApiPathItem();
@@ -50,8 +68,25 @@ namespace Carter.OpenApi
                     {
                         var operation = new OpenApiOperation
                         {
-                            Tags = new List<OpenApiTag> { new OpenApiTag { Name = methodRoute.Value.Tag } }, Description = methodRoute.Value.Description, OperationId = methodRoute.Value.OperationId
+                            Tags = new List<OpenApiTag> { new OpenApiTag { Name = methodRoute.Value.Tag } },
+                            Description = methodRoute.Value.Description,
+                            OperationId = methodRoute.Value.OperationId
                         };
+
+                        if (!string.IsNullOrWhiteSpace(methodRoute.Value.SecuritySchema))
+                        {
+                            operation.Security = new List<OpenApiSecurityRequirement>(new[]
+                            {
+                                new OpenApiSecurityRequirement
+                                {
+                                    {
+                                        new OpenApiSecurityScheme
+                                            { Reference = new OpenApiReference { Id = methodRoute.Value.SecuritySchema, Type = ReferenceType.SecurityScheme }, UnresolvedReference = true },
+                                        new List<string>()
+                                    }
+                                }
+                            });
+                        }
 
                         CreateOpenApiRequestBody(document, methodRoute, operation, context);
 
@@ -254,7 +289,7 @@ namespace Carter.OpenApi
                 {
                     Type = "object",
                     Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema { Type = GetOpenApiTypeMapping(value.Type) }),
-                    Example = propObj,
+                    Example = propObj
                 };
 
                 //Thanks for the pointers https://github.com/micro-elements/MicroElements.Swashbuckle.FluentValidation

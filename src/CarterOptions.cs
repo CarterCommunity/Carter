@@ -20,7 +20,7 @@ namespace Carter
         {
             this.Before = before;
             this.After = after;
-            this.OpenApi = openApiOptions ?? new OpenApiOptions(Enumerable.Empty<string>());
+            this.OpenApi = openApiOptions ?? new OpenApiOptions("Carter <3 OpenApi", Enumerable.Empty<string>(), new Dictionary<string, OpenApiSecurity>());
         }
 
         /// <summary>
@@ -33,18 +33,38 @@ namespace Carter
         /// </summary>
         public Func<HttpContext, Task> After { get; }
 
-        public OpenApiOptions OpenApi { get; set; }
+        /// <summary>
+        /// Options for configuring the OpenAPI response
+        /// </summary>
+        public OpenApiOptions OpenApi { get; }
     }
 
     public class OpenApiOptions
     {
-        public OpenApiOptions(IEnumerable<string> addresses)
+        public OpenApiOptions(string documentTitle, IEnumerable<string> addresses, Dictionary<string, OpenApiSecurity> securityDefinitions)
         {
+            this.DocumentTitle = documentTitle;
             this.ServerUrls = addresses;
+            this.Securities = securityDefinitions;
         }
 
-        public string DocumentTitle { get; set; } = "Carter <3 OpenApi";
+        public string DocumentTitle { get; }
 
-        public IEnumerable<string> ServerUrls { get; set; }
+        public IEnumerable<string> ServerUrls { get; }
+
+        public Dictionary<string, OpenApiSecurity> Securities { get; }
+    }
+
+    public class OpenApiSecurity
+    {
+        public string Type { get; set; }
+
+        public string Name { get; set; }
+
+        public string Scheme { get; set; }
+
+        public string BearerFormat { get; set; }
+
+        public string In { get; set; }
     }
 }
