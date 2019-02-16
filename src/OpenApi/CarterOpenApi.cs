@@ -56,10 +56,6 @@ namespace Carter.OpenApi
                     };
 
                     document.Components.SecuritySchemes.Add(apiSecurity.Key, scheme);
-                    // document.SecurityRequirements.Add(new OpenApiSecurityRequirement
-                    // {
-                    //     { new OpenApiSecurityScheme { Reference = new OpenApiReference { Id = apiSecurity.Key, Type = ReferenceType.SecurityScheme }, UnresolvedReference = true }, new List<string>() }
-                    // });
                 }
 
                 foreach (var routeMetaData in metaDatas.GroupBy(pair => pair.Key.path))

@@ -16,6 +16,7 @@ namespace Carter
         /// </summary>
         /// <param name="before">A global before handler which is invoked before all routes</param>
         /// <param name="after">A global after handler which is invoked after all routes</param>
+        /// <param name="openApiOptions">A <see cref="OpenApiOptions"/> instance to configure OpenApi</param>
         public CarterOptions(Func<HttpContext, Task<bool>> before = null, Func<HttpContext, Task> after = null, OpenApiOptions openApiOptions = null)
         {
             this.Before = before;
@@ -39,8 +40,18 @@ namespace Carter
         public OpenApiOptions OpenApi { get; }
     }
 
+    /// <summary>
+    /// A class that allows you to configure OpenApi inside of Carter
+    /// </summary>
     public class OpenApiOptions
     {
+        /// <summary>
+        /// Initializes <see cref="OpenApiOptions"/>
+        /// </summary>
+        /// <param name="documentTitle">The title of the OpenApi document</param>
+        /// <param name="addresses">The servers property of the OpenApi document</param>
+        /// <param name="securityDefinitions">The available security definitions of the OpenApi document</param>
+        /// <param name="globalSecurityDefinitions">The global security definitions that apply to the api that OpenApi describes</param>
         public OpenApiOptions(string documentTitle, IEnumerable<string> addresses, Dictionary<string, OpenApiSecurity> securityDefinitions, IEnumerable<string> globalSecurityDefinitions = null)
         {
             this.DocumentTitle = documentTitle;
@@ -58,6 +69,9 @@ namespace Carter
         public IEnumerable<string> GlobalSecurityDefinitions { get; }
     }
 
+    /// <summary>
+    /// A class that describes the OpenApi security definitions
+    /// </summary>
     public class OpenApiSecurity
     {
         public string Type { get; set; }
