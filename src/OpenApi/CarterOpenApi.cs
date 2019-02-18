@@ -1,8 +1,11 @@
 namespace Carter.OpenApi
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
+    using System.Text;
     using System.Threading.Tasks;
     using Carter.Request;
     using FluentValidation.Validators;
@@ -196,11 +199,14 @@ namespace Carter.OpenApi
                         Type responseType;
                         var responseTypeName = string.Empty;
                         var singularTypeName = string.Empty;
+                        object singleExample = null;
 
                         if (valueStatusCode.Response.IsArray() || valueStatusCode.Response.IsCollection() || valueStatusCode.Response.IsEnumerable())
                         {
                             arrayType = true;
                             responseType = valueStatusCode.Response.GetElementType();
+                            singleExample = ((IEnumerable<object>)valueStatusCode.ResponseExample)?.FirstOrDefault();
+
                             if (responseType == null)
                             {
                                 responseType = valueStatusCode.Response.GetGenericArguments().First();
@@ -218,30 +224,12 @@ namespace Carter.OpenApi
                             .Select(x => (Name: x.Name.ToLower(), Type: x.PropertyType.Name.ToLower()))
                             .ToList();
 
-                        var arrbj = new OpenApiArray();
-                        var propObj = new OpenApiObject();
-
-                        foreach (var propertyInfo in propNames)
-                        {
-                            propObj.Add(propertyInfo.Name, new OpenApiString("")); //TODO Could use Bogus to generate some data rather than empty string
-                        }
-
                         var schema = new OpenApiSchema
                         {
                             Type = "object",
                             Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema { Type = GetOpenApiTypeMapping(value.Type) }),
-                            Example = propObj
+                            Example = CreateOpenApiExample(responseType, singleExample),
                         };
-
-                        var arrayschema = new OpenApiSchema { Type = "array" };
-
-                        if (arrayType)
-                        {
-                            arrbj.Add(propObj);
-                            arrayschema.Items = schema;
-                        }
-
-                        var respObj = arrayType ? new OpenApiObject { { responseType.Name.ToLower(), arrbj } } : propObj;
 
                         openApiResponse = new OpenApiResponse
                         {
@@ -269,7 +257,10 @@ namespace Carter.OpenApi
                             else
                             {
                                 document.Components.Schemas.Add(responseTypeName,
-                                    new OpenApiSchema { Type = "array", Items = new OpenApiSchema { Reference = new OpenApiReference { Id = singularTypeName, Type = ReferenceType.Schema } } });
+                                    new OpenApiSchema {
+                                            Type = "array",
+                                            Example = CreateOpenApiExample(valueStatusCode.Response, valueStatusCode.ResponseExample),
+                                            Items = new OpenApiSchema { Reference = new OpenApiReference { Id = singularTypeName, Type = ReferenceType.Schema } } });
                                 //TODO Should we check that at the end that any components that are "array" types have a component registered of the  singularTypeName for example you could have IEnumerable<Foo> but Foo is not used in another route so won't be registered in components
                             }
                         }
@@ -277,10 +268,6 @@ namespace Carter.OpenApi
 
                     operation.Responses.Add(valueStatusCode.Code.ToString(), openApiResponse);
                 }
-            }
-            else
-            {
-                operation.Responses.Add("200", new OpenApiResponse { Description = string.Empty });
             }
         }
 
@@ -295,6 +282,7 @@ namespace Carter.OpenApi
             {
                 bool arrayType = false;
                 Type requestType;
+                object singleExample = null;
 
                 if (keyValuePair.Value.Request.IsArray() || keyValuePair.Value.Request.IsCollection() || keyValuePair.Value.Request.IsEnumerable())
                 {
@@ -303,35 +291,29 @@ namespace Carter.OpenApi
                     if (requestType == null)
                     {
                         requestType = keyValuePair.Value.Request.GetGenericArguments().First();
+                        singleExample = ((IEnumerable<object>)keyValuePair.Value.RequestExample)?.FirstOrDefault();
                     }
                 }
                 else
                 {
                     requestType = keyValuePair.Value.Request;
+                    singleExample = keyValuePair.Value.RequestExample;
                 }
 
                 var propNames = requestType.GetProperties()
                     .Select(x => (Name: x.Name.ToLower(), Type: x.PropertyType.Name.ToLower()))
                     .ToList();
 
-                var arrbj = new OpenApiArray();
-                var propObj = new OpenApiObject();
+                var validatorLocator = context.RequestServices.GetRequiredService<IValidatorLocator>();
 
-                foreach (var propertyInfo in propNames)
-                {
-                    propObj.Add(propertyInfo.Name, new OpenApiString("")); //TODO Could use Bogus to generate some data rather than empty string
-                }
+                var validator = validatorLocator.GetValidator(requestType);
 
                 var schema = new OpenApiSchema
                 {
                     Type = "object",
                     Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema { Type = GetOpenApiTypeMapping(value.Type) }),
-                    Example = propObj
+                    Example = CreateOpenApiExample(requestType, singleExample),
                 };
-
-                var validatorLocator = context.RequestServices.GetRequiredService<IValidatorLocator>();
-
-                var validator = validatorLocator.GetValidator(requestType);
 
                 if (validator != null)
                 {
@@ -428,22 +410,10 @@ namespace Carter.OpenApi
                     }
                 }
 
-                var arrayschema = new OpenApiSchema { Type = "array" };
-
-                if (arrayType)
-                {
-                    arrbj.Add(propObj);
-                    arrayschema.Items = schema;
-                }
-
-                //var reqObj = arrayType ? new OpenApiObject { { requestType.Name.ToLower(), arrbj } } : propObj;
-
                 var requestBody = new OpenApiRequestBody();
                 requestBody.Content.Add("application/json",
                     new OpenApiMediaType
                     {
-                        //Example = reqObj,
-                        //Schema = arrayType ? arrayschema : schema
                         Schema = new OpenApiSchema { Reference = new OpenApiReference { Id = requestType.Name, Type = ReferenceType.Schema } }
                     });
 
@@ -504,6 +474,107 @@ namespace Carter.OpenApi
                 default:
                     return "string";
             }
+        }
+
+        private static IOpenApiAny CreateOpenApiExample(Type exampleType, object exampleInstance) =>
+            exampleType == null
+                ? null
+                : exampleInstance == null
+                    ? CreateOpenApiObject(exampleType, true)
+                    : CreateOpenApiObject(exampleType, false, exampleInstance);
+
+        private static readonly Dictionary<Type, (Func<object, IOpenApiAny> PrimitiveTypeFactory, object DefaultValue)> OpenApiPrimitiveTypeMappings = new Dictionary<Type, (Func<object, IOpenApiAny> PrimitiveTypeFactory, object DefaultValue)>
+        {
+            [typeof(bool)] = (x => new OpenApiBoolean((bool)x), false),
+
+            [typeof(int)] = (x => new OpenApiInteger((int)x), 0),
+            [typeof(short)] = (x => new OpenApiInteger((int)x), 0),
+            [typeof(ushort)] = (x => new OpenApiInteger((int)x), 0),
+
+            [typeof(uint)] = (x => new OpenApiLong((long)x), 0),
+            [typeof(long)] = (x => new OpenApiLong((long)x), 0),
+            [typeof(ulong)] = (x => new OpenApiLong((long)x), 0),
+
+            [typeof(float)] = (x => new OpenApiFloat((float)x), 0.0f),
+            [typeof(double)] = (x => new OpenApiDouble((double)x), 0.0d),
+            [typeof(decimal)] = (x => new OpenApiDouble(Convert.ToDouble((decimal)x)), 0.1m),
+
+            [typeof(byte)] = (x => new OpenApiByte((byte)x), (byte)0xFF),
+
+            // Passing an actual byte[] causes an OpenApiWriterException
+            // "The type 'System.Byte[]' is not supported in Open API document."
+            // For now i've set the default example to null, which works. But this might catch
+            // people out if they are providing their own example instances - might need to special
+            // case the handling of these?
+            [typeof(byte[])] = (x => new OpenApiBinary((byte[])x), null), 
+            
+            [typeof(string)] = (x => new OpenApiString((string) x), "Example"),
+            
+            [typeof(DateTime)] = (x => new OpenApiDateTime((DateTime) x), DateTime.Now),
+        };
+
+        private static IOpenApiAny CreateOpenApiObject(Type objectType, bool useDefaults, object exampleValue = null)
+        {
+            if (exampleValue == null && !useDefaults)
+            {
+                return new OpenApiNull();
+            }
+            if (OpenApiPrimitiveTypeMappings.TryGetValue(objectType, out var primitiveMapping))
+            {
+                return primitiveMapping.PrimitiveTypeFactory(useDefaults
+                    ? primitiveMapping.DefaultValue
+                    : exampleValue);
+            }
+
+            if (objectType.IsArray() || objectType.IsCollection() || objectType.IsEnumerable())
+            {
+                var arrayElementType = objectType.GetElementType() ?? GetEnumerableType(objectType);
+
+                var arrayElements = useDefaults
+                    ? (IEnumerable)Activator.CreateInstance(objectType)
+                    : (IEnumerable)exampleValue;
+
+                var arrayExample = new OpenApiArray();
+
+                foreach (var element in arrayElements)
+                {
+                    arrayExample.Add(CreateOpenApiObject(arrayElementType, useDefaults, element));
+                }
+
+                return arrayExample;
+            }
+
+            var example = new OpenApiObject();
+
+            var properties = objectType.GetProperties();
+            foreach (var property in properties)
+            {
+                object propertyValue = null;
+                if (exampleValue != null)
+                {
+                    propertyValue = property.GetValue(exampleValue);
+                }
+
+                // TODO: I Maintained the original functionality of name.tolower here, but camelcase would be nicer I think?
+                example[property.Name.ToLower()] = CreateOpenApiObject(property.PropertyType, useDefaults, propertyValue);
+            }
+
+            return example;
+        }
+
+        public static Type GetEnumerableType(Type type)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                return type.GetGenericArguments()[0];
+
+            var iface = (from i in type.GetInterfaces()
+                where i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                select i).FirstOrDefault();
+
+            if (iface == null)
+                return null;
+
+            return GetEnumerableType(iface);
         }
     }
 }
