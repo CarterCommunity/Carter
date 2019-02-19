@@ -531,7 +531,7 @@ namespace Carter.OpenApi
                 var arrayElementType = objectType.GetElementType() ?? GetEnumerableType(objectType);
 
                 var arrayElements = useDefaults
-                    ? (IEnumerable)Activator.CreateInstance(objectType)
+                    ? (IEnumerable)new List<object>()
                     : (IEnumerable)exampleValue;
 
                 var arrayExample = new OpenApiArray();
