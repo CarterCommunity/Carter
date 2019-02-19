@@ -42,8 +42,8 @@ namespace CarterSample
                 new OpenApiOptions("Carter <3 OpenApi", addresses,
                     new Dictionary<string, OpenApiSecurity>
                     {
-                        { "BearerAuth", new OpenApiSecurity { BearerFormat = "JWT", Type = "http", Scheme = "bearer" } },
-                        { "ApiKey", new OpenApiSecurity { Type = "apiKey", Name = "X-API-KEY", In = "header" } }
+                        { "BearerAuth", new OpenApiSecurity { BearerFormat = "JWT", Type = OpenApiSecurityType.http, Scheme = "bearer" } },
+                        { "ApiKey", new OpenApiSecurity { Type = OpenApiSecurityType.apiKey, Name = "X-API-KEY", In = OpenApiIn.header } }
                     }, new[] { "BearerAuth" }));
         }
 

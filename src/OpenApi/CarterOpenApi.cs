@@ -49,10 +49,10 @@ namespace Carter.OpenApi
                     var scheme = new OpenApiSecurityScheme
                     {
                         Name = apiSecurity.Value.Name,
-                        Type = (SecuritySchemeType)Enum.Parse(typeof(SecuritySchemeType), apiSecurity.Value.Type, ignoreCase: true),
+                        Type = (SecuritySchemeType)Enum.Parse(typeof(SecuritySchemeType), apiSecurity.Value.Type.ToString(), ignoreCase: true),
                         Scheme = apiSecurity.Value.Scheme,
                         BearerFormat = apiSecurity.Value.BearerFormat,
-                        In = apiSecurity.Value.In == null ? ParameterLocation.Query : (ParameterLocation)Enum.Parse(typeof(ParameterLocation), apiSecurity.Value.In, ignoreCase: true)
+                        In = (ParameterLocation)Enum.Parse(typeof(ParameterLocation), apiSecurity.Value.In.ToString(), ignoreCase: true)
                     };
 
                     document.Components.SecuritySchemes.Add(apiSecurity.Key, scheme);

@@ -74,7 +74,7 @@ namespace Carter
     /// </summary>
     public class OpenApiSecurity
     {
-        public string Type { get; set; }
+        public OpenApiSecurityType Type { get; set; }
 
         public string Name { get; set; }
 
@@ -82,6 +82,27 @@ namespace Carter
 
         public string BearerFormat { get; set; }
 
-        public string In { get; set; }
+        public OpenApiIn In { get; set; }
+    }
+
+    /// <summary>
+    /// Location of the apiKey
+    /// </summary>
+    public enum OpenApiIn
+    {
+        query,
+        header,
+        cookie
+    }
+
+    /// <summary>
+    /// The OpneApi security type
+    /// </summary>
+    public enum OpenApiSecurityType
+    {
+        apiKey,
+        http,
+        oauth2,
+        openIdonnect
     }
 }
