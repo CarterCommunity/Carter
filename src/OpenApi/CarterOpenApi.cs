@@ -148,26 +148,6 @@ namespace Carter.OpenApi
             }
         }
 
-        private static void CreateOpenApiQueryStringParameters(OpenApiOperation operation, QueryStringParameter[] queryStringParameters)
-        {
-            if (queryStringParameters == null || !queryStringParameters.Any())
-            {
-                return;
-            }
-
-            foreach (var queryStringParameter in queryStringParameters)
-            {
-                operation.Parameters.Add(new OpenApiParameter
-                {
-                    In = ParameterLocation.Query,
-                    Required = queryStringParameter.Required,
-                    Name = queryStringParameter.Name,
-                    Description = queryStringParameter.Description,
-                    Schema = new OpenApiSchema { Type = GetOpenApiTypeMapping(queryStringParameter.Type.Name.ToLower()) }
-                });
-            }
-        }
-
         private static void CreateOpenApiRouteConstraints(RouteTemplate template, OpenApiOperation operation)
         {
             if (template.Parameters.Any())
@@ -196,40 +176,26 @@ namespace Carter.OpenApi
                     else
                     {
                         bool arrayType = false;
-                        Type responseType;
+                        Type responseType = valueStatusCode.Response;
                         var responseTypeName = string.Empty;
                         var singularTypeName = string.Empty;
-                        object singleExample = null;
 
                         if (valueStatusCode.Response.IsArray() || valueStatusCode.Response.IsCollection() || valueStatusCode.Response.IsEnumerable())
                         {
                             arrayType = true;
-                            responseType = valueStatusCode.Response.GetElementType();
-                            singleExample = ((IEnumerable<object>)valueStatusCode.ResponseExample)?.FirstOrDefault();
+                            var elementType = valueStatusCode.Response.GetElementType();
 
-                            if (responseType == null)
+                            if (elementType == null)
                             {
-                                responseType = valueStatusCode.Response.GetGenericArguments().First();
-                                responseTypeName = responseType.Name + "s";
-                                singularTypeName = responseType.Name;
+                                elementType = valueStatusCode.Response.GetGenericArguments().First();
+                                responseTypeName = elementType.Name + "s";
+                                singularTypeName = elementType.Name;
                             }
                         }
                         else
                         {
-                            responseType = valueStatusCode.Response;
                             responseTypeName = responseType.Name.Replace("`1", ""); //If type has a generic constraint remove the `1 from PagedList<Foo>
                         }
-
-                        var propNames = responseType.GetProperties()
-                            .Select(x => (Name: x.Name.ToLower(), Type: x.PropertyType.Name.ToLower()))
-                            .ToList();
-
-                        var schema = new OpenApiSchema
-                        {
-                            Type = "object",
-                            Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema { Type = GetOpenApiTypeMapping(value.Type) }),
-                            Example = CreateOpenApiExample(responseType, singleExample),
-                        };
 
                         openApiResponse = new OpenApiResponse
                         {
@@ -240,9 +206,7 @@ namespace Carter.OpenApi
                                     "application/json",
                                     new OpenApiMediaType
                                     {
-                                        //Example = respObj
                                         Schema = new OpenApiSchema { Reference = new OpenApiReference { Id = responseTypeName, Type = ReferenceType.Schema } }
-                                        //Schema = arrayType ? arrayschema : schema
                                     }
                                 }
                             }
@@ -250,8 +214,21 @@ namespace Carter.OpenApi
 
                         if (!document.Components.Schemas.ContainsKey(responseTypeName))
                         {
+                            var example = CreateOpenApiExample(responseType, valueStatusCode.ResponseExample);
+
                             if (!arrayType)
                             {
+                                var propNames = responseType.GetProperties()
+                                    .Select(x => (Name: x.Name.ToLower(), Type: x.PropertyType.Name.ToLower()))
+                                    .ToList();
+
+                                var schema = new OpenApiSchema
+                                {
+                                    Type = "object",
+                                    Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema { Type = GetOpenApiTypeMapping(value.Type) }),
+                                    Example = example,
+                                };
+
                                 document.Components.Schemas.Add(responseTypeName, schema);
                             }
                             else
@@ -259,7 +236,7 @@ namespace Carter.OpenApi
                                 document.Components.Schemas.Add(responseTypeName,
                                     new OpenApiSchema {
                                             Type = "array",
-                                            Example = CreateOpenApiExample(valueStatusCode.Response, valueStatusCode.ResponseExample),
+                                            Example = example,
                                             Items = new OpenApiSchema { Reference = new OpenApiReference { Id = singularTypeName, Type = ReferenceType.Schema } } });
                                 //TODO Should we check that at the end that any components that are "array" types have a component registered of the  singularTypeName for example you could have IEnumerable<Foo> but Foo is not used in another route so won't be registered in components
                             }
@@ -530,17 +507,20 @@ namespace Carter.OpenApi
             {
                 var arrayElementType = objectType.GetElementType() ?? GetEnumerableType(objectType);
 
-                var arrayElements = useDefaults
-                    ? (IEnumerable)new List<object>()
-                    : (IEnumerable)exampleValue;
-
                 var arrayExample = new OpenApiArray();
 
-                foreach (var element in arrayElements)
+                if (useDefaults)
                 {
-                    arrayExample.Add(CreateOpenApiObject(arrayElementType, useDefaults, element));
+                    arrayExample.Add(CreateOpenApiObject(arrayElementType, true));
                 }
-
+                else
+                {
+                    foreach (var element in (IEnumerable)exampleValue)
+                    {
+                        arrayExample.Add(CreateOpenApiObject(arrayElementType, useDefaults, element));
+                    }
+                }
+                
                 return arrayExample;
             }
 
