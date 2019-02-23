@@ -1,11 +1,12 @@
 namespace Carter.Tests
 {
+    using System;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
-    using Microsoft.Extensions.Options;
+    using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
     public class ModuleLifetimeTests
@@ -14,11 +15,17 @@ namespace Carter.Tests
 
         private HttpClient httpClient;
 
-        private void ConfigureServer(bool continueRequest = true)
+        private void ConfigureServer()
         {
             this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(); })
+                .ConfigureServices(x =>
+                {
+                    x.AddScoped<ScopedRequestDependency>();
+                    x.AddTransient<TransientRequestDependency>();
+                    x.AddCarter();
+                })
                 .Configure(x => x.UseCarter()));
+            
             this.httpClient = this.server.CreateClient();
         }
 
@@ -30,6 +37,59 @@ namespace Carter.Tests
             var second = await this.httpClient.GetStringAsync("/instanceid");
 
             Assert.NotEqual(first, second);
+        }
+        
+        [Fact]
+        public async Task Should_resolve_new_scoped_dependency_per_request()
+        {
+            this.ConfigureServer();
+            var first = await this.httpClient.GetStringAsync("/scopedreqdep");
+            var second = await this.httpClient.GetStringAsync("/scopedreqdep");
+
+            Assert.NotEqual(first, second);
+        }
+        
+         
+        [Fact]
+        public async Task Should_resolve_new_transient_dependency_per_request()
+        {
+            this.ConfigureServer();
+            var first = await this.httpClient.GetStringAsync("/transientreqdep");
+            var second = await this.httpClient.GetStringAsync("/transientreqdep");
+
+            Assert.NotEqual(first, second);
+        }
+    }
+
+    public class ScopedRequestDependency
+    {
+        public string GetGuid()
+        {
+            return Guid.NewGuid().ToString();
+        }
+    }
+    
+    public class TransientRequestDependency
+    {
+        public string GetGuid()
+        {
+            return Guid.NewGuid().ToString();
+        }
+    }
+
+    public class ScopedRequestDependencyModule : CarterModule
+    {
+        public ScopedRequestDependencyModule(ScopedRequestDependency scopedRequestDependency)
+        {
+            this.Get("/scopedreqdep", ctx=>ctx.Response.WriteAsync(scopedRequestDependency.GetGuid()));
+        }
+    }
+    
+    public class TransientRequestDependencyModule : CarterModule
+    {
+        public TransientRequestDependencyModule(ScopedRequestDependency scopedRequestDependency)
+        {
+            this.Get("/transientreqdep", ctx=>ctx.Response.WriteAsync(scopedRequestDependency.GetGuid()));
         }
     }
 }
