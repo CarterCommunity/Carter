@@ -3,13 +3,18 @@ namespace Carter.Tests
     using System;
     using System.Linq;
     using Carter.Request;
+    using Carter.Response;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
 
     public class TestModule : CarterModule
     {
+        private Guid _instanceId;
+        
         public TestModule()
         {
+            this._instanceId = Guid.NewGuid();
+            
             this.Before += async ctx =>
             {
                 await ctx.Response.WriteAsync("Before");
@@ -24,6 +29,9 @@ namespace Carter.Tests
                 var id = ctx.Request.Query.As<int>("id");
                 await ctx.Response.WriteAsync($"Managed to parse an int {id}");
             });
+
+            this.Get("/instanceid", ctx =>
+                ctx.Response.WriteAsync(this._instanceId.ToString()));
 
             this.Get("/nullablequerystring", async ctx =>
             {
