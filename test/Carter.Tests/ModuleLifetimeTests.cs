@@ -63,17 +63,31 @@ namespace Carter.Tests
 
     public class ScopedRequestDependency
     {
+        private string instanceId;
+
+        public ScopedRequestDependency()
+        {
+            this.instanceId = Guid.NewGuid().ToString();
+        }
+
         public string GetGuid()
         {
-            return Guid.NewGuid().ToString();
+            return this.instanceId;
         }
     }
     
     public class TransientRequestDependency
     {
+        private readonly string instanceId;
+
+        public TransientRequestDependency()
+        {
+            this.instanceId = Guid.NewGuid().ToString();
+        }
+
         public string GetGuid()
         {
-            return Guid.NewGuid().ToString();
+            return instanceId;
         }
     }
 
