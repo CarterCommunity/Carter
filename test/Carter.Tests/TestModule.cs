@@ -9,11 +9,11 @@ namespace Carter.Tests
 
     public class TestModule : CarterModule
     {
-        private Guid _instanceId;
+        private Guid instanceId;
         
         public TestModule()
         {
-            this._instanceId = Guid.NewGuid();
+            this.instanceId = Guid.NewGuid();
             
             this.Before += async ctx =>
             {
@@ -31,7 +31,7 @@ namespace Carter.Tests
             });
 
             this.Get("/instanceid", ctx =>
-                ctx.Response.WriteAsync(this._instanceId.ToString()));
+                ctx.Response.WriteAsync(this.instanceId.ToString()));
 
             this.Get("/nullablequerystring", async ctx =>
             {
