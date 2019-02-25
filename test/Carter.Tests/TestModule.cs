@@ -3,7 +3,6 @@ namespace Carter.Tests
     using System;
     using System.Linq;
     using Carter.Request;
-    using Carter.Response;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
 
@@ -22,6 +21,7 @@ namespace Carter.Tests
             };
 
             this.After = async ctx => { await ctx.Response.WriteAsync("After"); };
+            
             this.Get("/", async ctx => { await ctx.Response.WriteAsync("Hello"); });
 
             this.Get("/querystring", async ctx =>

@@ -56,7 +56,7 @@ namespace Carter
                     var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
                     foreach (var path in distinctPaths)
                     {
-                        routeBuilder.MapRoute(path, CreateRouteHandler(path, module, statusCodeHandlers, moduleLogger));
+                        routeBuilder.MapRoute(path, CreateRouteHandler(path, module.GetType(), statusCodeHandlers, moduleLogger));
                     }
                 }
             }
@@ -67,12 +67,12 @@ namespace Carter
         }
 
         private static RequestDelegate CreateRouteHandler(
-            string path, CarterModule module, IEnumerable<IStatusCodeHandler> statusCodeHandlers, ILogger logger)
+            string path, Type moduleType, IEnumerable<IStatusCodeHandler> statusCodeHandlers, ILogger logger)
         {
             return async ctx =>
             {
-             //   var module = ctx.RequestServices.GetRequiredService(moduleType) as CarterModule;
-                
+                var module = ctx.RequestServices.GetRequiredService(moduleType) as CarterModule;
+
                 if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
                 {
                     // if the path was registered but a handler matching the
