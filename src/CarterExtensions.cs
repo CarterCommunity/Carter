@@ -5,6 +5,7 @@ namespace Carter
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
@@ -39,7 +40,7 @@ namespace Carter
 
             var routeMetaData = new Dictionary<(string verb, string path), RouteMetaData>();
 
-            //Create a "startup scope" to resolve modules from
+            //Create a "startup scope" to resolve modules from so that they're cleaned up post-startup
             using (var scope = builder.ApplicationServices.CreateScope())
             {
                 var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>().ToList();
@@ -71,6 +72,7 @@ namespace Carter
         {
             return async ctx =>
             {
+                // Now in per-request scope
                 var module = ctx.RequestServices.GetRequiredService(moduleType) as CarterModule;
 
                 if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
@@ -164,33 +166,25 @@ namespace Carter
             }
         }
 
-        /// <summary>
-        /// Adds Carter to the specified <see cref="IServiceCollection"/>.
-        /// </summary>
-        /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
-        /// <param name="assemblyCatalog">Optional <see cref="DependencyContextAssemblyCatalog"/> containing assemblies to add to the services collection. If not provided, the default catalog of assemblies is added, which includes Assembly.GetEntryAssembly.</param>
-        public static void AddCarter(this IServiceCollection services, DependencyContextAssemblyCatalog assemblyCatalog = null)
+        public static void AddCarter(this IServiceCollection services, CarterConfigurator configurator)
+        {
+            AddCarter(services, 
+                configurator.moduleTypes, 
+                configurator.validatorTypes,
+                configurator.statusCodeHandlerTypes,
+                configurator.responseNegotiatorTypes);
+        }
+
+        public static void AddCarter(this IServiceCollection services,
+            DependencyContextAssemblyCatalog assemblyCatalog = null)
         {
             assemblyCatalog = assemblyCatalog ?? new DependencyContextAssemblyCatalog();
 
             var assemblies = assemblyCatalog.GetAssemblies();
 
-            CarterDiagnostics diagnostics = new CarterDiagnostics();
-            services.AddSingleton(diagnostics);
-
             var validators = assemblies.SelectMany(ass => ass.GetTypes())
                 .Where(typeof(IValidator).IsAssignableFrom)
                 .Where(t => !t.GetTypeInfo().IsAbstract);
-
-            foreach (var validator in validators)
-            {
-                diagnostics.AddValidator(validator);
-                services.AddSingleton(typeof(IValidator), validator);
-            }
-
-            services.AddSingleton<IValidatorLocator, DefaultValidatorLocator>();
-
-            services.AddRouting();
 
             var modules = assemblies.SelectMany(x => x.GetTypes()
                 .Where(t =>
@@ -200,20 +194,11 @@ namespace Carter
                     t.IsPublic
                 ));
 
-            foreach (var module in modules)
-            {
-                diagnostics.AddModule(module);
-                services.AddScoped(module);
-                services.AddScoped(typeof(CarterModule), module);
-            }
-
-            var schs = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler)));
-            foreach (var sch in schs)
-            {
-                diagnostics.AddStatusCodeHandler(sch);
-                services.AddScoped(typeof(IStatusCodeHandler), sch);
-            }
-
+            var schs = assemblies.SelectMany(x =>
+                x.GetTypes().Where(t =>
+                    typeof(IStatusCodeHandler).IsAssignableFrom(t) && 
+                    t != typeof(IStatusCodeHandler)));
+            
             var responseNegotiators = assemblies.SelectMany(x => x.GetTypes()
                 .Where(t =>
                     !t.IsAbstract &&
@@ -221,6 +206,42 @@ namespace Carter
                     t != typeof(IResponseNegotiator) &&
                     t != typeof(DefaultJsonResponseNegotiator)
                 ));
+            
+            AddCarter(services, modules, validators, schs, responseNegotiators);
+        }
+        
+        /// <summary>
+        /// Adds Carter to the specified <see cref="IServiceCollection"/>.
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
+        public static void AddCarter(this IServiceCollection services, IEnumerable<Type> moduleTypes, IEnumerable<Type> validatorTypes,
+            IEnumerable<Type> statusCodeHandlerTypes, IEnumerable<Type> responseNegotiators)
+        {
+            CarterDiagnostics diagnostics = new CarterDiagnostics();
+            services.AddSingleton(diagnostics);
+
+            foreach (var validator in validatorTypes)
+            {
+                diagnostics.AddValidator(validator);
+                services.AddSingleton(typeof(IValidator), validator);
+            }
+
+            services.AddSingleton<IValidatorLocator, DefaultValidatorLocator>();
+
+            services.AddRouting();
+
+            foreach (var module in moduleTypes)
+            {
+                diagnostics.AddModule(module);
+                services.AddScoped(module);
+                services.AddScoped(typeof(CarterModule), module);
+            }
+            
+            foreach (var sch in statusCodeHandlerTypes)
+            {
+                diagnostics.AddStatusCodeHandler(sch);
+                services.AddScoped(typeof(IStatusCodeHandler), sch);
+            }
 
             foreach (var negotiator in responseNegotiators)
             {
@@ -229,6 +250,17 @@ namespace Carter
             }
 
             services.AddSingleton<IResponseNegotiator, DefaultJsonResponseNegotiator>();
+        }
+    }
+
+    public static class TypeExtensions
+    {
+        public static void MustDeriveFrom<T>(this Type[] types)
+        {
+            var invalidTypes = types.Where(m => !typeof(T).IsAssignableFrom(m)).ToList();
+            if(invalidTypes.Any()) 
+                throw new ArgumentException($"Modules must derive from {typeof(T).Name}, failing types:" +
+                    $"{string.Join(",", invalidTypes)}");
         }
     }
 }
