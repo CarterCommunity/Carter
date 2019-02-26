@@ -166,13 +166,15 @@ namespace Carter
             }
         }
 
-        public static void AddCarter(this IServiceCollection services, CarterConfigurator configurator)
+        public static void AddCarter(this IServiceCollection services, Action<CarterConfigurator> configurator)
         {
+            var config = new CarterConfigurator();
+            configurator(config);
             AddCarter(services, 
-                configurator.moduleTypes, 
-                configurator.validatorTypes,
-                configurator.statusCodeHandlerTypes,
-                configurator.responseNegotiatorTypes);
+                config.moduleTypes, 
+                config.validatorTypes,
+                config.statusCodeHandlerTypes,
+                config.responseNegotiatorTypes);
         }
 
         public static void AddCarter(this IServiceCollection services,
