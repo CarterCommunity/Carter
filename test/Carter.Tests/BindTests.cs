@@ -23,7 +23,11 @@ namespace Carter.Tests
         public BindTests()
         {
             var server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(); })
+                .ConfigureServices(x => { x.AddCarter(c =>
+                    c.WithModule<BindModule>()
+                        .WithValidator<TestModelValidator>()
+                        .WithValidator<DuplicateTestModelOne>()
+                        .WithValidator<DuplicateTestModelTwo>()); })
                 .Configure(x => x.UseCarter())
             );
             this.httpClient = server.CreateClient();

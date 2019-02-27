@@ -16,7 +16,11 @@ namespace Carter.Tests
         public ResponseNegotiatorTests()
         {
             this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(); })
+                .ConfigureServices(x => { x.AddCarter(c => 
+                    c.WithModule<NegotiatorModule>()
+                        .WithResponseNegotiator<TestResponseNegotiator>()
+                        .WithResponseNegotiator<TestJsonResponseNegotiator>()
+                        .WithResponseNegotiator<TestXmlResponseNegotiator>()); })
                 .Configure(x => x.UseCarter())
             );
             this.httpClient = this.server.CreateClient();
