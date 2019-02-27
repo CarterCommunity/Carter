@@ -17,9 +17,12 @@
         private void ConfigureServer(bool authedUser = false, IEnumerable<Claim> claims = null)
         {
             var server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(c => 
-                    c.WithModule<SecurityClaimsModule>()
-                        .WithModule<SecurityModule>()); })
+                .ConfigureServices(x =>
+                {
+                    x.AddCarter(configurator: c =>
+                        c.WithModule<SecurityClaimsModule>()
+                            .WithModule<SecurityModule>());
+                })
                 .Configure(x =>
                 {
                     if (authedUser)

@@ -166,63 +166,38 @@ namespace Carter
             }
         }
 
-        public static void AddCarter(this IServiceCollection services, Action<CarterConfigurator> configurator)
-        {
-            var config = new CarterConfigurator();
-            configurator(config);
-            AddCarter(services, 
-                config.moduleTypes, 
-                config.validatorTypes,
-                config.statusCodeHandlerTypes,
-                config.responseNegotiatorTypes);
-        }
-
-        public static void AddCarter(this IServiceCollection services,
-            DependencyContextAssemblyCatalog assemblyCatalog = null)
-        {
-            assemblyCatalog = assemblyCatalog ?? new DependencyContextAssemblyCatalog();
-
-            var assemblies = assemblyCatalog.GetAssemblies();
-
-            var validators = assemblies.SelectMany(ass => ass.GetTypes())
-                .Where(typeof(IValidator).IsAssignableFrom)
-                .Where(t => !t.GetTypeInfo().IsAbstract);
-
-            var modules = assemblies.SelectMany(x => x.GetTypes()
-                .Where(t =>
-                    !t.IsAbstract &&
-                    typeof(CarterModule).IsAssignableFrom(t) &&
-                    t != typeof(CarterModule) &&
-                    t.IsPublic
-                ));
-
-            var schs = assemblies.SelectMany(x =>
-                x.GetTypes().Where(t =>
-                    typeof(IStatusCodeHandler).IsAssignableFrom(t) && 
-                    t != typeof(IStatusCodeHandler)));
-            
-            var responseNegotiators = assemblies.SelectMany(x => x.GetTypes()
-                .Where(t =>
-                    !t.IsAbstract &&
-                    typeof(IResponseNegotiator).IsAssignableFrom(t) &&
-                    t != typeof(IResponseNegotiator) &&
-                    t != typeof(DefaultJsonResponseNegotiator)
-                ));
-            
-            AddCarter(services, modules, validators, schs, responseNegotiators);
-        }
-        
         /// <summary>
         /// Adds Carter to the specified <see cref="IServiceCollection"/>.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
-        public static void AddCarter(this IServiceCollection services, IEnumerable<Type> moduleTypes, IEnumerable<Type> validatorTypes,
-            IEnumerable<Type> statusCodeHandlerTypes, IEnumerable<Type> responseNegotiators)
+        /// <param name="assemblyCatalog">Optional <see cref="DependencyContextAssemblyCatalog"/> containing assemblies to add to the services collection. If not provided, the default catalog of assemblies is added, which includes Assembly.GetEntryAssembly.</param>
+        /// <param name="configurator">Optional <see cref="CarterConfigurator"/> to enable registration of specific types within Carter</param>
+        public static void AddCarter(this IServiceCollection services, DependencyContextAssemblyCatalog assemblyCatalog = null, Action<CarterConfigurator> configurator = null)
         {
+            assemblyCatalog = assemblyCatalog ?? new DependencyContextAssemblyCatalog();
+
+            var config = new CarterConfigurator();
+            configurator?.Invoke(config);
+
+            WireupCarter(services, assemblyCatalog, config);
+        }
+
+        private static void WireupCarter(this IServiceCollection services, DependencyContextAssemblyCatalog assemblyCatalog, CarterConfigurator carterConfigurator)
+        {
+            var assemblies = assemblyCatalog.GetAssemblies();
+
+            var validators = GetValidators(carterConfigurator, assemblies);
+
+            var modules = GetModules(carterConfigurator, assemblies);
+
+            var statusCodeHandlers = GetStatusCodeHandlers(carterConfigurator, assemblies);
+
+            var responseNegotiators = GetResponseNegotiators(carterConfigurator, assemblies);
+
             CarterDiagnostics diagnostics = new CarterDiagnostics();
             services.AddSingleton(diagnostics);
 
-            foreach (var validator in validatorTypes)
+            foreach (var validator in validators)
             {
                 diagnostics.AddValidator(validator);
                 services.AddSingleton(typeof(IValidator), validator);
@@ -232,14 +207,14 @@ namespace Carter
 
             services.AddRouting();
 
-            foreach (var module in moduleTypes)
+            foreach (var module in modules)
             {
                 diagnostics.AddModule(module);
                 services.AddScoped(module);
                 services.AddScoped(typeof(CarterModule), module);
             }
-            
-            foreach (var sch in statusCodeHandlerTypes)
+
+            foreach (var sch in statusCodeHandlers)
             {
                 diagnostics.AddStatusCodeHandler(sch);
                 services.AddScoped(typeof(IStatusCodeHandler), sch);
@@ -253,16 +228,82 @@ namespace Carter
 
             services.AddSingleton<IResponseNegotiator, DefaultJsonResponseNegotiator>();
         }
-    }
 
-    public static class TypeExtensions
-    {
-        public static void MustDeriveFrom<T>(this Type[] types)
+        private static IEnumerable<Type> GetResponseNegotiators(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
         {
-            var invalidTypes = types.Where(m => !typeof(T).IsAssignableFrom(m)).ToList();
-            if(invalidTypes.Any()) 
-                throw new ArgumentException($"Modules must derive from {typeof(T).Name}, failing types:" +
-                    $"{string.Join(",", invalidTypes)}");
+            IEnumerable<Type> responseNegotiators;
+            if (carterConfigurator.ResponseNegotiatorTypes == null || !carterConfigurator.ResponseNegotiatorTypes.Any())
+            {
+                responseNegotiators = assemblies.SelectMany(x => x.GetTypes()
+                    .Where(t =>
+                        !t.IsAbstract &&
+                        typeof(IResponseNegotiator).IsAssignableFrom(t) &&
+                        t != typeof(IResponseNegotiator) &&
+                        t != typeof(DefaultJsonResponseNegotiator)
+                    ));
+            }
+            else
+            {
+                responseNegotiators = carterConfigurator.ResponseNegotiatorTypes;
+            }
+
+            return responseNegotiators;
+        }
+
+        private static IEnumerable<Type> GetStatusCodeHandlers(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
+        {
+            IEnumerable<Type> statusCodeHandlers;
+            if (carterConfigurator.StatusCodeHandlerTypes == null || !carterConfigurator.StatusCodeHandlerTypes.Any())
+            {
+                statusCodeHandlers = assemblies.SelectMany(x =>
+                    x.GetTypes().Where(t =>
+                        typeof(IStatusCodeHandler).IsAssignableFrom(t) &&
+                        t != typeof(IStatusCodeHandler)));
+            }
+            else
+            {
+                statusCodeHandlers = carterConfigurator.StatusCodeHandlerTypes;
+            }
+
+            return statusCodeHandlers;
+        }
+
+        private static IEnumerable<Type> GetModules(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
+        {
+            IEnumerable<Type> modules;
+            if (carterConfigurator.ModuleTypes == null || !carterConfigurator.ModuleTypes.Any())
+            {
+                modules = assemblies.SelectMany(x => x.GetTypes()
+                    .Where(t =>
+                        !t.IsAbstract &&
+                        typeof(CarterModule).IsAssignableFrom(t) &&
+                        t != typeof(CarterModule) &&
+                        t.IsPublic
+                    ));
+            }
+            else
+            {
+                modules = carterConfigurator.ModuleTypes;
+            }
+
+            return modules;
+        }
+
+        private static IEnumerable<Type> GetValidators(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
+        {
+            IEnumerable<Type> validators;
+            if (carterConfigurator.ValidatorTypes == null || !carterConfigurator.ValidatorTypes.Any())
+            {
+                validators = assemblies.SelectMany(ass => ass.GetTypes())
+                    .Where(typeof(IValidator).IsAssignableFrom)
+                    .Where(t => !t.GetTypeInfo().IsAbstract);
+            }
+            else
+            {
+                validators = carterConfigurator.ValidatorTypes;
+            }
+
+            return validators;
         }
     }
 }

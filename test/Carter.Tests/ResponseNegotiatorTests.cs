@@ -16,11 +16,14 @@ namespace Carter.Tests
         public ResponseNegotiatorTests()
         {
             this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(c => 
-                    c.WithModule<NegotiatorModule>()
-                        .WithResponseNegotiator<TestResponseNegotiator>()
-                        .WithResponseNegotiator<TestJsonResponseNegotiator>()
-                        .WithResponseNegotiator<TestXmlResponseNegotiator>()); })
+                .ConfigureServices(x =>
+                {
+                    x.AddCarter(configurator: c =>
+                        c.WithModule<NegotiatorModule>()
+                            .WithResponseNegotiator<TestResponseNegotiator>()
+                            .WithResponseNegotiator<TestJsonResponseNegotiator>()
+                            .WithResponseNegotiator<TestXmlResponseNegotiator>());
+                })
                 .Configure(x => x.UseCarter())
             );
             this.httpClient = this.server.CreateClient();
@@ -125,7 +128,7 @@ namespace Carter.Tests
             await res.WriteAsync("XML Response", cancellationToken);
         }
     }
-    
+
     internal class TestJsonResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept) => accept.MediaType.ToString().IndexOf("application/vnd.badger+json", StringComparison.OrdinalIgnoreCase) >= 0;

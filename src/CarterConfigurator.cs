@@ -4,63 +4,116 @@ namespace Carter
     using System.Collections.Generic;
     using FluentValidation;
 
+    /// <summary>
+    /// Configures registrations of certain types within Carter
+    /// </summary>
     public class CarterConfigurator
     {
-        internal List<Type> moduleTypes = new List<Type>();
-        internal List<Type> validatorTypes = new List<Type>();
-        internal List<Type> statusCodeHandlerTypes = new List<Type>();
-        internal List<Type> responseNegotiatorTypes = new List<Type>();
+        public CarterConfigurator()
+        {
+            this.ModuleTypes = new List<Type>();
+            this.ValidatorTypes = new List<Type>();
+            this.StatusCodeHandlerTypes = new List<Type>();
+            this.ResponseNegotiatorTypes = new List<Type>();
+        }
 
+        internal List<Type> ModuleTypes { get; }
+
+        internal List<Type> ValidatorTypes { get; }
+
+        internal List<Type> StatusCodeHandlerTypes { get; }
+
+        internal List<Type> ResponseNegotiatorTypes { get; }
+
+        /// <summary>
+        /// Register a specific <see cref="CarterModule"/>
+        /// </summary>
+        /// <typeparam name="TModule">The <see cref="CarterModule"/> to register</typeparam>
+        /// <returns><see cref="CarterConfigurator"/></returns>
         public CarterConfigurator WithModule<TModule>() where TModule : CarterModule
         {
-            this.moduleTypes.Add(typeof(TModule));
+            this.ModuleTypes.Add(typeof(TModule));
             return this;
         }
 
+        /// <summary>
+        /// Register specific <see cref="CarterModule"/>s
+        /// </summary>
+        /// <param name="modules">An array of <see cref="CarterModule"/>s</param>
+        /// <returns><see cref="CarterConfigurator"/></returns>
         public CarterConfigurator WithModules(params Type[] modules)
         {
             modules.MustDeriveFrom<CarterModule>();
-            this.moduleTypes.AddRange(modules);
+            this.ModuleTypes.AddRange(modules);
             return this;
         }
 
+        /// <summary>
+        /// Register a specific <see cref="IValidator"/>
+        /// </summary>
+        /// <typeparam name="T">The <see cref="IValidator"/> to register</typeparam>
+        /// <returns><see cref="CarterConfigurator"/></returns>
         public CarterConfigurator WithValidator<T>() where T : IValidator
         {
-            this.validatorTypes.Add(typeof(T));
+            this.ValidatorTypes.Add(typeof(T));
             return this;
         }
 
-        public CarterConfigurator WithValidator(params Type[] validators)
+        /// <summary>
+        /// Register specific <see cref="IValidator"/>s
+        /// </summary>
+        /// <param name="validators">An array of <see cref="IValidator"/>s</param>
+        /// <returns><see cref="CarterConfigurator"/></returns>
+        public CarterConfigurator WithValidators(params Type[] validators)
         {
             validators.MustDeriveFrom<IValidator>();
-            this.validatorTypes.AddRange(validators);
+            this.ValidatorTypes.AddRange(validators);
             return this;
         }
 
+        /// <summary>
+        /// Register a specific <see cref="IStatusCodeHandler"/>
+        /// </summary>
+        /// <typeparam name="T">The <see cref="IStatusCodeHandler"/> to register</typeparam>
+        /// <returns><see cref="CarterConfigurator"/></returns>
         public CarterConfigurator WithStatusCodeHandler<T>() where T : IStatusCodeHandler
         {
-            this.statusCodeHandlerTypes.Add(typeof(T));
+            this.StatusCodeHandlerTypes.Add(typeof(T));
             return this;
         }
 
+        /// <summary>
+        /// Register specific <see cref="IStatusCodeHandler"/>s
+        /// </summary>
+        /// <param name="statusCodeHandlers">An array of <see cref="IStatusCodeHandler"/>s</param>
+        /// <returns><see cref="CarterConfigurator"/></returns>
         public CarterConfigurator WithStatusCodeHandlers(params Type[] statusCodeHandlers)
         {
             statusCodeHandlers.MustDeriveFrom<IStatusCodeHandler>();
             return this;
         }
 
+        /// <summary>
+        /// Register a specific <see cref="IResponseNegotiator"/>
+        /// </summary>
+        /// <typeparam name="T">The <see cref="IResponseNegotiator"/> to register</typeparam>
+        /// <returns><see cref="CarterConfigurator"/></returns>
         public CarterConfigurator WithResponseNegotiator<T>() where T : IResponseNegotiator
         {
-            this.responseNegotiatorTypes.Add(typeof(T));
+            this.ResponseNegotiatorTypes.Add(typeof(T));
             return this;
         }
 
+        /// <summary>
+        /// Register specific <see cref="IStatusCodeHandler"/>s
+        /// </summary>
+        /// <param name="responseNegotiators">An array of <see cref="IResponseNegotiator"/>s</param>
+        /// <returns><see cref="CarterConfigurator"/></returns>
         public CarterConfigurator WithResponseNegotiators(params Type[] responseNegotiators)
         {
             responseNegotiators.MustDeriveFrom<IResponseNegotiator>();
-            this.responseNegotiatorTypes.AddRange(responseNegotiators);
+            this.ResponseNegotiatorTypes.AddRange(responseNegotiators);
             return this;
         }
-        
     }
 }

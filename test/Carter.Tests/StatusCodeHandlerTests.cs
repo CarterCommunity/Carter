@@ -12,9 +12,12 @@ namespace Carter.Tests
         public StatusCodeHandlerTests()
         {
             this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(c =>
-                    c.WithModule<StatusCodeHandlerModule>()
-                        .WithStatusCodeHandler<TeapotStatusCodeHandler>()); })
+                .ConfigureServices(x =>
+                {
+                    x.AddCarter(configurator: c =>
+                        c.WithModule<StatusCodeHandlerModule>()
+                            .WithStatusCodeHandler<TeapotStatusCodeHandler>());
+                })
                 .Configure(x => x.UseCarter())
             );
             this.httpClient = this.server.CreateClient();

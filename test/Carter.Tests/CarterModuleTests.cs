@@ -13,12 +13,12 @@
             this.server = new TestServer(new WebHostBuilder()
                 .ConfigureServices(x =>
                 {
-                    x.AddCarter(c =>
+                    x.AddCarter(configurator: c =>
                         c.WithModule<TestModule>()
-                         .WithModule<MultipleShortCircuitOnOff>()
-                         .WithModule<MultipleShortCircuitModule>()
-                         .WithModule<ShortCircuitModule>()
-                         .WithModule<TestModuleBaseClass>());
+                            .WithModule<MultipleShortCircuitOnOff>()
+                            .WithModule<MultipleShortCircuitModule>()
+                            .WithModule<ShortCircuitModule>()
+                            .WithModule<TestModuleBaseClass>());
                 })
                 .Configure(x => x.UseCarter())
             );
@@ -45,8 +45,7 @@
         [Theory]
         [InlineData("/nullablemultiquerystring?id=1&id=2")]
         [InlineData("/nullablemultiquerystring?id=1,2")]
-        public async Task Should_return_GET_requests_with_multiple_parsed_querystring_with_nullable_parameters(
-            string url)
+        public async Task Should_return_GET_requests_with_multiple_parsed_querystring_with_nullable_parameters(string url)
         {
             var response = await this.httpClient.GetAsync(url);
 
@@ -71,8 +70,7 @@
         [Theory]
         [InlineData("/parameterized/foo", "Beforeecho fooAfter")]
         [InlineData("/parameterized/bar", "Beforeecho barAfter")]
-        [InlineData("/parameterized/e3c6af72-9cb7-4638-b3ea-4e4705f96cea",
-            "Beforeecho e3c6af72-9cb7-4638-b3ea-4e4705f96ceaAfter")]
+        [InlineData("/parameterized/e3c6af72-9cb7-4638-b3ea-4e4705f96cea", "Beforeecho e3c6af72-9cb7-4638-b3ea-4e4705f96ceaAfter")]
         [InlineData("/parameterized/911", "Beforeecho 911After")]
         [InlineData("/parameterized/2018-05-15T04:23:14-05:00", "Beforeecho 15/05/2018 09:23:14After")]
         [InlineData("/parameterized/2018-05-15T09:23:14Z", "Beforeecho 15/05/2018 09:23:14After")]
