@@ -1,8 +1,6 @@
 namespace Carter.Tests
 {
     using System;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Http;
     using Xunit;
 
     public class CarterConfiguratorTests
@@ -168,7 +166,7 @@ namespace Carter.Tests
             var configurator = new CarterConfigurator();
 
             //When 
-            configurator.WithStatusCodeHandlers(typeof(TeapotStatusCodeHandler), typeof(LocalStatusCodeHandler));
+            configurator.WithStatusCodeHandlers(typeof(TeapotStatusCodeHandler), typeof(NoOpStatusCodeHandler));
 
             //Then
             Assert.Equal(2, configurator.StatusCodeHandlerTypes.Count);
@@ -181,7 +179,7 @@ namespace Carter.Tests
             var configurator = new CarterConfigurator();
 
             //When
-            var sameconfigurator = configurator.WithStatusCodeHandlers(typeof(TeapotStatusCodeHandler), typeof(LocalStatusCodeHandler));
+            var sameconfigurator = configurator.WithStatusCodeHandlers(typeof(TeapotStatusCodeHandler), typeof(NoOpStatusCodeHandler));
 
             //Then
             Assert.Same(configurator, sameconfigurator);
@@ -262,12 +260,6 @@ namespace Carter.Tests
 
             Assert.Equal("Types must derive from IResponseNegotiator, failing types: System.Int32,System.String", ex.Message);
         }
-        
-        private class LocalStatusCodeHandler : IStatusCodeHandler
-        {
-            public bool CanHandle(int statusCode) => statusCode == 200;
 
-            public Task Handle(HttpContext ctx) => Task.CompletedTask;
-        }
     }
 }
