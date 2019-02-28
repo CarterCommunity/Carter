@@ -9,7 +9,7 @@ namespace Carter
     /// </summary>
     public class CarterConfigurator
     {
-        public CarterConfigurator()
+        internal CarterConfigurator()
         {
             this.ModuleTypes = new List<Type>();
             this.ValidatorTypes = new List<Type>();
@@ -90,6 +90,7 @@ namespace Carter
         public CarterConfigurator WithStatusCodeHandlers(params Type[] statusCodeHandlers)
         {
             statusCodeHandlers.MustDeriveFrom<IStatusCodeHandler>();
+            this.StatusCodeHandlerTypes.AddRange(statusCodeHandlers);
             return this;
         }
 

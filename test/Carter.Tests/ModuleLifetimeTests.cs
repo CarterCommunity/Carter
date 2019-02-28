@@ -58,10 +58,10 @@ namespace Carter.Tests
             
             //Scoped uses the same instance per request so each value separated by a : should be the same
             var first = await this.httpClient.GetStringAsync("/scopedreqdep");
-            Assert.Equal(1, first.Split(":").Distinct().Count());
+            Assert.Single(first.Split(":").Distinct());
             
             var second = await this.httpClient.GetStringAsync("/scopedreqdep");
-            Assert.Equal(1, second.Split(":").Distinct().Count());
+            Assert.Single(second.Split(":").Distinct());
 
             Assert.NotEqual(first, second);
         }

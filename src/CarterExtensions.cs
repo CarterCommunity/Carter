@@ -5,7 +5,6 @@ namespace Carter
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
@@ -232,7 +231,7 @@ namespace Carter
         private static IEnumerable<Type> GetResponseNegotiators(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
         {
             IEnumerable<Type> responseNegotiators;
-            if (carterConfigurator.ResponseNegotiatorTypes == null || !carterConfigurator.ResponseNegotiatorTypes.Any())
+            if (!carterConfigurator.ResponseNegotiatorTypes.Any())
             {
                 responseNegotiators = assemblies.SelectMany(x => x.GetTypes()
                     .Where(t =>
@@ -253,7 +252,7 @@ namespace Carter
         private static IEnumerable<Type> GetStatusCodeHandlers(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
         {
             IEnumerable<Type> statusCodeHandlers;
-            if (carterConfigurator.StatusCodeHandlerTypes == null || !carterConfigurator.StatusCodeHandlerTypes.Any())
+            if (!carterConfigurator.StatusCodeHandlerTypes.Any())
             {
                 statusCodeHandlers = assemblies.SelectMany(x =>
                     x.GetTypes().Where(t =>
@@ -271,7 +270,7 @@ namespace Carter
         private static IEnumerable<Type> GetModules(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
         {
             IEnumerable<Type> modules;
-            if (carterConfigurator.ModuleTypes == null || !carterConfigurator.ModuleTypes.Any())
+            if (!carterConfigurator.ModuleTypes.Any())
             {
                 modules = assemblies.SelectMany(x => x.GetTypes()
                     .Where(t =>
@@ -292,7 +291,7 @@ namespace Carter
         private static IEnumerable<Type> GetValidators(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
         {
             IEnumerable<Type> validators;
-            if (carterConfigurator.ValidatorTypes == null || !carterConfigurator.ValidatorTypes.Any())
+            if (!carterConfigurator.ValidatorTypes.Any())
             {
                 validators = assemblies.SelectMany(ass => ass.GetTypes())
                     .Where(typeof(IValidator).IsAssignableFrom)

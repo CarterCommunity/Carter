@@ -9,8 +9,9 @@ namespace Carter
         {
             var invalidTypes = types.Where(m => !typeof(T).IsAssignableFrom(m)).ToList();
             if (invalidTypes.Any())
-                throw new ArgumentException($"Types must derive from {typeof(T).Name}, failing types:" +
-                    $"{string.Join(",", invalidTypes)}");
+            {
+                throw new ArgumentException($"Types must derive from {typeof(T).Name}, failing types: {string.Join(",", invalidTypes)}");
+            }
         }
     }
 }
