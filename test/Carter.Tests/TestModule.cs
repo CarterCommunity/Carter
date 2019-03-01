@@ -30,8 +30,7 @@ namespace Carter.Tests
                 await ctx.Response.WriteAsync($"Managed to parse an int {id}");
             });
 
-            this.Get("/instanceid", ctx =>
-                ctx.Response.WriteAsync(this.instanceId.ToString()));
+            
 
             this.Get("/nullablequerystring", async ctx =>
             {

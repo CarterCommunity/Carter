@@ -22,16 +22,17 @@ namespace Carter.Tests
     {
         public BindTests()
         {
-            var server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x =>
-                {
-                    x.AddCarter(configurator: c =>
-                        c.WithModule<BindModule>()
-                            .WithValidator<TestModelValidator>()
-                            .WithValidator<DuplicateTestModelOne>()
-                            .WithValidator<DuplicateTestModelTwo>());
-                })
-                .Configure(x => x.UseCarter())
+            var server = new TestServer(
+                new WebHostBuilder()
+                    .ConfigureServices(x =>
+                    {
+                        x.AddCarter(configurator: c =>
+                            c.WithModule<BindModule>()
+                             .WithValidator<TestModelValidator>()
+                             .WithValidator<DuplicateTestModelOne>()
+                             .WithValidator<DuplicateTestModelTwo>());
+                    })
+                    .Configure(x => x.UseCarter())
             );
             this.httpClient = server.CreateClient();
         }
@@ -146,7 +147,10 @@ namespace Carter.Tests
         [Fact]
         public async Task Should_return_instance_of_T()
         {
-            var res = await this.httpClient.PostAsync("/bind", new StringContent("{\"MyIntProperty\":\"911\",\"MyStringProperty\":\"Vincent Vega\"}", Encoding.UTF8, "application/json"));
+            var res = await this.httpClient.PostAsync("/bind",
+                new StringContent(
+                    "{\"MyIntProperty\":\"911\",\"MyStringProperty\":\"Vincent Vega\"}",
+                    Encoding.UTF8, "application/json"));
             var body = await res.Content.ReadAsStringAsync();
             var model = JsonConvert.DeserializeObject<TestModel>(body);
 
@@ -175,7 +179,10 @@ namespace Carter.Tests
         [Fact]
         public async Task Should_return_instance_of_T_on_successful_validation()
         {
-            var res = await this.httpClient.PostAsync("/bindandvalidate", new StringContent("{\"MyIntProperty\":\"911\",\"MyStringProperty\":\"Vincent Vega\"}", Encoding.UTF8, "application/json"));
+            var res = await this.httpClient.PostAsync("/bindandvalidate",
+                new StringContent(
+                    "{\"MyIntProperty\":\"911\",\"MyStringProperty\":\"Vincent Vega\"}",
+                    Encoding.UTF8, "application/json"));
 
             var body = await res.Content.ReadAsStringAsync();
             var model = JsonConvert.DeserializeObject<TestModel>(body);
@@ -218,7 +225,9 @@ namespace Carter.Tests
         [Fact]
         public async Task Should_return_validation_failure_result_when_invalid_data_for_rule()
         {
-            var res = await this.httpClient.PostAsync("/bindandvalidate", new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}", Encoding.UTF8, "application/json"));
+            var res = await this.httpClient.PostAsync("/bindandvalidate",
+                new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}",
+                    Encoding.UTF8, "application/json"));
             var body = await res.Content.ReadAsStringAsync();
             var model = JsonConvert.DeserializeObject<List<ValidationFailure>>(body);
 
@@ -228,7 +237,9 @@ namespace Carter.Tests
         [Fact]
         public async Task Should_return_validation_failure_result_when_no_validator_found()
         {
-            var res = await this.httpClient.PostAsync("/novalidator", new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}", Encoding.UTF8, "application/json"));
+            var res = await this.httpClient.PostAsync("/novalidator",
+                new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}",
+                    Encoding.UTF8, "application/json"));
             var body = await res.Content.ReadAsStringAsync();
             var model = JsonConvert.DeserializeObject<List<ExpandoObject>>(body);
             dynamic first = model.First();
@@ -241,7 +252,9 @@ namespace Carter.Tests
         public async Task Should_throw_exception_when_multiple_validators_found()
         {
             var ex = await Record.ExceptionAsync(async () =>
-                await this.httpClient.PostAsync("/duplicatevalidator", new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}", Encoding.UTF8, "application/json")));
+                await this.httpClient.PostAsync("/duplicatevalidator",
+                    new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}", Encoding.UTF8,
+                        "application/json")));
 
             Assert.IsType<InvalidOperationException>(ex);
         }

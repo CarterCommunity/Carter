@@ -13,9 +13,10 @@
     {
         public ResponseFromStreamTests()
         {
-            this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(configurator: c => c.WithModule<StreamModule>()); })
-                .Configure(x => x.UseCarter())
+            this.server = new TestServer(
+                new WebHostBuilder()
+                    .ConfigureServices(x => { x.AddCarter(configurator: c => c.WithModule<StreamModule>()); })
+                    .Configure(x => x.UseCarter())
             );
             this.httpClient = this.server.CreateClient();
         }
