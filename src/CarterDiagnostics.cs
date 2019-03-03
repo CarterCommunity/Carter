@@ -4,7 +4,7 @@ namespace Carter
     using System.Collections.Generic;
     using Microsoft.Extensions.Logging;
 
-    internal class CarterDiagnostics
+    public class CarterDiagnostics
     {
         private readonly List<Type> modules = new List<Type>();
 
