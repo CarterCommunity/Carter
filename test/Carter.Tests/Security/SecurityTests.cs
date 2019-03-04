@@ -1,4 +1,4 @@
-﻿namespace Carter.Tests
+﻿namespace Carter.Tests.Security
 {
     using System.Collections.Generic;
     using System.Net.Http;

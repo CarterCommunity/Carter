@@ -1,6 +1,9 @@
 namespace Carter.Tests
 {
     using System.Linq;
+    using Carter.Tests.ContentNegotiation;
+    using Carter.Tests.Modelbinding;
+    using Carter.Tests.StatusCodeHandlers;
     using FluentValidation;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;

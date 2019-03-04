@@ -1,4 +1,4 @@
-﻿namespace Carter.Tests
+﻿namespace Carter.Tests.StreamTests
 {
     using System.IO;
     using System.Net.Mime;

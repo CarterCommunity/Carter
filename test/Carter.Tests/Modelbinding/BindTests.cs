@@ -1,4 +1,4 @@
-namespace Carter.Tests
+namespace Carter.Tests.Modelbinding
 {
     using System;
     using System.Collections.Generic;
@@ -9,9 +9,6 @@ namespace Carter.Tests
     using System.Net.Http.Headers;
     using System.Text;
     using System.Threading.Tasks;
-    using Carter.ModelBinding;
-    using Carter.Response;
-    using FluentValidation;
     using FluentValidation.Results;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
@@ -28,9 +25,9 @@ namespace Carter.Tests
                     {
                         x.AddCarter(configurator: c =>
                             c.WithModule<BindModule>()
-                             .WithValidator<TestModelValidator>()
-                             .WithValidator<DuplicateTestModelOne>()
-                             .WithValidator<DuplicateTestModelTwo>());
+                                .WithValidator<TestModelValidator>()
+                                .WithValidator<DuplicateTestModelOne>()
+                                .WithValidator<DuplicateTestModelTwo>());
                     })
                     .Configure(x => x.UseCarter())
             );
@@ -257,117 +254,6 @@ namespace Carter.Tests
                         "application/json")));
 
             Assert.IsType<InvalidOperationException>(ex);
-        }
-    }
-
-    public class TestModel
-    {
-        public int MyIntProperty { get; set; }
-
-        public string MyStringProperty { get; set; }
-
-        public double MyDoubleProperty { get; set; }
-
-        public string[] MyArrayProperty { get; set; }
-
-        public IEnumerable<int> MyIntArrayProperty { get; set; }
-
-        public IEnumerable<int> MyIntListProperty { get; set; }
-    }
-
-    public class TestModelValidator : AbstractValidator<TestModel>
-    {
-        public TestModelValidator()
-        {
-            this.RuleFor(x => x.MyIntProperty).GreaterThan(0);
-            this.RuleFor(x => x.MyStringProperty).NotEmpty();
-        }
-    }
-
-    public class TestModelNoValidator
-    {
-        public int MyIntProperty { get; set; }
-
-        public string MyStringProperty { get; set; }
-    }
-
-    public class DuplicateTestModel
-    {
-    }
-
-    public class DuplicateTestModelOne : AbstractValidator<DuplicateTestModel>
-    {
-    }
-
-    public class DuplicateTestModelTwo : AbstractValidator<DuplicateTestModel>
-    {
-    }
-
-    public class PathTestModel
-    {
-        public string Path { get; set; }
-    }
-
-    public class BindModule : CarterModule
-    {
-        public BindModule()
-        {
-            this.Post("/bind", (req, res, routeData) =>
-            {
-                var model = req.Bind<TestModel>();
-                return res.Negotiate(model);
-            });
-
-            this.Post("/bindandvalidate", (req, res, routeData) =>
-            {
-                var model = req.BindAndValidate<TestModel>();
-                if (!model.ValidationResult.IsValid)
-                {
-                    return res.Negotiate(model.ValidationResult.GetFormattedErrors());
-                }
-
-                return res.Negotiate(model.Data);
-            });
-
-            this.Post("/novalidator", (req, res, routeData) =>
-            {
-                var model = req.BindAndValidate<TestModelNoValidator>();
-                if (!model.ValidationResult.IsValid)
-                {
-                    return res.Negotiate(model.ValidationResult.GetFormattedErrors());
-                }
-
-                return res.Negotiate(model);
-            });
-
-            this.Post("/duplicatevalidator", (req, res, routeData) =>
-            {
-                var model = req.BindAndValidate<DuplicateTestModel>();
-                if (!model.ValidationResult.IsValid)
-                {
-                    return res.Negotiate(model.ValidationResult.GetFormattedErrors());
-                }
-
-                return res.Negotiate(model.Data);
-            });
-
-            this.Post("/bindandsave", async (req, res, routeData) =>
-            {
-                var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-
-                await req.BindAndSaveFile(filePath);
-
-                await res.Negotiate(new PathTestModel { Path = filePath });
-            });
-
-            this.Post("/bindandsavecustomname", async (req, res, routeData) =>
-            {
-                var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-
-                await req.BindAndSaveFile(filePath, "mycustom.txt");
-
-                await res.Negotiate(new PathTestModel { Path = filePath });
-            });
         }
     }
 }

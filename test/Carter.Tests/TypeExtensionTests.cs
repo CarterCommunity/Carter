@@ -2,6 +2,7 @@ namespace Carter.Tests
 {
     using System;
     using System.Linq;
+    using Carter.Tests.Modelbinding;
     using Xunit;
 
     public class TypeExtensionTests

@@ -1,4 +1,4 @@
-﻿namespace Carter.Tests
+﻿namespace Carter.Tests.Modules
 {
     using System.Net.Http;
     using System.Threading.Tasks;
