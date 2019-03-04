@@ -8,8 +8,12 @@ namespace Carter.Tests
 
     public class TestModule : CarterModule
     {
+        private Guid instanceId;
+        
         public TestModule()
         {
+            this.instanceId = Guid.NewGuid();
+            
             this.Before += async ctx =>
             {
                 await ctx.Response.WriteAsync("Before");
@@ -17,6 +21,7 @@ namespace Carter.Tests
             };
 
             this.After = async ctx => { await ctx.Response.WriteAsync("After"); };
+            
             this.Get("/", async ctx => { await ctx.Response.WriteAsync("Hello"); });
 
             this.Get("/querystring", async ctx =>
@@ -24,6 +29,8 @@ namespace Carter.Tests
                 var id = ctx.Request.Query.As<int>("id");
                 await ctx.Response.WriteAsync($"Managed to parse an int {id}");
             });
+
+            
 
             this.Get("/nullablequerystring", async ctx =>
             {

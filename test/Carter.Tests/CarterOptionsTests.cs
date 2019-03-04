@@ -15,13 +15,14 @@ namespace Carter.Tests
 
         private void ConfigureServer(bool continueRequest = true)
         {
-            this.server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(); })
-                .Configure(x => x.UseCarter(new CarterOptions(async ctx =>
-                {
-                    await ctx.Response.WriteAsync("GlobalBefore");
-                    return continueRequest;
-                }, async ctx => await ctx.Response.WriteAsync("GlobalAfter"))))
+            this.server = new TestServer(
+                new WebHostBuilder()
+                    .ConfigureServices(x => { x.AddCarter(configurator: c => c.WithModule<TestModule>()); })
+                    .Configure(x => x.UseCarter(new CarterOptions(async ctx =>
+                    {
+                        await ctx.Response.WriteAsync("GlobalBefore");
+                        return continueRequest;
+                    }, async ctx => await ctx.Response.WriteAsync("GlobalAfter"))))
             );
             this.httpClient = this.server.CreateClient();
         }

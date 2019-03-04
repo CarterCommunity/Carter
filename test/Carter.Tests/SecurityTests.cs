@@ -16,27 +16,33 @@
 
         private void ConfigureServer(bool authedUser = false, IEnumerable<Claim> claims = null)
         {
-            var server = new TestServer(new WebHostBuilder()
-                .ConfigureServices(x => { x.AddCarter(); })
-                .Configure(x =>
-                {
-                    if (authedUser)
+            var server = new TestServer(
+                new WebHostBuilder()
+                    .ConfigureServices(x =>
                     {
-                        x.Use(async (context, next) =>
+                        x.AddCarter(configurator: c =>
+                            c.WithModule<SecurityClaimsModule>()
+                             .WithModule<SecurityModule>());
+                    })
+                    .Configure(x =>
+                    {
+                        if (authedUser)
                         {
-                            var identity = new GenericIdentity("AuthedUser");
-                            if (claims != null)
+                            x.Use(async (context, next) =>
                             {
-                                identity.AddClaims(claims);
-                            }
+                                var identity = new GenericIdentity("AuthedUser");
+                                if (claims != null)
+                                {
+                                    identity.AddClaims(claims);
+                                }
 
-                            context.User = new ClaimsPrincipal(identity);
-                            await next();
-                        });
-                    }
+                                context.User = new ClaimsPrincipal(identity);
+                                await next();
+                            });
+                        }
 
-                    x.UseCarter();
-                })
+                        x.UseCarter();
+                    })
             );
             this.httpClient = server.CreateClient();
         }

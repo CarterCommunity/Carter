@@ -1,5 +1,6 @@
 namespace Carter
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -23,12 +24,12 @@ namespace Carter
         /// <returns>A reference to this instance after the operation has completed.</returns>
         public static IApplicationBuilder UseCarter(this IApplicationBuilder builder, CarterOptions options = null)
         {
-            var diagnostics = builder.ApplicationServices.GetService<CarterDiagnostics>();
+            var carterConfigurator = builder.ApplicationServices.GetService<CarterConfigurator>();
 
             var loggerFactory = builder.ApplicationServices.GetService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger(typeof(CarterDiagnostics));
+            var logger = loggerFactory.CreateLogger(typeof(CarterConfigurator));
 
-            diagnostics.LogDiscoveredCarterTypes(logger);
+            carterConfigurator.LogDiscoveredCarterTypes(logger);
 
             ApplyGlobalBeforeHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalBeforeHook"));
 
@@ -38,7 +39,7 @@ namespace Carter
 
             var routeMetaData = new Dictionary<(string verb, string path), RouteMetaData>();
 
-            //Create a "startup scope" to resolve modules from
+            //Create a "startup scope" to resolve modules from so that they're cleaned up post-startup
             using (var scope = builder.ApplicationServices.CreateScope())
             {
                 var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>().ToList();
@@ -55,7 +56,7 @@ namespace Carter
                     var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
                     foreach (var path in distinctPaths)
                     {
-                        routeBuilder.MapRoute(path, CreateRouteHandler(path, module, statusCodeHandlers, moduleLogger));
+                        routeBuilder.MapRoute(path, CreateRouteHandler(path, module.GetType(), statusCodeHandlers, moduleLogger));
                     }
                 }
             }
@@ -66,10 +67,13 @@ namespace Carter
         }
 
         private static RequestDelegate CreateRouteHandler(
-            string path, CarterModule module, IEnumerable<IStatusCodeHandler> statusCodeHandlers, ILogger logger)
+            string path, Type moduleType, IEnumerable<IStatusCodeHandler> statusCodeHandlers, ILogger logger)
         {
             return async ctx =>
             {
+                // Now in per-request scope
+                var module = ctx.RequestServices.GetRequiredService(moduleType) as CarterModule;
+
                 if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
                 {
                     // if the path was registered but a handler matching the
@@ -166,22 +170,33 @@ namespace Carter
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
         /// <param name="assemblyCatalog">Optional <see cref="DependencyContextAssemblyCatalog"/> containing assemblies to add to the services collection. If not provided, the default catalog of assemblies is added, which includes Assembly.GetEntryAssembly.</param>
-        public static void AddCarter(this IServiceCollection services, DependencyContextAssemblyCatalog assemblyCatalog = null)
+        /// <param name="configurator">Optional <see cref="CarterConfigurator"/> to enable registration of specific types within Carter</param>
+        public static void AddCarter(this IServiceCollection services, DependencyContextAssemblyCatalog assemblyCatalog = null, Action<CarterConfigurator> configurator = null)
         {
             assemblyCatalog = assemblyCatalog ?? new DependencyContextAssemblyCatalog();
 
+            var config = new CarterConfigurator();
+            configurator?.Invoke(config);
+
+            WireupCarter(services, assemblyCatalog, config);
+        }
+
+        private static void WireupCarter(this IServiceCollection services, DependencyContextAssemblyCatalog assemblyCatalog, CarterConfigurator carterConfigurator)
+        {
             var assemblies = assemblyCatalog.GetAssemblies();
 
-            CarterDiagnostics diagnostics = new CarterDiagnostics();
-            services.AddSingleton(diagnostics);
+            var validators = GetValidators(carterConfigurator, assemblies);
 
-            var validators = assemblies.SelectMany(ass => ass.GetTypes())
-                .Where(typeof(IValidator).IsAssignableFrom)
-                .Where(t => !t.GetTypeInfo().IsAbstract);
+            var modules = GetModules(carterConfigurator, assemblies);
+
+            var statusCodeHandlers = GetStatusCodeHandlers(carterConfigurator, assemblies);
+
+            var responseNegotiators = GetResponseNegotiators(carterConfigurator, assemblies);
+
+            services.AddSingleton(carterConfigurator);
 
             foreach (var validator in validators)
             {
-                diagnostics.AddValidator(validator);
                 services.AddSingleton(typeof(IValidator), validator);
             }
 
@@ -189,43 +204,108 @@ namespace Carter
 
             services.AddRouting();
 
-            var modules = assemblies.SelectMany(x => x.GetTypes()
-                .Where(t =>
-                    !t.IsAbstract &&
-                    typeof(CarterModule).IsAssignableFrom(t) &&
-                    t != typeof(CarterModule) &&
-                    t.IsPublic
-                ));
-
             foreach (var module in modules)
             {
-                diagnostics.AddModule(module);
                 services.AddScoped(module);
                 services.AddScoped(typeof(CarterModule), module);
             }
 
-            var schs = assemblies.SelectMany(x => x.GetTypes().Where(t => typeof(IStatusCodeHandler).IsAssignableFrom(t) && t != typeof(IStatusCodeHandler)));
-            foreach (var sch in schs)
+            foreach (var sch in statusCodeHandlers)
             {
-                diagnostics.AddStatusCodeHandler(sch);
                 services.AddScoped(typeof(IStatusCodeHandler), sch);
             }
 
-            var responseNegotiators = assemblies.SelectMany(x => x.GetTypes()
-                .Where(t =>
-                    !t.IsAbstract &&
-                    typeof(IResponseNegotiator).IsAssignableFrom(t) &&
-                    t != typeof(IResponseNegotiator) &&
-                    t != typeof(DefaultJsonResponseNegotiator)
-                ));
-
             foreach (var negotiator in responseNegotiators)
             {
-                diagnostics.AddResponseNegotiator(negotiator);
                 services.AddSingleton(typeof(IResponseNegotiator), negotiator);
             }
 
             services.AddSingleton<IResponseNegotiator, DefaultJsonResponseNegotiator>();
+        }
+
+        private static IEnumerable<Type> GetResponseNegotiators(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
+        {
+            IEnumerable<Type> responseNegotiators;
+            if (!carterConfigurator.ResponseNegotiatorTypes.Any())
+            {
+                responseNegotiators = assemblies.SelectMany(x => x.GetTypes()
+                    .Where(t =>
+                        !t.IsAbstract &&
+                        typeof(IResponseNegotiator).IsAssignableFrom(t) &&
+                        t != typeof(IResponseNegotiator) &&
+                        t != typeof(DefaultJsonResponseNegotiator)
+                    ));
+
+                carterConfigurator.ResponseNegotiatorTypes.AddRange(responseNegotiators);
+            }
+            else
+            {
+                responseNegotiators = carterConfigurator.ResponseNegotiatorTypes;
+            }
+
+            return responseNegotiators;
+        }
+
+        private static IEnumerable<Type> GetStatusCodeHandlers(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
+        {
+            IEnumerable<Type> statusCodeHandlers;
+            if (!carterConfigurator.StatusCodeHandlerTypes.Any())
+            {
+                statusCodeHandlers = assemblies.SelectMany(x =>
+                    x.GetTypes().Where(t =>
+                        typeof(IStatusCodeHandler).IsAssignableFrom(t) &&
+                        t != typeof(IStatusCodeHandler)));
+
+                carterConfigurator.StatusCodeHandlerTypes.AddRange(statusCodeHandlers);
+            }
+            else
+            {
+                statusCodeHandlers = carterConfigurator.StatusCodeHandlerTypes;
+            }
+
+            return statusCodeHandlers;
+        }
+
+        private static IEnumerable<Type> GetModules(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
+        {
+            IEnumerable<Type> modules;
+            if (!carterConfigurator.ModuleTypes.Any())
+            {
+                modules = assemblies.SelectMany(x => x.GetTypes()
+                    .Where(t =>
+                        !t.IsAbstract &&
+                        typeof(CarterModule).IsAssignableFrom(t) &&
+                        t != typeof(CarterModule) &&
+                        t.IsPublic
+                    ));
+
+                carterConfigurator.ModuleTypes.AddRange(modules);
+            }
+            else
+            {
+                modules = carterConfigurator.ModuleTypes;
+            }
+
+            return modules;
+        }
+
+        private static IEnumerable<Type> GetValidators(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
+        {
+            IEnumerable<Type> validators;
+            if (!carterConfigurator.ValidatorTypes.Any())
+            {
+                validators = assemblies.SelectMany(ass => ass.GetTypes())
+                    .Where(typeof(IValidator).IsAssignableFrom)
+                    .Where(t => !t.GetTypeInfo().IsAbstract);
+
+                carterConfigurator.ValidatorTypes.AddRange(validators);
+            }
+            else
+            {
+                validators = carterConfigurator.ValidatorTypes;
+            }
+
+            return validators;
         }
     }
 }
