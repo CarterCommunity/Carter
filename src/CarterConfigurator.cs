@@ -3,6 +3,7 @@ namespace Carter
     using System;
     using System.Collections.Generic;
     using FluentValidation;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Configures registrations of certain types within Carter
@@ -24,6 +25,29 @@ namespace Carter
         internal List<Type> StatusCodeHandlerTypes { get; }
 
         internal List<Type> ResponseNegotiatorTypes { get; }
+        
+        internal void LogDiscoveredCarterTypes(ILogger logger)
+        {
+            foreach (var validator in this.ValidatorTypes)
+            {
+                logger.LogDebug("Found validator {ValidatorName}", validator.Name);
+            }
+
+            foreach (var module in this.ModuleTypes)
+            {
+                logger.LogDebug("Found module {ModuleName}", module.FullName);
+            }
+
+            foreach (var sch in this.StatusCodeHandlerTypes)
+            {
+                logger.LogDebug("Found status code handler {StatusCodeHandlerName}", sch.FullName);
+            }
+
+            foreach (var negotiator in this.ResponseNegotiatorTypes)
+            {
+                logger.LogDebug("Found response negotiator {ResponseNegotiatorName}", negotiator.FullName);
+            }
+        }
 
         /// <summary>
         /// Register a specific <see cref="CarterModule"/>

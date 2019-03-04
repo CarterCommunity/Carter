@@ -24,12 +24,12 @@ namespace Carter
         /// <returns>A reference to this instance after the operation has completed.</returns>
         public static IApplicationBuilder UseCarter(this IApplicationBuilder builder, CarterOptions options = null)
         {
-            var diagnostics = builder.ApplicationServices.GetService<CarterDiagnostics>();
+            var carterConfigurator = builder.ApplicationServices.GetService<CarterConfigurator>();
 
             var loggerFactory = builder.ApplicationServices.GetService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger(typeof(CarterDiagnostics));
+            var logger = loggerFactory.CreateLogger(typeof(CarterConfigurator));
 
-            diagnostics.LogDiscoveredCarterTypes(logger);
+            carterConfigurator.LogDiscoveredCarterTypes(logger);
 
             ApplyGlobalBeforeHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalBeforeHook"));
 
@@ -193,12 +193,10 @@ namespace Carter
 
             var responseNegotiators = GetResponseNegotiators(carterConfigurator, assemblies);
 
-            CarterDiagnostics diagnostics = new CarterDiagnostics();
-            services.AddSingleton(diagnostics);
+            services.AddSingleton(carterConfigurator);
 
             foreach (var validator in validators)
             {
-                diagnostics.AddValidator(validator);
                 services.AddSingleton(typeof(IValidator), validator);
             }
 
@@ -208,20 +206,17 @@ namespace Carter
 
             foreach (var module in modules)
             {
-                diagnostics.AddModule(module);
                 services.AddScoped(module);
                 services.AddScoped(typeof(CarterModule), module);
             }
 
             foreach (var sch in statusCodeHandlers)
             {
-                diagnostics.AddStatusCodeHandler(sch);
                 services.AddScoped(typeof(IStatusCodeHandler), sch);
             }
 
             foreach (var negotiator in responseNegotiators)
             {
-                diagnostics.AddResponseNegotiator(negotiator);
                 services.AddSingleton(typeof(IResponseNegotiator), negotiator);
             }
 
@@ -240,6 +235,8 @@ namespace Carter
                         t != typeof(IResponseNegotiator) &&
                         t != typeof(DefaultJsonResponseNegotiator)
                     ));
+
+                carterConfigurator.ResponseNegotiatorTypes.AddRange(responseNegotiators);
             }
             else
             {
@@ -258,6 +255,8 @@ namespace Carter
                     x.GetTypes().Where(t =>
                         typeof(IStatusCodeHandler).IsAssignableFrom(t) &&
                         t != typeof(IStatusCodeHandler)));
+
+                carterConfigurator.StatusCodeHandlerTypes.AddRange(statusCodeHandlers);
             }
             else
             {
@@ -279,6 +278,8 @@ namespace Carter
                         t != typeof(CarterModule) &&
                         t.IsPublic
                     ));
+
+                carterConfigurator.ModuleTypes.AddRange(modules);
             }
             else
             {
@@ -296,6 +297,8 @@ namespace Carter
                 validators = assemblies.SelectMany(ass => ass.GetTypes())
                     .Where(typeof(IValidator).IsAssignableFrom)
                     .Where(t => !t.GetTypeInfo().IsAbstract);
+
+                carterConfigurator.ValidatorTypes.AddRange(validators);
             }
             else
             {
