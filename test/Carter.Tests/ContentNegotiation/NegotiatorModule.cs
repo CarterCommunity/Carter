@@ -1,4 +1,4 @@
-namespace Carter.Tests
+namespace Carter.Tests.ContentNegotiation
 {
     using Carter.Response;
 

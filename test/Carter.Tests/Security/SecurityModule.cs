@@ -1,4 +1,4 @@
-﻿namespace Carter.Tests
+﻿namespace Carter.Tests.Security
 {
     using Microsoft.AspNetCore.Http;
 

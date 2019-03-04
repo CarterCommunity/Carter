@@ -3,8 +3,6 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\src\Carter.csproj" />
   </ItemGroup>
 </Project>

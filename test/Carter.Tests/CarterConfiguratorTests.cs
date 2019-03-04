@@ -1,5 +1,8 @@
 namespace Carter.Tests
 {
+    using Carter.Tests.ContentNegotiation;
+    using Carter.Tests.Modelbinding;
+    using Carter.Tests.StatusCodeHandlers;
     using Xunit;
 
     public class CarterConfiguratorTests
