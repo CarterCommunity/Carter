@@ -1,6 +1,5 @@
 namespace Carter.Tests
 {
-    using System;
     using Xunit;
 
     public class CarterConfiguratorTests
@@ -58,18 +57,6 @@ namespace Carter.Tests
         }
 
         [Fact]
-        public void Should_throw_when_registering_multiple_modules_with_invalid_types()
-        {
-            //Given
-            var configurator = new CarterConfigurator();
-
-            //When & Then
-            var ex = Assert.Throws<ArgumentException>(() => configurator.WithModules(typeof(int), typeof(string)));
-
-            Assert.Equal("Types must derive from CarterModule, failing types: System.Int32,System.String", ex.Message);
-        }
-
-        [Fact]
         public void Should_add_single_validator()
         {
             //Given
@@ -94,7 +81,7 @@ namespace Carter.Tests
             //Then
             Assert.Same(configurator, sameconfigurator);
         }
-        
+
         [Fact]
         public void Should_add_multiple_validators()
         {
@@ -122,18 +109,6 @@ namespace Carter.Tests
         }
 
         [Fact]
-        public void Should_throw_when_registering_multiple_validators_with_invalid_types()
-        {
-            //Given
-            var configurator = new CarterConfigurator();
-
-            //When & Then
-            var ex = Assert.Throws<ArgumentException>(() => configurator.WithValidators(typeof(int), typeof(string)));
-
-            Assert.Equal("Types must derive from IValidator, failing types: System.Int32,System.String", ex.Message);
-        }
-        
-        [Fact]
         public void Should_add_single_statuscodehandler()
         {
             //Given
@@ -158,7 +133,7 @@ namespace Carter.Tests
             //Then
             Assert.Same(configurator, sameconfigurator);
         }
-        
+
         [Fact]
         public void Should_add_multiple_statuscodehandlers()
         {
@@ -186,18 +161,6 @@ namespace Carter.Tests
         }
 
         [Fact]
-        public void Should_throw_when_registering_multiple_statuscodehandlers_with_invalid_types()
-        {
-            //Given
-            var configurator = new CarterConfigurator();
-
-            //When & Then
-            var ex = Assert.Throws<ArgumentException>(() => configurator.WithStatusCodeHandlers(typeof(int), typeof(string)));
-
-            Assert.Equal("Types must derive from IStatusCodeHandler, failing types: System.Int32,System.String", ex.Message);
-        }
-        
-        [Fact]
         public void Should_add_single_responsenegotiator()
         {
             //Given
@@ -222,7 +185,7 @@ namespace Carter.Tests
             //Then
             Assert.Same(configurator, sameconfigurator);
         }
-        
+
         [Fact]
         public void Should_add_multiple_responsenegotiators()
         {
@@ -248,18 +211,5 @@ namespace Carter.Tests
             //Then
             Assert.Same(configurator, sameconfigurator);
         }
-
-        [Fact]
-        public void Should_throw_when_registering_multiple_responsenegotiators_with_invalid_types()
-        {
-            //Given
-            var configurator = new CarterConfigurator();
-
-            //When & Then
-            var ex = Assert.Throws<ArgumentException>(() => configurator.WithResponseNegotiators(typeof(int), typeof(string)));
-
-            Assert.Equal("Types must derive from IResponseNegotiator, failing types: System.Int32,System.String", ex.Message);
-        }
-
     }
 }
