@@ -6,6 +6,7 @@ namespace Carter
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Carter.OpenApi;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;

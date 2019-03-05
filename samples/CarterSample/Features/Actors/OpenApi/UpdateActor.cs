@@ -1,7 +1,7 @@
 namespace CarterSample.Features.Actors
 {
     using System;
-    using Carter;
+    using Carter.OpenApi;
 
     public class UpdateActor : RouteMetaData
     {
