@@ -1,6 +1,6 @@
 namespace CarterSample.Features.Actors
 {
-    using Carter;
+    using Carter.OpenApi;
 
     public class DeleteActor : RouteMetaData
     {

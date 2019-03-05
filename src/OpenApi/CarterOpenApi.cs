@@ -102,6 +102,8 @@ namespace Carter.OpenApi
 
                         CreateOpenApiRouteConstraints(template, operation);
 
+                        CreateOpenApiQueryStringParameters(operation, methodRoute.Value.QueryStringParameter);
+
                         var verb = CreateOpenApiOperationVerb(methodRoute);
 
                         pathItem.Operations.Add(verb, operation);
@@ -136,6 +138,26 @@ namespace Carter.OpenApi
                     return OperationType.Patch;
                 default:
                     return OperationType.Get;
+            }
+        }
+
+        private static void CreateOpenApiQueryStringParameters(OpenApiOperation operation, QueryStringParameter[] queryStringParameters)
+        {
+            if (queryStringParameters == null || !queryStringParameters.Any())
+            {
+                return;
+            }
+
+            foreach (var queryStringParameter in queryStringParameters)
+            {
+                operation.Parameters.Add(new OpenApiParameter
+                {
+                    In = ParameterLocation.Query,
+                    Required = queryStringParameter.Required,
+                    Name = queryStringParameter.Name,
+                    Description = queryStringParameter.Description,
+                    Schema = new OpenApiSchema { Type = GetOpenApiTypeMapping(queryStringParameter.Type.Name.ToLower()) }
+                });
             }
         }
 

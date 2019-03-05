@@ -20,6 +20,24 @@
         ],
         "description": "Returns a list of actors",
         "operationId": "Actors_GetActors",
+        "parameters": [
+          {
+            "name": "Offset",
+            "in": "query",
+            "description": "How man items to offset from the start of the list",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Size",
+            "in": "query",
+            "description": "How many items to return at one time. MAX:20",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "A list of Actors",
