@@ -57,6 +57,9 @@
         ]
       },
       "post": {
+        "tags": [
+          "Actors"
+        ],
         "description": "Create an actor in the system",
         "operationId": "Actors_AddActor",
         "requestBody": {
@@ -158,6 +161,15 @@
         "responses": {
           "204": {
             "description": "Deleted Actor"
+          }
+        }
+      }
+    },
+    "/empty": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }

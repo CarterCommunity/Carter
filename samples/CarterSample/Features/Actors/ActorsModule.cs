@@ -6,6 +6,7 @@ namespace CarterSample.Features.Actors
     using Carter.ModelBinding;
     using Carter.Request;
     using Carter.Response;
+    using CarterSample.Features.Actors.OpenApi;
 
     public class ActorsModule : CarterModule
     {
@@ -70,6 +71,8 @@ namespace CarterSample.Features.Actors
                     await response.FromStream(video, "video/mp4");
                 }
             });
+
+            this.Get<EmptyOpenApi>("/empty", (request, response, routeData) => Task.CompletedTask);
         }
     }
 }
