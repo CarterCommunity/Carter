@@ -57,9 +57,6 @@
         ]
       },
       "post": {
-        "tags": [
-          "Actors"
-        ],
         "description": "Create an actor in the system",
         "operationId": "Actors_AddActor",
         "requestBody": {
