@@ -1,4 +1,4 @@
-namespace CarterSample.Features.Actors
+namespace CarterSample.Features.Actors.OpenApi
 {
     using System;
     using Carter.OpenApi;
@@ -11,7 +11,7 @@ namespace CarterSample.Features.Actors
 
         public override RouteMetaDataResponse[] Responses { get; } = { new RouteMetaDataResponse { Code = 201, Description = "Created Actors" } };
 
-        //public override string Tag { get; } = "Actors";
+        public override string Tag { get; } = "Actors";
 
         public override string OperationId { get; } = "Actors_AddActor";
     }

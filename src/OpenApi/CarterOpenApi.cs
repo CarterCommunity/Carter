@@ -278,6 +278,10 @@ namespace Carter.OpenApi
                     operation.Responses.Add(valueStatusCode.Code.ToString(), openApiResponse);
                 }
             }
+            else
+            {
+                operation.Responses.Add("200", new OpenApiResponse{Description = string.Empty});
+            }
         }
 
         private static void CreateOpenApiRequestBody(OpenApiDocument document, KeyValuePair<(string verb, string path), RouteMetaData> keyValuePair, OpenApiOperation operation, HttpContext context)

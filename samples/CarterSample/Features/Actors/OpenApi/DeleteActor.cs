@@ -1,4 +1,4 @@
-namespace CarterSample.Features.Actors
+namespace CarterSample.Features.Actors.OpenApi
 {
     using Carter.OpenApi;
 
