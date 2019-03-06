@@ -76,10 +76,14 @@ namespace Carter.OpenApi
                     {
                         var operation = new OpenApiOperation
                         {
-                            Tags = new List<OpenApiTag> { new OpenApiTag { Name = methodRoute.Value.Tag } },
                             Description = methodRoute.Value.Description,
                             OperationId = methodRoute.Value.OperationId
                         };
+
+                        if (!string.IsNullOrWhiteSpace(methodRoute.Value.Tag))
+                        {
+                            operation.Tags = new List<OpenApiTag> { new OpenApiTag { Name = methodRoute.Value.Tag } };
+                        }
 
                         if (!string.IsNullOrWhiteSpace(methodRoute.Value.SecuritySchema))
                         {
