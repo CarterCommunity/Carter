@@ -187,6 +187,22 @@
             }
           }
         }
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Foo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     }
   },
@@ -232,6 +248,21 @@
         },
         "example": {
           "data": ""
+        }
+      },
+      "Foo": {
+        "type": "object",
+        "properties": {
+          "enumbars": {
+            "type": "string"
+          },
+          "listbars": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "enumbars": "",
+          "listbars": ""
         }
       }
     },

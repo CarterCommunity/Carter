@@ -317,11 +317,7 @@ namespace Carter.OpenApi
                     propObj.Add(propertyInfo.Name, new OpenApiString("")); //TODO Could use Bogus to generate some data rather than empty string
                 }
 
-                var validatorLocator = context.RequestServices.GetRequiredService<IValidatorLocator>();
-
-                var validator = validatorLocator.GetValidator(requestType);
-
-                var validatorDescriptor = validator.CreateDescriptor();
+              
 
                 var schema = new OpenApiSchema
                 {
@@ -329,91 +325,101 @@ namespace Carter.OpenApi
                     Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema { Type = GetOpenApiTypeMapping(value.Type) }),
                     Example = propObj
                 };
+                
+                var validatorLocator = context.RequestServices.GetRequiredService<IValidatorLocator>();
 
-                //Thanks for the pointers https://github.com/micro-elements/MicroElements.Swashbuckle.FluentValidation
-                //TODO Also need to look at request parameters that might be required from the header or querystring for example. MVC does binding on GETs from these sources
-                foreach (var key in schema.Properties.Keys)
+                var validator = validatorLocator.GetValidator(requestType);
+
+                if (validator != null)
                 {
-                    foreach (var propertyValidator in validatorDescriptor
-                        .GetValidatorsForMember(ToPascalCase(key)))
+
+                    var validatorDescriptor = validator.CreateDescriptor();
+
+                    //Thanks for the pointers https://github.com/micro-elements/MicroElements.Swashbuckle.FluentValidation
+                    //TODO Also need to look at request parameters that might be required from the header or querystring for example. MVC does binding on GETs from these sources
+                    foreach (var key in schema.Properties.Keys)
                     {
-                        if (propertyValidator is INotNullValidator
-                            || propertyValidator is INotEmptyValidator)
+                        foreach (var propertyValidator in validatorDescriptor
+                            .GetValidatorsForMember(ToPascalCase(key)))
                         {
-                            if (!schema.Required.Contains(key))
+                            if (propertyValidator is INotNullValidator
+                                || propertyValidator is INotEmptyValidator)
                             {
-                                schema.Required.Add(key);
+                                if (!schema.Required.Contains(key))
+                                {
+                                    schema.Required.Add(key);
+                                }
+
+                                if (propertyValidator is INotEmptyValidator)
+                                {
+                                    schema.Properties[key].MinLength = 1;
+                                }
                             }
 
-                            if (propertyValidator is INotEmptyValidator)
+                            if (propertyValidator is ILengthValidator lengthValidator)
                             {
-                                schema.Properties[key].MinLength = 1;
+                                if (lengthValidator.Max > 0)
+                                    schema.Properties[key].MaxLength = lengthValidator.Max;
+
+                                schema.Properties[key].MinLength = lengthValidator.Min;
                             }
-                        }
 
-                        if (propertyValidator is ILengthValidator lengthValidator)
-                        {
-                            if (lengthValidator.Max > 0)
-                                schema.Properties[key].MaxLength = lengthValidator.Max;
-
-                            schema.Properties[key].MinLength = lengthValidator.Min;
-                        }
-
-                        if (propertyValidator is IComparisonValidator comparisonValidator)
-                        {
-                            //var comparisonValidator = (IComparisonValidator)context.PropertyValidator;
-                            if (comparisonValidator.ValueToCompare.IsNumeric())
+                            if (propertyValidator is IComparisonValidator comparisonValidator)
                             {
-                                var valueToCompare = comparisonValidator.ValueToCompare.NumericToDecimal();
+                                //var comparisonValidator = (IComparisonValidator)context.PropertyValidator;
+                                if (comparisonValidator.ValueToCompare.IsNumeric())
+                                {
+                                    var valueToCompare = comparisonValidator.ValueToCompare.NumericToDecimal();
+                                    var schemaProperty = schema.Properties[key];
+
+                                    if (comparisonValidator.Comparison == Comparison.GreaterThanOrEqual)
+                                    {
+                                        schemaProperty.Minimum = valueToCompare;
+                                    }
+                                    else if (comparisonValidator.Comparison == Comparison.GreaterThan)
+                                    {
+                                        schemaProperty.Minimum = valueToCompare;
+                                        schemaProperty.ExclusiveMinimum = true;
+                                    }
+                                    else if (comparisonValidator.Comparison == Comparison.LessThanOrEqual)
+                                    {
+                                        schemaProperty.Maximum = valueToCompare;
+                                    }
+                                    else if (comparisonValidator.Comparison == Comparison.LessThan)
+                                    {
+                                        schemaProperty.Maximum = valueToCompare;
+                                        schemaProperty.ExclusiveMaximum = true;
+                                    }
+                                }
+                            }
+
+                            if (propertyValidator is RegularExpressionValidator expressionValidator)
+                            {
+                                schema.Properties[key].Pattern = expressionValidator.Expression;
+                            }
+
+                            if (propertyValidator is IBetweenValidator betweenValidator)
+                            {
                                 var schemaProperty = schema.Properties[key];
 
-                                if (comparisonValidator.Comparison == Comparison.GreaterThanOrEqual)
+                                if (betweenValidator.From.IsNumeric())
                                 {
-                                    schemaProperty.Minimum = valueToCompare;
+                                    schemaProperty.Minimum = betweenValidator.From.NumericToDecimal();
+
+                                    if (betweenValidator is ExclusiveBetweenValidator)
+                                    {
+                                        schemaProperty.ExclusiveMinimum = true;
+                                    }
                                 }
-                                else if (comparisonValidator.Comparison == Comparison.GreaterThan)
+
+                                if (betweenValidator.To.IsNumeric())
                                 {
-                                    schemaProperty.Minimum = valueToCompare;
-                                    schemaProperty.ExclusiveMinimum = true;
-                                }
-                                else if (comparisonValidator.Comparison == Comparison.LessThanOrEqual)
-                                {
-                                    schemaProperty.Maximum = valueToCompare;
-                                }
-                                else if (comparisonValidator.Comparison == Comparison.LessThan)
-                                {
-                                    schemaProperty.Maximum = valueToCompare;
-                                    schemaProperty.ExclusiveMaximum = true;
-                                }
-                            }
-                        }
+                                    schemaProperty.Maximum = betweenValidator.To.NumericToDecimal();
 
-                        if (propertyValidator is RegularExpressionValidator expressionValidator)
-                        {
-                            schema.Properties[key].Pattern = expressionValidator.Expression;
-                        }
-
-                        if (propertyValidator is IBetweenValidator betweenValidator)
-                        {
-                            var schemaProperty = schema.Properties[key];
-
-                            if (betweenValidator.From.IsNumeric())
-                            {
-                                schemaProperty.Minimum = betweenValidator.From.NumericToDecimal();
-
-                                if (betweenValidator is ExclusiveBetweenValidator)
-                                {
-                                    schemaProperty.ExclusiveMinimum = true;
-                                }
-                            }
-
-                            if (betweenValidator.To.IsNumeric())
-                            {
-                                schemaProperty.Maximum = betweenValidator.To.NumericToDecimal();
-
-                                if (betweenValidator is ExclusiveBetweenValidator)
-                                {
-                                    schemaProperty.ExclusiveMaximum = true;
+                                    if (betweenValidator is ExclusiveBetweenValidator)
+                                    {
+                                        schemaProperty.ExclusiveMaximum = true;
+                                    }
                                 }
                             }
                         }
