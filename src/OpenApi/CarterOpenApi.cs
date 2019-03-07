@@ -286,6 +286,11 @@ namespace Carter.OpenApi
 
         private static void CreateOpenApiRequestBody(OpenApiDocument document, KeyValuePair<(string verb, string path), RouteMetaData> keyValuePair, OpenApiOperation operation, HttpContext context)
         {
+            if (keyValuePair.Key.verb == "GET")
+            {
+                return;
+            }
+
             if (keyValuePair.Value.Request != null)
             {
                 bool arrayType = false;
@@ -317,22 +322,19 @@ namespace Carter.OpenApi
                     propObj.Add(propertyInfo.Name, new OpenApiString("")); //TODO Could use Bogus to generate some data rather than empty string
                 }
 
-              
-
                 var schema = new OpenApiSchema
                 {
                     Type = "object",
                     Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema { Type = GetOpenApiTypeMapping(value.Type) }),
                     Example = propObj
                 };
-                
+
                 var validatorLocator = context.RequestServices.GetRequiredService<IValidatorLocator>();
 
                 var validator = validatorLocator.GetValidator(requestType);
 
                 if (validator != null)
                 {
-
                     var validatorDescriptor = validator.CreateDescriptor();
 
                     //Thanks for the pointers https://github.com/micro-elements/MicroElements.Swashbuckle.FluentValidation
