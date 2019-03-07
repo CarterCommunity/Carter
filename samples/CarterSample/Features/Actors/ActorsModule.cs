@@ -73,6 +73,8 @@ namespace CarterSample.Features.Actors
             });
 
             this.Get<EmptyOpenApi>("/empty", (request, response, routeData) => Task.CompletedTask);
+            
+            this.Get<SampleMetaData>("/actors/sample", (request, response, routeData) => Task.CompletedTask);
         }
     }
 }
