@@ -211,7 +211,7 @@ namespace Carter.OpenApi
                         else
                         {
                             responseType = valueStatusCode.Response;
-                            responseTypeName = responseType.Name;
+                            responseTypeName = responseType.Name.Replace("`1", ""); //If type has a generic constraint remove the `1 from PagedList<Foo>
                         }
 
                         var propNames = responseType.GetProperties()
@@ -280,7 +280,7 @@ namespace Carter.OpenApi
             }
             else
             {
-                operation.Responses.Add("200", new OpenApiResponse{Description = string.Empty});
+                operation.Responses.Add("200", new OpenApiResponse { Description = string.Empty });
             }
         }
 

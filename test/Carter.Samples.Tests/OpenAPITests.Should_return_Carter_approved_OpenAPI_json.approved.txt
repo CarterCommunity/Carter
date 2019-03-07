@@ -173,6 +173,21 @@
           }
         }
       }
+    },
+    "/actors/sample": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedItems"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -206,6 +221,17 @@
           "name": "",
           "id": "",
           "age": ""
+        }
+      },
+      "PagedItems": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "data": ""
         }
       }
     },
