@@ -4,8 +4,6 @@ namespace Carter.OpenApi
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
-    using System.Text;
     using System.Threading.Tasks;
     using Carter.Request;
     using FluentValidation.Validators;
@@ -147,6 +145,26 @@ namespace Carter.OpenApi
                     return OperationType.Get;
             }
         }
+        
+        private static void CreateOpenApiQueryStringParameters(OpenApiOperation operation, QueryStringParameter[] queryStringParameters)
+        {
+            if (queryStringParameters == null || !queryStringParameters.Any())
+            {
+                return;
+            }
+
+            foreach (var queryStringParameter in queryStringParameters)
+            {
+                operation.Parameters.Add(new OpenApiParameter
+                {
+                    In = ParameterLocation.Query,
+                    Required = queryStringParameter.Required,
+                    Name = queryStringParameter.Name,
+                    Description = queryStringParameter.Description,
+                    Schema = new OpenApiSchema { Type = GetOpenApiTypeMapping(queryStringParameter.Type.Name.ToLower()) }
+                });
+            }
+        }
 
         private static void CreateOpenApiRouteConstraints(RouteTemplate template, OpenApiOperation operation)
         {
@@ -245,6 +263,10 @@ namespace Carter.OpenApi
 
                     operation.Responses.Add(valueStatusCode.Code.ToString(), openApiResponse);
                 }
+            }
+            else
+            {
+                operation.Responses.Add("200", new OpenApiResponse { Description = string.Empty });
             }
         }
 

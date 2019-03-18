@@ -5,8 +5,25 @@ namespace Carter.OpenApi
     /// <summary>
     /// A class to supply OpenApi data
     /// </summary>
-    public abstract class RouteMetaData
+    public  class RouteMetaData
     {
+        public RouteMetaData(
+            string description = null, 
+            string tag = null, 
+            Type request = null, 
+            RouteMetaDataResponse[] responses = null, 
+            string operationId = null, 
+            string securitySchema = null, 
+            QueryStringParameter[] queryStringParameter = null)
+        {
+            this.Description = description;
+            this.Tag = tag;
+            this.Request = request;
+            this.Responses = responses;
+            this.OperationId = operationId;
+            this.SecuritySchema = securitySchema;
+            this.QueryStringParameter = queryStringParameter;
+        }
         /// <summary>
         /// A description about the route
         /// </summary>
@@ -21,6 +38,8 @@ namespace Carter.OpenApi
         /// The <see cref="Type"/> of the request body
         /// </summary>
         public virtual Type Request { get; }
+        
+        public virtual object RequestExample { get; }
 
         /// <summary>
         /// An array of possible <see cref="RouteMetaDataResponse"/>s that can be returned from the route
@@ -35,7 +54,7 @@ namespace Carter.OpenApi
         /// <summary>
         /// The name of a security schema used in the API
         /// </summary>
-        public virtual string SecuritySchema { get; set; }
+        public virtual string SecuritySchema { get; }
         
         /// <summary>
         /// An array of possible <see cref="QueryStringParameter"/>s that a route may use

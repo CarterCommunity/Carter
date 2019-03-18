@@ -21,5 +21,7 @@ namespace Carter.OpenApi
         /// The <see cref="Type"/> of response body
         /// </summary>
         public Type Response { get; set; }
+        
+        public object ResponseExample { get; set; }
     }
 }

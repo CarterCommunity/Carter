@@ -21,7 +21,7 @@ namespace CarterSample.Features.Actors.OpenApi
 
         public override string OperationId { get; } = "Actors_GetActors";
 
-        public override string SecuritySchema { get; set; } = "ApiKey";
+        public override string SecuritySchema { get; } = "ApiKey";
 
         public override QueryStringParameter[] QueryStringParameter { get; } =
         {
