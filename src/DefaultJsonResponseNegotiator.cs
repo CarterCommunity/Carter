@@ -26,10 +26,14 @@
             return accept.MediaType.ToString().IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        public Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken)
+        public Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken, bool includeNull)
         {
             res.ContentType = "application/json; charset=utf-8";
-            return res.WriteAsync(JsonConvert.SerializeObject(model, this.jsonSettings), cancellationToken);
+            var customJsonSetting = this.jsonSettings;
+            if (includeNull) {
+                customJsonSetting = new JsonSerializerSettings { ContractResolver = this.jsonSettings.ContractResolver, NullValueHandling = NullValueHandling.Include };
+            }
+            return res.WriteAsync(JsonConvert.SerializeObject(model, customJsonSetting), cancellationToken);
         }
     }
 }

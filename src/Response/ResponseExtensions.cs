@@ -21,7 +21,7 @@ namespace Carter.Response
         /// <param name="obj">View model</param>
         /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
         /// <returns><see cref="Task"/></returns>
-        public static Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
+        public static Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default, bool includeNull = false)
         {
             var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>().ToList();
             IResponseNegotiator negotiator = null;
@@ -46,7 +46,7 @@ namespace Carter.Response
                 negotiator = negotiators.First(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
             }
 
-            return negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
+            return negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken, includeNull);
         }
 
         /// <summary>
@@ -56,13 +56,13 @@ namespace Carter.Response
         /// <param name="obj">View model</param>
         /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
         /// <returns><see cref="Task"/></returns>
-        public static Task AsJson(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
+        public static Task AsJson(this HttpResponse response, object obj, CancellationToken cancellationToken = default, bool includeNull = false)
         {
             var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
 
             var negotiator = negotiators.First(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
 
-            return negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
+            return negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken, includeNull);
         }
 
         /// <summary>

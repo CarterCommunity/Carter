@@ -109,7 +109,7 @@ namespace Carter.Tests.ContentNegotiation
             accept.MediaType.ToString().IndexOf("foo/bar", StringComparison.OrdinalIgnoreCase) >= 0;
 
         public async Task Handle(HttpRequest req, HttpResponse res, object model,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken), bool includeNull = false)
         {
             await res.WriteAsync("FOOBAR", cancellationToken);
         }
@@ -121,7 +121,7 @@ namespace Carter.Tests.ContentNegotiation
             accept.MediaType.ToString().IndexOf("text/html", StringComparison.OrdinalIgnoreCase) >= 0;
 
         public async Task Handle(HttpRequest req, HttpResponse res, object model,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken), bool includeNull = false)
         {
             await res.WriteAsync("HTML Response", cancellationToken);
         }
@@ -133,7 +133,7 @@ namespace Carter.Tests.ContentNegotiation
             accept.MediaType.ToString().IndexOf("application/xml", StringComparison.OrdinalIgnoreCase) >= 0;
 
         public async Task Handle(HttpRequest req, HttpResponse res, object model,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken), bool includeNull = false)
         {
             await res.WriteAsync("XML Response", cancellationToken);
         }
@@ -147,7 +147,7 @@ namespace Carter.Tests.ContentNegotiation
                                                                   StringComparison.OrdinalIgnoreCase) >= 0;
 
         public async Task Handle(HttpRequest req, HttpResponse res, object model,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default(CancellationToken), bool includeNull = false)
         {
             await res.WriteAsync("Non default json Response", cancellationToken);
         }
