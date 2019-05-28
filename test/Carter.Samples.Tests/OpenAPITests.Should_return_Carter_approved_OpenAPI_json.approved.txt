@@ -13,6 +13,27 @@
     }
   ],
   "paths": {
+    "/castmembers": {
+      "get": {
+        "tags": [
+          "CastMembers"
+        ],
+        "description": "Returns a list of actors",
+        "operationId": "CastMembers_GetCastMembers",
+        "responses": {
+          "200": {
+            "description": "A list of CastMembers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CastMembers"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/actors": {
       "get": {
         "tags": [
@@ -208,6 +229,23 @@
   },
   "components": {
     "schemas": {
+      "CastMembers": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CastMember"
+        }
+      },
+      "CastMember": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "name": ""
+        }
+      },
       "Actors": {
         "type": "array",
         "items": {
