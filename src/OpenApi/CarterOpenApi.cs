@@ -442,11 +442,18 @@ namespace Carter.OpenApi
 
                 operation.RequestBody = requestBody;
 
-                //TODO Should we document array request bodies and if so the next line applies:
-                //TODO Should we check that at the end that any components that are "array" types have a component registered of the  singularTypeName for example you could have IEnumerable<Foo> but Foo is not used in another route so won't be registered in components
                 if (!document.Components.Schemas.ContainsKey(requestType.Name))
                 {
                     document.Components.Schemas.Add(requestType.Name, schema);
+                }
+                else
+                {
+                    //TODO
+                    //Currently request schemas contain potentially more information in them via the validation properties.
+                    //If the response openapi processing has added the type as a component already we should override this here as it may contain more info
+                    //One solution to fix this if the response schema needs additional information is to mark each request/response schema accordingly to prevent the race condition of the response
+                    //schema getting listed with its additional data or the request schema getting listed with its validation additional data. Eg "Actors" becomes "Actors_Request" & "Actors_Response"
+                    document.Components.Schemas[requestType.Name] = schema;
                 }
             }
         }
