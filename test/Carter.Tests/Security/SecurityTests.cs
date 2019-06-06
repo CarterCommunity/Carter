@@ -8,6 +8,7 @@
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
+    using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
     public class SecurityTests
@@ -20,9 +21,18 @@
                 new WebHostBuilder()
                     .ConfigureServices(x =>
                     {
+                        x.AddAuthorization(options =>
+                        {
+                            options.AddPolicy("reallysecurepolicy", policy => { policy.RequireClaim(ClaimTypes.Actor); });
+                            options.AddPolicy("reallysecuresecondpolicy", policy => { policy.RequireClaim(ClaimTypes.Email); });
+                        });
+
                         x.AddCarter(configurator: c =>
                             c.WithModule<SecurityClaimsModule>()
-                             .WithModule<SecurityModule>());
+                                .WithModule<SecurityModule>()
+                                .WithModule<SecureSinglePolicyModule>()
+                                .WithModule<SecureMultiPolicyModule>()
+                        );
                     })
                     .Configure(x =>
                     {
@@ -65,6 +75,7 @@
         {
             //Given
             this.ConfigureServer(true, new[] { new Claim(ClaimTypes.Actor, "Christian Slater") });
+
             //When
             var response = await this.httpClient.GetAsync("/secureclaim");
             var body = response.StatusCode;
@@ -92,6 +103,7 @@
         {
             //Given
             this.ConfigureServer(true, new[] { new Claim(ClaimTypes.Thumbprint, "Zebra") });
+
             //When
             var response = await this.httpClient.GetAsync("/secureclaim");
             var body = response.StatusCode;
@@ -105,6 +117,7 @@
         {
             //Given
             this.ConfigureServer(true);
+
             //When
             var response = await this.httpClient.GetAsync("/secureclaim");
             var body = response.StatusCode;
@@ -118,6 +131,7 @@
         {
             //Given
             this.ConfigureServer();
+
             //When
             var response = await this.httpClient.GetAsync("/secureclaim");
             var body = response.StatusCode;
@@ -125,5 +139,62 @@
             //Then
             Assert.Equal(401, (int)body);
         }
+
+        [Fact]
+        public async Task Should_return_200_when_valid_policy()
+        {
+            //Given
+            this.ConfigureServer(authedUser: true, new[] { new Claim(ClaimTypes.Actor, "Nicholas Cage") });
+
+            //When
+            var response = await this.httpClient.GetAsync("/securepolicy");
+            var body = response.StatusCode;
+
+            //Then
+            Assert.Equal(200, (int)body);
+        }
+
+        [Fact]
+        public async Task Should_return_401_when_invalid_policy()
+        {
+            //Given
+            this.ConfigureServer(authedUser: true);
+
+            //When
+            var response = await this.httpClient.GetAsync("/securepolicy");
+            var body = response.StatusCode;
+
+            //Then
+            Assert.Equal(401, (int)body);
+        }
+
+        [Fact]
+        public async Task Should_return_200_when_valid_on_multiple_policies()
+        {
+            //Given
+            this.ConfigureServer(authedUser: true, new[] { new Claim(ClaimTypes.Actor, "Nicholas Cage"), new Claim(ClaimTypes.Email, "faceoff@niccage.com") });
+
+            //When
+            var response = await this.httpClient.GetAsync("/securemultipolicy");
+            var body = response.StatusCode;
+
+            //Then
+            Assert.Equal(200, (int)body);
+        }
+        
+        [Fact]
+        public async Task Should_return_401_when_invalid_on_multiple_policies()
+        {
+            //Given
+            this.ConfigureServer(authedUser: true, new[] { new Claim(ClaimTypes.Actor, "Nicholas Cage") });
+
+            //When
+            var response = await this.httpClient.GetAsync("/securemultipolicy");
+            var body = response.StatusCode;
+
+            //Then
+            Assert.Equal(401, (int)body);
+        }
+
     }
 }

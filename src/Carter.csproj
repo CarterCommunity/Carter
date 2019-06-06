@@ -16,6 +16,7 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="FluentValidation" Version="8.1.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
         <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
