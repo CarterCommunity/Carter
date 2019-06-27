@@ -218,7 +218,6 @@ namespace Carter.OpenApi
                             .Select(x => (Name: x.Name.ToLower(), Type: x.PropertyType.Name.ToLower()))
                             .ToList();
 
-                        var arrbj = new OpenApiArray();
                         var propObj = new OpenApiObject();
 
                         foreach (var propertyInfo in propNames)
@@ -233,16 +232,6 @@ namespace Carter.OpenApi
                             Example = propObj
                         };
 
-                        var arrayschema = new OpenApiSchema { Type = "array" };
-
-                        if (arrayType)
-                        {
-                            arrbj.Add(propObj);
-                            arrayschema.Items = schema;
-                        }
-
-                        var respObj = arrayType ? new OpenApiObject { { responseType.Name.ToLower(), arrbj } } : propObj;
-
                         openApiResponse = new OpenApiResponse
                         {
                             Description = valueStatusCode.Description,
@@ -252,9 +241,7 @@ namespace Carter.OpenApi
                                     "application/json",
                                     new OpenApiMediaType
                                     {
-                                        //Example = respObj
                                         Schema = new OpenApiSchema { Reference = new OpenApiReference { Id = responseTypeName, Type = ReferenceType.Schema } }
-                                        //Schema = arrayType ? arrayschema : schema
                                     }
                                 }
                             }
@@ -268,9 +255,15 @@ namespace Carter.OpenApi
                             }
                             else
                             {
+                                //Add component called "Directors" plural
                                 document.Components.Schemas.Add(responseTypeName,
                                     new OpenApiSchema { Type = "array", Items = new OpenApiSchema { Reference = new OpenApiReference { Id = singularTypeName, Type = ReferenceType.Schema } } });
-                                //TODO Should we check that at the end that any components that are "array" types have a component registered of the  singularTypeName for example you could have IEnumerable<Foo> but Foo is not used in another route so won't be registered in components
+
+                                //If not already added add component called "Director" singular
+                                if (!document.Components.Schemas.ContainsKey(singularTypeName))
+                                {
+                                    document.Components.Schemas.Add(singularTypeName, schema);
+                                }
                             }
                         }
                     }
@@ -449,11 +442,18 @@ namespace Carter.OpenApi
 
                 operation.RequestBody = requestBody;
 
-                //TODO Should we document array request bodies and if so the next line applies:
-                //TODO Should we check that at the end that any components that are "array" types have a component registered of the  singularTypeName for example you could have IEnumerable<Foo> but Foo is not used in another route so won't be registered in components
                 if (!document.Components.Schemas.ContainsKey(requestType.Name))
                 {
                     document.Components.Schemas.Add(requestType.Name, schema);
+                }
+                else
+                {
+                    //TODO
+                    //Currently request schemas contain potentially more information in them via the validation properties.
+                    //If the response openapi processing has added the type as a component already we should override this here as it may contain more info
+                    //One solution to fix this if the response schema needs additional information is to mark each request/response schema accordingly to prevent the race condition of the response
+                    //schema getting listed with its additional data or the request schema getting listed with its validation additional data. Eg "Actors" becomes "Actors_Request" & "Actors_Response"
+                    document.Components.Schemas[requestType.Name] = schema;
                 }
             }
         }
