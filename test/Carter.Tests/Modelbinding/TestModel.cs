@@ -1,5 +1,6 @@
 namespace Carter.Tests.Modelbinding
 {
+    using System;
     using System.Collections.Generic;
 
     public class TestModel
@@ -15,5 +16,7 @@ namespace Carter.Tests.Modelbinding
         public IEnumerable<int> MyIntArrayProperty { get; set; }
 
         public IEnumerable<int> MyIntListProperty { get; set; }
+
+        public Guid MyGuidProperty { get; set; }
     }
 }
