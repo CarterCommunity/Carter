@@ -64,7 +64,7 @@ namespace Carter.ModelBinding
                     }
 
                     // Convert.ChangeType (below) chokes on Guids, so doing it here instead.
-                    if (propertyType == typeof(Guid))
+                    if (propertyType == typeof(Guid) || propertyType == typeof(Guid?))
                     {
                         if (Guid.TryParse(val.Value[0], out Guid result))
                         {

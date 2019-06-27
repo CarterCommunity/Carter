@@ -17,6 +17,6 @@ namespace Carter.Tests.Modelbinding
 
         public IEnumerable<int> MyIntListProperty { get; set; }
 
-        public Guid MyGuidListProperty { get; set; }
+        public Guid MyGuidProperty { get; set; }
     }
 }
