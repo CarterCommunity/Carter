@@ -55,7 +55,8 @@ namespace Carter.Tests.Modelbinding
                         new KeyValuePair<string, string>("MyIntArrayProperty", "3"),
                         new KeyValuePair<string, string>("MyIntListProperty", "1"),
                         new KeyValuePair<string, string>("MyIntListProperty", "2"),
-                        new KeyValuePair<string, string>("MyIntListProperty", "3")
+                        new KeyValuePair<string, string>("MyIntListProperty", "3"),
+                        new KeyValuePair<string, string>("MyGuidListProperty", "E3D2E063-BDC6-426E-A27B-0AAFB5D17AE5")
                     }));
 
             //When
@@ -69,6 +70,7 @@ namespace Carter.Tests.Modelbinding
             Assert.Equal(new[] { "1", "2", "3" }, model.MyArrayProperty);
             Assert.Equal(Enumerable.Range(1, 3), model.MyIntArrayProperty);
             Assert.Equal(Enumerable.Range(1, 3), model.MyIntListProperty);
+            Assert.Equal(Guid.Parse("E3D2E063-BDC6-426E-A27B-0AAFB5D17AE5"), model.MyGuidListProperty);
         }
 
         [Fact]

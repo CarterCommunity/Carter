@@ -62,6 +62,17 @@ namespace Carter.ModelBinding
                         }
                         return val.Value.Select(y => Convert.ChangeType(y, colType));
                     }
+
+                    // Convert.ChangeType (below) chokes on Guids, so doing it here instead.
+                    if (propertyType == typeof(Guid))
+                    {
+                        if (Guid.TryParse(val.Value[0], out Guid result))
+                        {
+                            return result;
+                        }
+                        return Guid.Empty;
+                    }
+
                     //int, double etc
                     return Convert.ChangeType(val.Value[0], propertyType);
                 }));
