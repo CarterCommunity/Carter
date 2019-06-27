@@ -1,6 +1,6 @@
 image: ubuntu
 
-version: 4.0.0-ci{build}
+version: 4.2.0-ci{build}
 
 max_jobs: 1
 
