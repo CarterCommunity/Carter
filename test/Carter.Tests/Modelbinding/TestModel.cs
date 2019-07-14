@@ -18,5 +18,15 @@ namespace Carter.Tests.Modelbinding
         public IEnumerable<int> MyIntListProperty { get; set; }
 
         public Guid MyGuidProperty { get; set; }
+
+        public bool MyBoolProperty { get; set; }
+
+        public DateTime MyDateTimeProperty { get; set; }
+
+        public bool? MyNullableBoolProperty { get; set; }
+
+        public int? MyNullableIntProperty { get; set; }
+
+        public DateTime? MyNullableDataTimeProperty { get; set; }
     }
 }

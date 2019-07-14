@@ -56,7 +56,12 @@ namespace Carter.Tests.Modelbinding
                         new KeyValuePair<string, string>("MyIntListProperty", "1"),
                         new KeyValuePair<string, string>("MyIntListProperty", "2"),
                         new KeyValuePair<string, string>("MyIntListProperty", "3"),
-                        new KeyValuePair<string, string>("MyGuidProperty", "E3D2E063-BDC6-426E-A27B-0AAFB5D17AE5")
+                        new KeyValuePair<string, string>("MyGuidProperty", "E3D2E063-BDC6-426E-A27B-0AAFB5D17AE5"),
+                        new KeyValuePair<string, string>("MyBoolProperty", "true"),
+                        new KeyValuePair<string, string>("MyDateTimeProperty", "2011-05-30 15:00:00"),
+                        new KeyValuePair<string, string>("MyNullableBoolProperty", "false"),
+                        new KeyValuePair<string, string>("MyNullableIntProperty", "7"),
+                        new KeyValuePair<string, string>("MyNullableDataTimeProperty", "2011-05-30 15:00:00")
                     }));
 
             //When
@@ -71,6 +76,11 @@ namespace Carter.Tests.Modelbinding
             Assert.Equal(Enumerable.Range(1, 3), model.MyIntArrayProperty);
             Assert.Equal(Enumerable.Range(1, 3), model.MyIntListProperty);
             Assert.Equal(Guid.Parse("E3D2E063-BDC6-426E-A27B-0AAFB5D17AE5"), model.MyGuidProperty);
+            Assert.True(model.MyBoolProperty);
+            Assert.Equal(new DateTime(2011, 5, 30, 15, 0, 0), model.MyDateTimeProperty);
+            Assert.False(model.MyNullableBoolProperty.Value);
+            Assert.Equal(7, model.MyNullableIntProperty.Value);
+            Assert.Equal(new DateTime(2011, 5, 30, 15, 0, 0), model.MyNullableDataTimeProperty.Value);
         }
 
         [Fact]
