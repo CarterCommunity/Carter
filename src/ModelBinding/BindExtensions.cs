@@ -2,7 +2,7 @@ namespace Carter.ModelBinding
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -63,13 +63,11 @@ namespace Carter.ModelBinding
                         }
                         return val.Value.Select(y => 
                         {
-                            var convert = TypeDescriptor.GetConverter(colType);
-                            return convert.ConvertFromInvariantString(y);
+                            return ConvertToType(y, colType);
                         });
                     }
 
-                    var converter = TypeDescriptor.GetConverter(propertyType);
-                    return converter.ConvertFromInvariantString(val.Value[0]);
+                    return ConvertToType(val.Value[0], propertyType);
                 }));
 
                 var instance = res.ToObject<T>();
@@ -81,6 +79,48 @@ namespace Carter.ModelBinding
             {
                 return JsonSerializer.Deserialize<T>(jsonTextReader);
             }
+        }
+
+        private static object ConvertToType(string value, Type type)
+        {
+            var underlyingType = Nullable.GetUnderlyingType(type);
+
+            if (value.Length > 0)
+            {
+                if (type == typeof(DateTime) || underlyingType == typeof(DateTime))
+                {
+                    return DateTime.Parse(value, CultureInfo.InvariantCulture);
+                }
+                if (type == typeof(Guid) || underlyingType == typeof(Guid))
+                {
+                    return new Guid(value);
+                }
+                if (type == typeof(Uri) || underlyingType == typeof(Uri))
+                {
+                    if (Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out Uri uri))
+                    {
+                        return uri;
+                    }
+                    return null;
+                }
+            }
+            else 
+            {
+                if (type == typeof(Guid))
+                {
+                    return default(Guid);
+                }
+                if (underlyingType != null)
+                {
+                    return null;
+                }
+            }
+
+            if (underlyingType is object)
+            {
+                return Convert.ChangeType(value, underlyingType);
+            }
+            return Convert.ChangeType(value, type);
         }
 
         private static async Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request, bool returnOnFirst)

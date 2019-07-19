@@ -27,6 +27,24 @@ namespace Carter.Tests.Modelbinding
 
         public int? MyNullableIntProperty { get; set; }
 
-        public DateTime? MyNullableDataTimeProperty { get; set; }
+        public DateTime? MyNullableDateTimeProperty { get; set; }
+
+        public DateTime MyDateTimeWithTimeZoneProperty { get; set; }
+
+        public DateTime MyDateTimeWithMillisecondsProperty { get; set; }
+
+        public Uri MyUriProperty { get; set; }
+
+        public Guid? MyNullableGuidProperty { get; set; }
+
+        public bool? MyEmptyNullableBoolProperty { get; set; }
+
+        public int? MyEmptyNullableIntProperty { get; set; }
+
+        public Guid MyEmptyGuidProperty { get; set; }
+
+        public Guid? MyEmptyNullableGuidProperty { get; set; }
+
+        public DateTime? MyEmptyNullableDateTimeProperty { get; set; }
     }
 }
