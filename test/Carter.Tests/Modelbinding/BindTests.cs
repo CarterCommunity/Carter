@@ -62,7 +62,6 @@ namespace Carter.Tests.Modelbinding
                         new KeyValuePair<string, string>("MyNullableBoolProperty", "false"),
                         new KeyValuePair<string, string>("MyNullableIntProperty", "7"),
                         new KeyValuePair<string, string>("MyNullableDateTimeProperty", "2011-05-30 15:00:00"),
-                        new KeyValuePair<string, string>("MyDateTimeWithTimeZoneProperty", "2011-05-30T15:00:00+01:00"),
                         new KeyValuePair<string, string>("MyDateTimeWithMillisecondsProperty", "2011-05-30 15:00:01.387"),
                         new KeyValuePair<string, string>("MyUriProperty", "http://example.com"),
                         new KeyValuePair<string, string>("MyNullableGuidProperty", "E3D2E063-BDC6-426E-A27B-0AAFB5D17AE5"),
@@ -90,7 +89,6 @@ namespace Carter.Tests.Modelbinding
             Assert.False(model.MyNullableBoolProperty.Value);
             Assert.Equal(7, model.MyNullableIntProperty.Value);
             Assert.Equal(new DateTime(2011, 5, 30, 15, 0, 0), model.MyNullableDateTimeProperty.Value);
-            Assert.Equal(new DateTime(2011, 5, 30, 15, 0, 0), model.MyDateTimeWithTimeZoneProperty);
             Assert.Equal(new DateTime(2011, 5, 30, 15, 0, 1).AddMilliseconds(387), model.MyDateTimeWithMillisecondsProperty);
             Assert.Equal(new Uri("http://example.com"), model.MyUriProperty);
             Assert.Equal(Guid.Parse("E3D2E063-BDC6-426E-A27B-0AAFB5D17AE5"), model.MyNullableGuidProperty.Value);

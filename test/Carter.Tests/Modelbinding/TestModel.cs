@@ -29,8 +29,6 @@ namespace Carter.Tests.Modelbinding
 
         public DateTime? MyNullableDateTimeProperty { get; set; }
 
-        public DateTime MyDateTimeWithTimeZoneProperty { get; set; }
-
         public DateTime MyDateTimeWithMillisecondsProperty { get; set; }
 
         public Uri MyUriProperty { get; set; }
