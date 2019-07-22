@@ -69,7 +69,9 @@ namespace Carter.Tests.Modelbinding
                         new KeyValuePair<string, string>("MyEmptyNullableIntProperty", ""),
                         new KeyValuePair<string, string>("MyEmptyGuidProperty", ""),
                         new KeyValuePair<string, string>("MyEmptyNullableGuidProperty", ""),
-                        new KeyValuePair<string, string>("MyEmptyNullableDateTimeProperty", "")
+                        new KeyValuePair<string, string>("MyEmptyNullableDateTimeProperty", ""),
+                        new KeyValuePair<string, string>("MyDecimalProperty", "1234.00"),
+                        new KeyValuePair<string, string>("MyFormattedDecimalProperty", "1,234.00")
                     }));
 
             //When
@@ -97,6 +99,8 @@ namespace Carter.Tests.Modelbinding
             Assert.Equal(Guid.Empty, model.MyEmptyGuidProperty);
             Assert.False(model.MyEmptyNullableGuidProperty.HasValue);
             Assert.False(model.MyEmptyNullableDateTimeProperty.HasValue);
+            Assert.Equal(1234.00m, model.MyDecimalProperty);
+            Assert.Equal(1234.00m, model.MyFormattedDecimalProperty);
         }
 
         [Fact]

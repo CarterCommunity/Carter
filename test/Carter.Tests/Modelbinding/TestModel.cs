@@ -44,5 +44,9 @@ namespace Carter.Tests.Modelbinding
         public Guid? MyEmptyNullableGuidProperty { get; set; }
 
         public DateTime? MyEmptyNullableDateTimeProperty { get; set; }
+
+        public Decimal MyDecimalProperty { get; set; }
+
+        public Decimal MyFormattedDecimalProperty { get ; set; }
     }
 }
