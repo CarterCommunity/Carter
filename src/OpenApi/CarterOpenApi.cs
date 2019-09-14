@@ -486,6 +486,9 @@ namespace Carter.OpenApi
                 case "long64":
                 case "int":
                 case "long":
+                case "ulong":
+                case "uint":
+                case "ushort":
                     return "integer";
 
                 case "single":
