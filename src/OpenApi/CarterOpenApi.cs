@@ -214,9 +214,19 @@ namespace Carter.OpenApi
                             responseTypeName = responseType.Name.Replace("`1", ""); //If type has a generic constraint remove the `1 from PagedList<Foo>
                         }
 
-                        var propNames = responseType.GetProperties()
-                            .Select(x => (Name: x.Name.ToLower(), Type: x.PropertyType.Name.ToLower()))
-                            .ToList();
+                        var propertyInfos = responseType.GetProperties();
+                        var propNames = new List<(string Name, string Type, bool Nullable)>();
+                        foreach (var propertyInfo in propertyInfos)
+                        {
+                            var propertyType = propertyInfo.PropertyType;
+                            var nullable = false;
+                            if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                            {
+                                propertyType = propertyType.GetGenericArguments()[0];
+                                nullable = true;
+                            }
+                            propNames.Add((propertyInfo.Name.ToLower(), propertyType.Name.ToLower(), nullable));
+                        }
 
                         var propObj = new OpenApiObject();
 
@@ -228,7 +238,10 @@ namespace Carter.OpenApi
                         var schema = new OpenApiSchema
                         {
                             Type = "object",
-                            Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema { Type = GetOpenApiTypeMapping(value.Type) }),
+                            Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema {
+                                Type = GetOpenApiTypeMapping(value.Type),
+                                Nullable = value.Nullable
+                            }),
                             Example = propObj
                         };
 
@@ -458,7 +471,25 @@ namespace Carter.OpenApi
             }
         }
 
-        public static bool IsNumeric(this object value) => value is int || value is long || value is float || value is double || value is decimal;
+        public static bool IsNumeric(this object value) =>
+            value is sbyte ||
+            value is byte ||
+            value is short ||
+            value is ushort ||
+            value is int ||
+            value is uint ||
+            value is long ||
+            value is ulong ||
+            value is Int32 ||
+            value is UInt32 ||
+            value is Int64 ||
+            value is UInt64 ||
+            value is Int16 ||
+            value is UInt16 ||
+            value is Single ||
+            value is decimal ||
+            value is double ||
+            value is float;
 
         /// <summary>
         /// Convert numeric to double.
@@ -482,13 +513,20 @@ namespace Carter.OpenApi
 
             switch (constraint)
             {
-                case "int32":
-                case "long64":
+                case "sbyte":
+                case "byte":
+                case "short":
+                case "ushort":
                 case "int":
+                case "uint":
                 case "long":
                 case "ulong":
-                case "uint":
-                case "ushort":
+                case "int32":
+                case "uint32":
+                case "int64":
+                case "uint64":
+                case "int16":
+                case "uint16":
                     return "integer";
 
                 case "single":
