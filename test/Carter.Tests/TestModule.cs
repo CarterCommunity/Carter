@@ -56,12 +56,6 @@ namespace Carter.Tests
                 await ctx.Response.WriteAsync($"Managed to parse default int {id}");
             });
 
-            this.Post("/asstring", async ctx =>
-            {
-                var content = ctx.Request.Body.AsString();
-                await ctx.Response.WriteAsync(content);
-            });
-
             this.Post("/asstringasync", async ctx =>
             {
                 var content = await ctx.Request.Body.AsStringAsync();

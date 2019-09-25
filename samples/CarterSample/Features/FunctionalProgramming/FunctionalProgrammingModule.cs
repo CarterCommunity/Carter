@@ -43,7 +43,7 @@
 
             this.Post("/directors", async (req, res, routeData) =>
             {
-                var result = req.BindAndValidate<Director>();
+                var result = await req.BindAndValidate<Director>();
 
                 if (!result.ValidationResult.IsValid)
                 {
@@ -62,7 +62,7 @@
 
             this.Put("/directors/{id:int}", async (req, res, routeData) =>
             {
-                var result = req.BindAndValidate<Director>();
+                var result = await req.BindAndValidate<Director>();
 
                 if (!result.ValidationResult.IsValid)
                 {

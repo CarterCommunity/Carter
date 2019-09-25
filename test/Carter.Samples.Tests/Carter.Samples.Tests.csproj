@@ -11,6 +11,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Shouldly" Version="4.0.0-beta0001" />
+    <PackageReference Include="Shouldly" Version="4.0.0-beta0002" />
   </ItemGroup>
 </Project>

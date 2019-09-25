@@ -11,16 +11,17 @@
     {
         public CastMemberModule()
         {
-            this.Post("/castmembers", (req, res, routeData) =>
+            this.Post("/castmembers", async (req, res, routeData) =>
             {
-                var result = req.BindAndValidate<CastMember>();
+                var result = await req.BindAndValidate<CastMember>();
 
                 if (!result.ValidationResult.IsValid)
                 {
-                    return res.AsJson(result.ValidationResult.GetFormattedErrors());
+                    await res.AsJson(result.ValidationResult.GetFormattedErrors());
+                    return;
                 }
 
-                return res.WriteAsync("OK");
+                await res.WriteAsync("OK");
             });
 
             this.Get<GetCastMembers>("/castmembers", (request, response, routeData) =>

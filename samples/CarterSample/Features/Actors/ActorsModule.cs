@@ -26,7 +26,7 @@ namespace CarterSample.Features.Actors
 
             this.Put<UpdateActor>("/actors/{id:int}", async (req, res, routeData) =>
             {
-                var result = req.BindAndValidate<Actor>();
+                var result = await req.BindAndValidate<Actor>();
 
                 if (!result.ValidationResult.IsValid)
                 {
@@ -42,7 +42,7 @@ namespace CarterSample.Features.Actors
 
             this.Post<AddActor>("/actors", async (req, res, routeData) =>
             {
-                var result = req.BindAndValidate<Actor>();
+                var result = await req.BindAndValidate<Actor>();
 
                 if (!result.ValidationResult.IsValid)
                 {

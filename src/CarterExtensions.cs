@@ -35,7 +35,7 @@ namespace Carter
 
             ApplyGlobalAfterHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalAfterHook"));
 
-            return builder.UseRouting(endpointRouteBuilder =>
+            return builder.UseRouting().UseEndpoints(endpointRouteBuilder =>
             {
                 var routeMetaData = new Dictionary<(string verb, string path), RouteMetaData>();
 
@@ -54,9 +54,9 @@ namespace Carter
                         routeMetaData = routeMetaData.Concat(module.RouteMetaData).ToDictionary(x => x.Key, x => x.Value);
 
                         foreach (var descriptor in module.Routes)
-                        {
-                            endpointRouteBuilder.MapVerbs(descriptor.Key.path, CreateRouteHandler(descriptor.Key.path, module.GetType(), statusCodeHandlers, moduleLogger, descriptor.Value),
-                                new List<string> { descriptor.Key.verb });
+                        { 
+                            endpointRouteBuilder.MapMethods(descriptor.Key.path, new List<string> { descriptor.Key.verb },
+                                CreateRouteHandler(descriptor.Key.path, module.GetType(), statusCodeHandlers, moduleLogger));
                         }
                     }
                 }
@@ -66,12 +66,22 @@ namespace Carter
         }
 
         private static RequestDelegate CreateRouteHandler(
-            string path, Type moduleType, IEnumerable<IStatusCodeHandler> statusCodeHandlers, ILogger logger, RequestDelegate routeHandler)
+            string path, Type moduleType, IEnumerable<IStatusCodeHandler> statusCodeHandlers, ILogger logger)
         {
             return async ctx =>
             {
                 // Now in per-request scope
                 var module = ctx.RequestServices.GetRequiredService(moduleType) as CarterModule;
+
+                if (!module.Routes.TryGetValue((ctx.Request.Method, path), out var routeHandler))
+                {
+                    // if the path was registered but a handler matching the
+                    // current method was not found, return MethodNotFound
+                    // ctx.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
+                    throw new Exception();
+                }
+                
+                
 
                 // run the module handlers
                 bool shouldContinue = true;
@@ -80,7 +90,6 @@ namespace Carter
                 {
                     foreach (var beforeDelegate in module.Before.GetInvocationList())
                     {
-                        
                         var beforeTask = (Task<bool>)beforeDelegate.DynamicInvoke(ctx);
                         shouldContinue = await beforeTask;
                         if (!shouldContinue)

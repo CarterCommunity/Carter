@@ -16,10 +16,10 @@
                     {
                         x.AddCarter(configurator: c =>
                             c.WithModule<TestModule>()
-                             .WithModule<MultipleShortCircuitOnOff>()
-                             .WithModule<MultipleShortCircuitModule>()
-                             .WithModule<ShortCircuitModule>()
-                             .WithModule<TestModuleBaseClass>());
+                                .WithModule<MultipleShortCircuitOnOff>()
+                                .WithModule<MultipleShortCircuitModule>()
+                                .WithModule<ShortCircuitModule>()
+                                .WithModule<TestModuleBaseClass>());
                     })
                     .Configure(x => x.UseCarter())
             );
@@ -236,7 +236,9 @@
         {
             var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, "/"));
 
+
             Assert.Equal(200, (int)response.StatusCode);
+            Assert.Null(response.Content.Headers.ContentLength);
         }
 
         [Fact]
@@ -283,19 +285,6 @@
         {
             var response = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"), "/test/"));
             Assert.Equal(200, (int)response.StatusCode);
-        }
-
-        [Fact]
-        public async Task Should_return_POST_request_body_AsString()
-        {
-            const string content = "Hello";
-
-            var response = await this.httpClient.PostAsync("/asstring", new StringContent(content));
-
-            var body = await response.Content.ReadAsStringAsync();
-
-            Assert.Equal(200, (int)response.StatusCode);
-            Assert.Contains(content, body);
         }
 
         [Fact]

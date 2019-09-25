@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>netcoreapp3.0</TargetFramework>
-        <Version>3.11.0</Version>
-        <VersionPrefix>3.11.0</VersionPrefix>
+        <Version>5.0.0-alpha</Version>
+        <VersionPrefix>5.0.0-alpha</VersionPrefix>
         <Authors>Jonathan Channon</Authors>
         <Description>Carter is a library that allows Nancy-esque routing for use with ASP.Net Core.</Description>
         <PackageTags>asp.net core;nancy;.net core;routing;carter</PackageTags>
         <PackageProjectUrl>https://github.com/CarterCommunity/Carter</PackageProjectUrl>
-        <PackageIconUrl>https://github.com/CarterCommunity/Media/raw/master/carterlogo.png</PackageIconUrl>
+        <PackageIcon>carterlogo.png</PackageIcon>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <LangVersion>latest</LangVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -15,13 +15,15 @@
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     </PropertyGroup>
     <ItemGroup>
+        <None Include="..\Media\carterlogo.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
+    <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="8.1.2" />
-        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0-preview-27315-3" />
-        <PackageReference Include="Microsoft.OpenApi" Version="1.1.2" />
+        <PackageReference Include="FluentValidation" Version="8.4.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0-rc1-19456-20" />
+        <PackageReference Include="Microsoft.OpenApi" Version="1.1.4" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     </ItemGroup>
 </Project>

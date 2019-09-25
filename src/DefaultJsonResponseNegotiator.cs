@@ -1,24 +1,19 @@
 ﻿namespace Carter
 {
     using System;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Net.Http.Headers;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
 
     public class DefaultJsonResponseNegotiator : IResponseNegotiator
     {
-        private readonly JsonSerializerSettings jsonSettings;
+        private readonly JsonSerializerOptions jsonSettings;
 
         public DefaultJsonResponseNegotiator()
         {
-            var contractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
-            this.jsonSettings = new JsonSerializerSettings { ContractResolver = contractResolver, NullValueHandling = NullValueHandling.Ignore };
+            this.jsonSettings = new JsonSerializerOptions { IgnoreNullValues = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
         }
 
         public bool CanHandle(MediaTypeHeaderValue accept)
@@ -29,7 +24,7 @@
         public Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken)
         {
             res.ContentType = "application/json; charset=utf-8";
-            return res.WriteAsync(JsonConvert.SerializeObject(model, this.jsonSettings), cancellationToken);
+            return res.WriteAsync(JsonSerializer.Serialize(model, this.jsonSettings), cancellationToken);
         }
     }
 }
