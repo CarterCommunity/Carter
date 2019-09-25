@@ -15,15 +15,15 @@
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     </PropertyGroup>
     <ItemGroup>
-        <None Include="..\Media\carterlogo.png" Pack="true" PackagePath="\" />
+        <None Include="..\media\carterlogo.png" Pack="true" PackagePath="\" />
     </ItemGroup>
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="8.4.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0-rc1-19456-20" />
+        <PackageReference Include="FluentValidation" Version="8.5.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.0.0" />
         <PackageReference Include="Microsoft.OpenApi" Version="1.1.4" />
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01" PrivateAssets="all" />
     </ItemGroup>
 </Project>
