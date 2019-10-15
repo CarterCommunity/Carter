@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carter", "src\Carter.csproj", "{A6D020CF-1722-4AB3-A8B3-69F54319AD6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carter", "src\Carter\Carter.csproj", "{A6D020CF-1722-4AB3-A8B3-69F54319AD6A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarterSample", "samples\CarterSample\CarterSample.csproj", "{2C511F74-490A-4804-A826-DC9626C669E9}"
 EndProject
@@ -29,6 +29,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidatorOnlyProject", "samples\ValidatorOnlyProject\ValidatorOnlyProject.csproj", "{E5D99119-96EB-4C01-9EC2-A06FC3EEC182}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleSDKClient", "samples\SampleSDKClient\SampleSDKClient.csproj", "{A4ACBFCD-7B56-4FDB-809B-6FD26985A836}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.OpenApi", "src\Microsoft.OpenApi\Microsoft.OpenApi.csproj", "{18C07D41-925A-41D6-9C99-6ABEFD91E91D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -136,6 +138,18 @@ Global
 		{A4ACBFCD-7B56-4FDB-809B-6FD26985A836}.Release|x64.Build.0 = Release|Any CPU
 		{A4ACBFCD-7B56-4FDB-809B-6FD26985A836}.Release|x86.ActiveCfg = Release|Any CPU
 		{A4ACBFCD-7B56-4FDB-809B-6FD26985A836}.Release|x86.Build.0 = Release|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Debug|x64.Build.0 = Debug|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Debug|x86.Build.0 = Debug|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Release|x64.ActiveCfg = Release|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Release|x64.Build.0 = Release|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Release|x86.ActiveCfg = Release|Any CPU
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -149,6 +163,7 @@ Global
 		{CE26885C-BB25-4A2C-B550-1D807CD1A066} = {35DE35A0-758D-4FDD-BDA3-67F04F65677D}
 		{E5D99119-96EB-4C01-9EC2-A06FC3EEC182} = {35DE35A0-758D-4FDD-BDA3-67F04F65677D}
 		{A4ACBFCD-7B56-4FDB-809B-6FD26985A836} = {35DE35A0-758D-4FDD-BDA3-67F04F65677D}
+		{18C07D41-925A-41D6-9C99-6ABEFD91E91D} = {5D056A8A-821C-4C3C-A281-4FA7F8CE251B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9096DE78-6327-48BA-AE0E-336F769681A7}

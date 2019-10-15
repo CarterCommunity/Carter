@@ -9,6 +9,6 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Carter.csproj" />
+    <ProjectReference Include="..\..\src\Carter\Carter.csproj" />
   </ItemGroup>
 </Project>

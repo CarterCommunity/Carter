@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0</TargetFrameworks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageIconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</PackageIconUrl>
+        <PackageProjectUrl>https://github.com/Microsoft/OpenAPI.NET</PackageProjectUrl>
+        <PackageLicenseUrl>https://raw.githubusercontent.com/Microsoft/OpenAPI.NET/master/LICENSE</PackageLicenseUrl>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <Authors>Microsoft</Authors>
+        <Company>Microsoft</Company>
+        <Title>Microsoft.OpenApi</Title>
+        <PackageId>Microsoft.OpenApi</PackageId>
+        <Version>1.1.4</Version>
+        <Description>.NET models with JSON and YAML writers for OpenAPI specification</Description>
+        <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+        <PackageTags>OpenAPI .NET</PackageTags>
+        
+        <AssemblyName>Microsoft.OpenApi</AssemblyName>
+        <RootNamespace>Microsoft.OpenApi</RootNamespace>
+    </PropertyGroup>
+
+    
+    <ItemGroup>
+        <Compile Update="Properties\SRResource.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>SRResource.resx</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Update="Properties\SRResource.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>SRResource.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
+</Project>

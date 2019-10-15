@@ -18,7 +18,7 @@ namespace Carter.OpenApi
     {
         internal static RequestDelegate BuildOpenApiResponse(CarterOptions options, Dictionary<(string verb, string path), RouteMetaData> metaDatas)
         {
-            return context =>
+            return async context =>
             {
                 var document = new OpenApiDocument
                 {
@@ -117,8 +117,7 @@ namespace Carter.OpenApi
                 }
 
                 context.Response.ContentType = "application/json; charset=utf-8";
-                document.SerializeAsJson(context.Response.Body, OpenApiSpecVersion.OpenApi3_0);
-                return Task.CompletedTask;
+                await document.SerializeAsJsonAsync(context.Response.Body, OpenApiSpecVersion.OpenApi3_0);
             };
         }
 

@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActiveScopeNeededForPropertyNameWriting" xml:space="preserve">
+    <value>There must be an active scope for name '{0}' to be written.</value>
+  </data>
+  <data name="ArgumentNullOrWhiteSpace" xml:space="preserve">
+    <value>The argument '{0}' is null, empty or consists only of white-space.</value>
+  </data>
+  <data name="ExtensionFieldNameMustBeginWithXDash" xml:space="preserve">
+    <value>The filed name '{0}' of extension doesn't begin with x-.</value>
+  </data>
+  <data name="IndentationLevelInvalid" xml:space="preserve">
+    <value>Indentation level cannot be lower than 0.</value>
+  </data>
+  <data name="InputItemShouldBeType" xml:space="preserve">
+    <value>The input item should be in type of '{0}'.</value>
+  </data>
+  <data name="InvalidReferenceId" xml:space="preserve">
+    <value>Invalid Reference identifier '{0}'.</value>
+  </data>
+  <data name="InvalidReferenceType" xml:space="preserve">
+    <value>Invalid Reference Type.</value>
+  </data>
+  <data name="LocalReferenceRequiresType" xml:space="preserve">
+    <value>Local reference must have type specified.</value>
+  </data>
+  <data name="ObjectScopeNeededForPropertyNameWriting" xml:space="preserve">
+    <value>The active scope must be an object scope for property name '{0}' to be written.</value>
+  </data>
+  <data name="OpenApiExceptionGenericError" xml:space="preserve">
+    <value>An error occurred while processing the Open API document.</value>
+  </data>
+  <data name="OpenApiFormatNotSupported" xml:space="preserve">
+    <value>The given OpenAPI format '{0}' is not supported.</value>
+  </data>
+  <data name="OpenApiObjectElementIsRequired" xml:space="preserve">
+    <value>The object element name '{0}' is required.</value>
+  </data>
+  <data name="OpenApiObjectMarkAsReference" xml:space="preserve">
+    <value>The OpenApi element '{0}' is already marked as reference object.</value>
+  </data>
+  <data name="OpenApiParameterRequiredPropertyMandatory" xml:space="preserve">
+    <value>If the parameter location is "path", this property is REQUIRED and its value MUST be true</value>
+  </data>
+  <data name="OpenApiSpecVersionNotSupported" xml:space="preserve">
+    <value>The given OpenAPI specification version '{0}' is not supported.</value>
+  </data>
+  <data name="OpenApiUnsupportedValueType" xml:space="preserve">
+    <value>The type '{0}' is not supported in Open API document.</value>
+  </data>
+  <data name="OpenApiWriterExceptionGenericError" xml:space="preserve">
+    <value>An error occurred while writing the Open API document.</value>
+  </data>
+  <data name="PrimitiveTypeNotSupported" xml:space="preserve">
+    <value>The given primitive type '{0}' is not supported.</value>
+  </data>
+  <data name="ReferenceHasInvalidFormat" xml:space="preserve">
+    <value>The reference string '{0}' has invalid format.</value>
+  </data>
+  <data name="RemoteReferenceNotSupported" xml:space="preserve">
+    <value>Remote reference not supported.</value>
+  </data>
+  <data name="RuntimeExpressionHasInvalidFormat" xml:space="preserve">
+    <value>The runtime expression '{0}' has invalid format.</value>
+  </data>
+  <data name="RuntimeExpressionMustBeginWithDollar" xml:space="preserve">
+    <value>The runtime expression '{0}' should start with '$'</value>
+  </data>
+  <data name="ScopeMustBePresentToEnd" xml:space="preserve">
+    <value>Scope must be present to end.</value>
+  </data>
+  <data name="ScopeToEndHasIncorrectType" xml:space="preserve">
+    <value>The scope to end is expected to be of type '{0}' but it is of type '{0}'.</value>
+  </data>
+  <data name="SourceExpressionHasInvalidFormat" xml:space="preserve">
+    <value>The source expression '{0}' has invalid format.</value>
+  </data>
+  <data name="UnknownVisitorType" xml:space="preserve">
+    <value>Can not find visitor type registered for type '{0}'.</value>
+  </data>
+  <data name="Validation_ComponentsKeyMustMatchRegularExpr" xml:space="preserve">
+    <value>The key '{0}' in '{1}' of components MUST match the regular expression '{2}'.</value>
+  </data>
+  <data name="Validation_ExtensionNameMustBeginWithXDash" xml:space="preserve">
+    <value>The extension name '{0}' in '{1}' object MUST begin with 'x-'.</value>
+  </data>
+  <data name="Validation_FieldIsRequired" xml:space="preserve">
+    <value>The field '{0}' in '{1}' object is REQUIRED.</value>
+  </data>
+  <data name="Validation_PathItemMustBeginWithSlash" xml:space="preserve">
+    <value>The path item name '{0}' MUST begin with a slash.</value>
+  </data>
+  <data name="Validation_RuleAddTwice" xml:space="preserve">
+    <value>The same rule cannot be in the same rule set twice.</value>
+  </data>
+  <data name="Validation_SchemaRequiredFieldListMustContainThePropertySpecifiedInTheDiscriminator" xml:space="preserve">
+    <value>Schema {0} must contain property specified in the discriminator {1} in the required field list.</value>
+  </data>
+  <data name="Validation_StringMustBeEmailAddress" xml:space="preserve">
+    <value>The string '{0}' MUST be in the format of an email address.</value>
+  </data>
+</root>
