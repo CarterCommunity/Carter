@@ -11,7 +11,7 @@
         /// A way to require authentication for your <see cref="CarterModule"/>
         /// </summary>
         /// <param name="module">Current <see cref="CarterModule"/></param>
-        public static void RequiresAuthentication(this CarterModule module)
+        public static void RequiresAuthorization(this CarterModule module)
         {
             module.RequiresAuth = true;
         }

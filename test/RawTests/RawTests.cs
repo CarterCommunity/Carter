@@ -221,7 +221,8 @@ namespace Carter.Tests
                             options.DefaultAuthenticateScheme = CustomAuthOptions.DefaultScheme;
                             options.DefaultChallengeScheme = CustomAuthOptions.DefaultScheme;
                         }).AddCustomAuth(options => options.AuthKey = "custom auth key");
-                        x.AddAuthorization(options => options.AddPolicy("secure", builder => builder.RequireClaim("claim")));
+                        //x.AddAuthorization(options => options.AddPolicy("secure", builder => builder.RequireClaim("claim")));
+                        x.AddAuthorization();
                         x.AddScoped<CarterModule2, HelloModule>();
                     })
                     .Configure(x =>
