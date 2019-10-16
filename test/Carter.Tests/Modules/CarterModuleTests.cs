@@ -2,6 +2,7 @@
 {
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
     using Xunit;
@@ -19,9 +20,14 @@
                                 .WithModule<MultipleShortCircuitOnOff>()
                                 .WithModule<MultipleShortCircuitModule>()
                                 .WithModule<ShortCircuitModule>()
-                                .WithModule<TestModuleBaseClass>());
+                                .WithModule<TestModuleBaseClass>()
+                                );
                     })
-                    .Configure(x => x.UseCarter())
+                    .Configure(x =>
+                    {
+                        x.UseRouting();
+                        x.UseEndpoints(builder => builder.MapCarter());
+                    })
             );
             this.httpClient = this.server.CreateClient();
         }
@@ -229,6 +235,8 @@
             var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, "/head"));
 
             Assert.Equal(200, (int)response.StatusCode);
+            Assert.Null(response.Content.Headers.ContentLength);
+
         }
 
         [Fact]
@@ -247,6 +255,8 @@
             var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, "/test/"));
 
             Assert.Equal(200, (int)response.StatusCode);
+            Assert.Null(response.Content.Headers.ContentLength);
+
         }
 
         [Fact]

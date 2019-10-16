@@ -7,6 +7,7 @@ namespace Carter.OpenApi
     using Carter.Request;
     using FluentValidation.Validators;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.Features;
     using Microsoft.AspNetCore.Routing.Template;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.OpenApi;
@@ -18,7 +19,7 @@ namespace Carter.OpenApi
     {
         internal static RequestDelegate BuildOpenApiResponse(CarterOptions options, Dictionary<(string verb, string path), RouteMetaData> metaDatas)
         {
-            return async context =>
+            return context =>
             {
                 var document = new OpenApiDocument
                 {
@@ -116,8 +117,16 @@ namespace Carter.OpenApi
                     document.Paths.Add("/" + templateName, pathItem);
                 }
 
+                var syncIOFeature = context.Features.Get<IHttpBodyControlFeature>();
+
+                if (syncIOFeature != null)
+                {
+                    syncIOFeature.AllowSynchronousIO = true;
+                }
+
                 context.Response.ContentType = "application/json; charset=utf-8";
-                await document.SerializeAsJsonAsync(context.Response.Body, OpenApiSpecVersion.OpenApi3_0);
+                document.SerializeAsJson(context.Response.Body, OpenApiSpecVersion.OpenApi3_0);
+                return Task.CompletedTask;
             };
         }
 

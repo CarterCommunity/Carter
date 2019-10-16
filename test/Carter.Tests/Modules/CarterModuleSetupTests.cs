@@ -9,7 +9,7 @@
         public void Module_attempts_to_register_conflicting_routes()
         {
             var ex = Assert.Throws<ArgumentException>(() => { new ExampleModuleWithConflictingRoutes(); });
-            Assert.Equal("An item with the same key has already been added. Key: (POST, Foo)", ex.Message);
+            Assert.Equal("An item with the same key has already been added. Key: (POST, /Foo)", ex.Message);
         }
 
         [Fact]

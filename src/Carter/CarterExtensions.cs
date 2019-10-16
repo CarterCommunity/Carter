@@ -2,7 +2,6 @@ namespace Carter
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
@@ -10,6 +9,7 @@ namespace Carter
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using static OpenApi.CarterOpenApi;
@@ -22,47 +22,56 @@ namespace Carter
         /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
         /// <param name="options">A <see cref="CarterOptions"/> instance.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
-        public static IApplicationBuilder UseCarter(this IApplicationBuilder builder, CarterOptions options = null)
+        public static IEndpointConventionBuilder MapCarter(this IEndpointRouteBuilder builder, CarterOptions options = null)
         {
-            var carterConfigurator = builder.ApplicationServices.GetService<CarterConfigurator>();
+            var carterConfigurator = builder.ServiceProvider.GetService<CarterConfigurator>();
 
-            var loggerFactory = builder.ApplicationServices.GetService<ILoggerFactory>();
+            var loggerFactory = builder.ServiceProvider.GetService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger(typeof(CarterConfigurator));
 
             carterConfigurator.LogDiscoveredCarterTypes(logger);
 
-            ApplyGlobalBeforeHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalBeforeHook"));
+            var builders = new List<IEndpointConventionBuilder>();
 
-            ApplyGlobalAfterHook(builder, options, loggerFactory.CreateLogger("Carter.GlobalAfterHook"));
+            var routeMetaData = new Dictionary<(string verb, string path), RouteMetaData>();
 
-            return builder.UseRouting().UseEndpoints(endpointRouteBuilder =>
+            //Create a "startup scope" to resolve modules from
+            using (var scope = builder.ServiceProvider.CreateScope())
             {
-                var routeMetaData = new Dictionary<(string verb, string path), RouteMetaData>();
+                var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>().ToList();
 
-                //Create a "startup scope" to resolve modules from
-                using (var scope = builder.ApplicationServices.CreateScope())
+                //Get all instances of CarterModule to fetch and register declared routes
+                foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
                 {
-                    var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>().ToList();
+                    var moduleLogger = scope.ServiceProvider
+                        .GetService<ILoggerFactory>()
+                        .CreateLogger(module.GetType());
 
-                    //Get all instances of CarterModule to fetch and register declared routes
-                    foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
+                    routeMetaData = routeMetaData.Concat(module.RouteMetaData).ToDictionary(x => x.Key, x => x.Value);
+
+                    foreach (var route in module.Routes)
                     {
-                        var moduleLogger = scope.ServiceProvider
-                            .GetService<ILoggerFactory>()
-                            .CreateLogger(module.GetType());
+                        var conventionBuilder = builder.MapMethods(route.Key.path, new[] { route.Key.verb },
+                            CreateRouteHandler(route.Key.path, module.GetType(), statusCodeHandlers, moduleLogger));
 
-                        routeMetaData = routeMetaData.Concat(module.RouteMetaData).ToDictionary(x => x.Key, x => x.Value);
-
-                        foreach (var descriptor in module.Routes)
-                        { 
-                            endpointRouteBuilder.MapMethods(descriptor.Key.path, new List<string> { descriptor.Key.verb },
-                                CreateRouteHandler(descriptor.Key.path, module.GetType(), statusCodeHandlers, moduleLogger));
+                        if (module.AuthPolicies.Any())
+                        {
+                            conventionBuilder.RequireAuthorization(module.AuthPolicies);
                         }
+                        else if (module.RequiresAuth)
+                        {
+                            conventionBuilder.RequireAuthorization();
+                        }
+
+                        route.Value.conventions.Apply(conventionBuilder);
+                        builders.Add(conventionBuilder);
                     }
                 }
+            }
 
-                endpointRouteBuilder.MapGet("openapi", BuildOpenApiResponse(options, routeMetaData));
-            });
+            builders.Add(builder.MapGet("openapi", BuildOpenApiResponse(options, routeMetaData)));
+
+            return new CompositeConventionBuilder(builders);
         }
 
         private static RequestDelegate CreateRouteHandler(
@@ -80,8 +89,6 @@ namespace Carter
                     // ctx.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
                     throw new Exception();
                 }
-                
-                
 
                 // run the module handlers
                 bool shouldContinue = true;
@@ -103,7 +110,7 @@ namespace Carter
                 {
                     // run the route handler
                     logger.LogDebug("Executing module route handler for {Method} /{Path}", ctx.Request.Method, path);
-                    await routeHandler(ctx);
+                    await routeHandler.handler(ctx);
 
                     // run after handler
                     if (module.After != null)
@@ -119,37 +126,6 @@ namespace Carter
                     await scHandler.Handle(ctx);
                 }
             };
-        }
-
-        private static void ApplyGlobalAfterHook(IApplicationBuilder builder, CarterOptions options, ILogger logger)
-        {
-            if (options?.After != null)
-            {
-                builder.Use(async (ctx, next) =>
-                {
-                    await next();
-                    logger.LogDebug("Executing global after hook");
-                    await options.After(ctx);
-                });
-            }
-        }
-
-        private static void ApplyGlobalBeforeHook(IApplicationBuilder builder, CarterOptions options, ILogger logger)
-        {
-            if (options?.Before != null)
-            {
-                builder.Use(async (ctx, next) =>
-                {
-                    logger.LogDebug("Executing global before hook");
-
-                    var carryOn = await options.Before(ctx);
-                    if (carryOn)
-                    {
-                        logger.LogDebug("Executing next handler after global before hook");
-                        await next();
-                    }
-                });
-            }
         }
 
         /// <summary>
@@ -293,6 +269,24 @@ namespace Carter
             }
 
             return validators;
+        }
+
+        private class CompositeConventionBuilder : IEndpointConventionBuilder
+        {
+            private readonly List<IEndpointConventionBuilder> _builders;
+
+            public CompositeConventionBuilder(List<IEndpointConventionBuilder> builders)
+            {
+                _builders = builders;
+            }
+
+            public void Add(Action<EndpointBuilder> convention)
+            {
+                foreach (var builder in _builders)
+                {
+                    builder.Add(convention);
+                }
+            }
         }
     }
 }

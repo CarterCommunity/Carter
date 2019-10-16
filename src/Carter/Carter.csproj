@@ -26,7 +26,4 @@
         <PackageReference Include="Microsoft.OpenApi" Version="1.1.4" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01" PrivateAssets="all" />
     </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\Microsoft.OpenApi\Microsoft.OpenApi.csproj" />
-    </ItemGroup>
 </Project>

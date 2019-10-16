@@ -2,6 +2,7 @@ namespace Carter.Tests.StatusCodeHandlers
 {
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
     using Xunit;
@@ -18,7 +19,11 @@ namespace Carter.Tests.StatusCodeHandlers
                             c.WithModule<StatusCodeHandlerModule>()
                              .WithStatusCodeHandler<TeapotStatusCodeHandler>());
                     })
-                    .Configure(x => x.UseCarter())
+                    .Configure(x =>
+                    {
+                        x.UseRouting();
+                        x.UseEndpoints(builder => builder.MapCarter());
+                    })
             );
             this.httpClient = this.server.CreateClient();
         }

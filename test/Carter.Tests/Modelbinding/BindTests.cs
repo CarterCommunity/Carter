@@ -11,6 +11,7 @@ namespace Carter.Tests.Modelbinding
     using System.Text;
     using System.Threading.Tasks;
     using FluentValidation.Results;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
     using Newtonsoft.Json;
@@ -30,7 +31,11 @@ namespace Carter.Tests.Modelbinding
                                 .WithValidator<DuplicateTestModelOne>()
                                 .WithValidator<DuplicateTestModelTwo>());
                     })
-                    .Configure(x => x.UseCarter())
+                    .Configure(x =>
+                    {
+                        x.UseRouting();
+                        x.UseEndpoints(builder => builder.MapCarter());
+                    })
             );
             this.httpClient = server.CreateClient();
         }
