@@ -27,7 +27,7 @@ build:
   verbosity: minimal
 
 nuget:
-  disable_publish_on_pr: true
+  disable_publish_on_pr: false
 
 pull_requests:
   do_not_increment_build_number: true
