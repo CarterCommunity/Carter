@@ -31,20 +31,20 @@ namespace Carter
         /// <summary>
         /// Initializes a new instance of <see cref="CarterModule"/>
         /// </summary>
-        protected CarterModule() : this(string.Empty)
-        {
-        }
+//        protected CarterModule() : this(string.Empty)
+//        {
+//        }
 
         /// <summary>
         /// Initializes a new instance of <see cref="CarterModule"/>
         /// </summary>
         /// <param name="basePath">A base path to group routes in your <see cref="CarterModule"/></param>
-        protected CarterModule(string basePath)
+        protected CarterModule(string basePath = null)
         {
             this.Routes = new Dictionary<(string verb, string path), RequestDelegate>(RouteComparer.Comparer);
             this.RouteMetaData = new Dictionary<(string verb, string path), RouteMetaData>(RouteComparer.Comparer);
 
-            var cleanPath = this.RemoveStartingSlash(basePath);
+            var cleanPath = this.RemoveStartingSlash(basePath ?? string.Empty);
             this.basePath = this.RemoveEndingSlash(cleanPath);
         }
 
