@@ -19,25 +19,15 @@ namespace Carter.Benchmarks.StartupBenchmarks
         }
     }
 
-    [InProcessAttribute]
+    [InProcess, MemoryDiagnoser]
     public class Startup
     {
         [Benchmark]
-        public void EntryPoint()
+        public void Configure()
         {
-            WebHost.CreateDefaultBuilder()
-                .UseStartup<Startup>()
+            new WebHostBuilder()
+                .Configure(app => app.UseCarter())
                 .Build();
-        }
-        
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddCarter();
-        }
-        
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseCarter();
         }
     }
 
