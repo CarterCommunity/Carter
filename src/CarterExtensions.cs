@@ -46,9 +46,8 @@ namespace Carter
                 var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>();
 
                 //Get all instances of CarterModule to fetch and register declared routes
-                var carterModules = scope.ServiceProvider.GetServices<CarterModule>();
-                
-                foreach (var module in carterModules)
+
+                foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
                 {
                     var moduleLogger = scope.ServiceProvider
                         .GetService<ILoggerFactory>()
