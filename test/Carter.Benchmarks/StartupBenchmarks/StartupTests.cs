@@ -1,11 +1,10 @@
 namespace Carter.Benchmarks.StartupBenchmarks
 {
+    using System.Collections.Generic;
     using BenchmarkDotNet.Attributes;
     using BenchmarkDotNet.Running;
-    using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Builder.Internal;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
@@ -22,20 +21,33 @@ namespace Carter.Benchmarks.StartupBenchmarks
     [InProcess, MemoryDiagnoser]
     public class Startup
     {
-        [Benchmark]
-        public void Configure()
-        {
-            new WebHostBuilder()
-                .Configure(app => app.UseCarter())
-                .Build();
-        }
-    }
+        private ApplicationBuilder applicationBuilder;
 
-    public class TestModule : CarterModule
-    {
-        public TestModule()
+        public IEnumerable<ServiceCollection> ServiceCollection()
         {
-            Get("/", async (req, res, routeData) => await res.WriteAsync("Hello from Carter!"));
+            yield return new ServiceCollection();
         }
+        
+        public IEnumerable<IApplicationBuilder> ApplicationBuilder()
+        {
+            yield return applicationBuilder;
+        }
+        
+        [IterationSetup]
+        public void IterationSetup()
+        {
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddLogging();
+            serviceCollection.AddCarter();
+            this.applicationBuilder = new ApplicationBuilder(serviceCollection.BuildServiceProvider());
+        }
+
+        [Benchmark]
+        [ArgumentsSource(nameof(ServiceCollection))]
+        public void ConfigureServices(IServiceCollection services) => services.AddCarter();
+
+        [Benchmark]
+        [ArgumentsSource(nameof(ApplicationBuilder))]
+        public void Configure(IApplicationBuilder app) => app.UseCarter();
     }
 }
