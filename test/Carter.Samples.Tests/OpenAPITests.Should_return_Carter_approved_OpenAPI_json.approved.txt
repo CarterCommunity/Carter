@@ -26,7 +26,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CastMembers"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CastMember"
+                  }
                 }
               }
             }
@@ -65,7 +68,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Actors"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Actor"
+                  }
                 }
               }
             }
@@ -202,7 +208,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PagedItems"
+                  "$ref": "#/components/schemas/PagedItemsOfFoo"
                 }
               }
             }
@@ -229,78 +235,62 @@
   },
   "components": {
     "schemas": {
-      "CastMembers": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/CastMember"
+      "Actor": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Id": {
+            "type": "integer"
+          },
+          "Age": {
+            "type": "integer"
+          }
+        }
+      },
+      "Bar": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string"
+          }
         }
       },
       "CastMember": {
         "type": "object",
         "properties": {
-          "name": {
+          "Name": {
             "type": "string"
           }
-        },
-        "example": {
-          "name": ""
-        }
-      },
-      "Actors": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Actor"
-        }
-      },
-      "Actor": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "id": {
-            "type": "integer"
-          },
-          "age": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "integer"
-          }
-        },
-        "example": {
-          "name": "",
-          "id": "",
-          "age": ""
-        }
-      },
-      "PagedItems": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "string"
-          }
-        },
-        "example": {
-          "data": ""
         }
       },
       "Foo": {
         "type": "object",
         "properties": {
-          "enumbars": {
-            "type": "string"
+          "EnumBars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bar"
+            }
           },
-          "listbars": {
-            "type": "string"
+          "ListBars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bar"
+            }
           }
-        },
-        "example": {
-          "enumbars": "",
-          "listbars": ""
+        }
+      },
+      "PagedItemsOfFoo": {
+        "type": "object",
+        "properties": {
+          "Data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Foo"
+            }
+          }
         }
       }
     },
