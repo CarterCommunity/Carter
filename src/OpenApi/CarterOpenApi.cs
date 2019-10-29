@@ -96,20 +96,22 @@ namespace Carter.OpenApi
                 return;
             }
 
+            // Add this first to avoid infinite recursion.
+            navigation.Add(fullName, schemaElement);
+
             foreach (var genericType in type.GenericTypeArguments)
             {
                 ReadTypeInformation(genericType, navigation);
                 var genericTypeElement = navigation[genericType.FullName];
-                schemaElement.GenericTypes.Add(genericTypeElement);
+                navigation[fullName].GenericTypes.Add(genericTypeElement);
             }
 
             foreach (var propertyInfo in type.GetProperties())
             {
                 ReadTypeInformation(propertyInfo.PropertyType, navigation);
                 var propertyTypeElement = navigation[propertyInfo.PropertyType.FullName];
-                schemaElement.DataMembers.Add(propertyInfo.Name, propertyTypeElement);
+                navigation[fullName].DataMembers.Add(CamelCase(propertyInfo.Name), propertyTypeElement);
             }
-            navigation.Add(fullName, schemaElement);
         }
 
         /// <summary>
@@ -315,6 +317,8 @@ namespace Carter.OpenApi
         /// <returns>OpenApiSchema filled from input information.</returns>
         private static OpenApiSchema SchemaFromElement(SchemaElement schemaElement)
         {
+            if (schemaElement == null) return null;
+
             var schema = new OpenApiSchema();
             if (schemaElement.IsSimple())
             {
@@ -663,30 +667,12 @@ namespace Carter.OpenApi
             return openApiResponse;
         }
 
-        public static OpenApiSchema CreateOpenApiSchema()
+        public static string CamelCase(string inputString)
                 {
-            var schema = new OpenApiSchema
-                {
-                Type = "object",
-                //Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema
-                //{
-                //    Type = GetOpenApiTypeMapping(value.Type),
-                //    Nullable = value.Nullable
-                //}),
-                Example = CreateExampleObject()
-            };
-            return schema;
-            }
-
-        public static OpenApiObject CreateExampleObject()
-        {
-            var exampleObject = new OpenApiObject();
-
-            //foreach (var propertyInfo in propNames)
-            //{
-            //    propObj.Add(propertyInfo.Name, new OpenApiString("")); //TODO Could use Bogus to generate some data rather than empty string
-            //}
-            return exampleObject;
+            if (inputString == null) return null;
+            if (inputString.Length == 0) return inputString;
+            if (inputString.Length == 1) return inputString.ToLower();
+            return Char.ToLowerInvariant(inputString[0]) + inputString.Substring(1);
         }
 
         public static bool IsNumeric(this object value) =>
