@@ -3,6 +3,7 @@ namespace Carter.OpenApi
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Threading.Tasks;
     using Carter.Request;
     using FluentValidation.Validators;
@@ -20,24 +21,338 @@ namespace Carter.OpenApi
         {
             return context =>
             {
-                var document = new OpenApiDocument
+                var schemaNavigation = ReadSchemaInformation(metaDatas);
+                if (!UniqueShortNames(schemaNavigation))
+                {
+                    // Cannot generate unique names.  Therefore, exit with an error.   
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    return Task.CompletedTask;
+                }
+                var document = CreateDocument(options, "3.0.0");
+                AddSchema(schemaNavigation, document);
+                AddSecurityInformation(options, document);
+                AddPaths(schemaNavigation, metaDatas, document, context);
+                context.Response.ContentType = "application/json; charset=utf-8";
+                document.SerializeAsJson(context.Response.Body, OpenApiSpecVersion.OpenApi3_0);
+                return Task.CompletedTask;
+            };
+        }
+
+        /// <summary>
+        /// A function to read schema information from the provided RouteMetaData into a schema navigation map.
+        /// </summary>
+        /// <param name="metaDatas">Input information read from definitions and meta data classes.</param>
+        /// <returns>A map that contains unique SchemaElements.  These SchemaElements may reference each other.  The keys of the map are the unique long names.</returns>
+        private static Dictionary<string, SchemaElement> ReadSchemaInformation(Dictionary<(string verb, string path), RouteMetaData> metaDatas)
+        {
+            var navigation = new Dictionary<string, SchemaElement>();
+            foreach (var routeMetaData in metaDatas)
+            {
+                System.Diagnostics.Debug.WriteLine(routeMetaData.Key);
+                if (routeMetaData.Value.Request != null)
+                {
+                    ReadTypeInformation(routeMetaData.Value.Request, navigation);
+                }
+                if (routeMetaData.Value.Responses != null)
+                {
+                    foreach (var response in routeMetaData.Value.Responses)
+                    {
+                        ReadTypeInformation(response.Response, navigation);
+                    }
+                }
+            }
+            return navigation;
+        }
+
+        /// <summary>
+        /// A function to read information from types and populsate a schema navigation map.
+        /// </summary>
+        /// <param name="navigation">A map of SchemaElements that are in a hierarchical structure.  The keys of the map are the unique long names.</param>
+        /// <param name="type">The input class type.</param>
+        private static void ReadTypeInformation(Type type, Dictionary<string, SchemaElement> navigation)
+        {
+            if (type == null) return;
+
+            // Build the unique long name and the short name.
+            var fullName = type.FullName;
+            var shortName = type.Name;
+            var pos = shortName.IndexOf("`", System.StringComparison.Ordinal);
+            if (pos != -1) shortName = shortName.Substring(0, pos);
+
+            // If this is a known type.
+            if (navigation.ContainsKey(fullName)) return;
+
+            var schemaElement = new SchemaElement
+            {
+                FullName = fullName,
+                ShortName = shortName,
+                ElementType = type
+            };
+
+            // Prevent the navigation from including the properties of a string.
+            if (fullName == "System.String")
+            {
+                navigation.Add(fullName, schemaElement);
+                return;
+            }
+
+            foreach (var genericType in type.GenericTypeArguments)
+            {
+                ReadTypeInformation(genericType, navigation);
+                var genericTypeElement = navigation[genericType.FullName];
+                schemaElement.GenericTypes.Add(genericTypeElement);
+            }
+
+            foreach (var propertyInfo in type.GetProperties())
+            {
+                ReadTypeInformation(propertyInfo.PropertyType, navigation);
+                var propertyTypeElement = navigation[propertyInfo.PropertyType.FullName];
+                schemaElement.DataMembers.Add(propertyInfo.Name, propertyTypeElement);
+            }
+            navigation.Add(fullName, schemaElement);
+        }
+
+        /// <summary>
+        /// A function to check the short names for the classes and preappend sections of the namespace if needed.
+        /// </summary>
+        /// <param name="navigation">A map of SchemaElements that are in a hierarchical structure.  The keys of the map are the unique long names.</param>
+        /// <returns>True if the short names are or can be made unique and false if this operation false.</returns>
+        private static bool UniqueShortNames(Dictionary<string, SchemaElement> navigation)
+        {
+            // Attempt to remove duplicate short names by preappending minimal namepace sections.
+            // The generic classes are not included, since they need to be considered after being flatterned.
+            var (noDuplicates, longNamesAffected, newShortNames) = DetectDuplicateNames(navigation, checkGeneric: false);
+            if (!noDuplicates)
+            {
+                if (!CorrectShortNames(navigation, longNamesAffected, newShortNames)) return false;
+            }
+            FlatternGenericNames(navigation);
+            (noDuplicates, longNamesAffected, newShortNames) = DetectDuplicateNames(navigation, checkGeneric: true);
+            if (!noDuplicates)
+            {
+                if (!CorrectShortNames(navigation, longNamesAffected, newShortNames)) return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// A function to detect duplicate short names.
+        /// </summary>
+        /// <param name="navigation">The input map of long names and SchemaElements.</param>
+        /// <param name="checkGeneric">A bool to include generic classes within this test.</param>
+        /// <returns>A bool to indicate if duplicate names were deletected, together with affected names and initial short names.</returns>
+        private static (bool,
+            Dictionary<string, List<string>>,
+            Dictionary<string, List<string>>) DetectDuplicateNames(Dictionary<string, SchemaElement> navigation, bool checkGeneric = false)
+        {
+            // Find names that are not unique
+            var shortNames = navigation.Values.Select(o => o.ShortName).ToList();
+            var longNamesAffected = new Dictionary<string, List<string>>();
+            var newShortNames = new Dictionary<string, List<string>>();
+            foreach (var keyValuePair in navigation)
+            {
+                // Skip generic classes if requested.
+                if (!checkGeneric && keyValuePair.Value.IsGeneric()) continue;
+
+                // Exclude short names that are unique.
+                if (shortNames.Where(o => o.Equals(keyValuePair.Value.ShortName)).Count() == 1) continue;
+
+                // Record the namespace fragments of the affected long names.
+                var namespaceString = keyValuePair.Value.ElementType.Namespace;
+                var fragments = new List<string>();
+                if (namespaceString != null && namespaceString != "")
+                {
+                    if (!namespaceString.Contains("."))
+                    {
+                        fragments.Add(namespaceString);
+                    }
+                    else
+                    {
+                        fragments.AddRange(namespaceString.Split('.').ToList());
+                    }
+                }
+                longNamesAffected.Add(keyValuePair.Key, fragments);
+
+                // Store this ready to append namespace fragments.
+                newShortNames.Add(keyValuePair.Key, new List<string>
+                {
+                    keyValuePair.Value.ShortName
+                });
+            }
+            var noDuplicates = false;
+            if (longNamesAffected.Count() == 0) noDuplicates = true;
+            return (noDuplicates, longNamesAffected, newShortNames);
+        }
+
+        /// <summary>
+        /// A function to attempt to rename the short names, such that they are unique.  Name space sections
+        /// are prepended to try to create unique simple names.
+        /// </summary>
+        /// <param name="navigation">The input map of long names and SchemaElements.</param>
+        /// <param name="longNamesAffected">The long names that are associated with duplicate short names and their namespace fragments.</param>
+        /// <param name="newShortNames">The new short names without prepended namespace information.</param>
+        /// <returns>False if the attempt to correct the short names was not successful.</returns>
+        private static bool CorrectShortNames(Dictionary<string, SchemaElement> navigation, 
+            Dictionary<string, List<string>> longNamesAffected,
+            Dictionary<string, List<string>> newShortNames)
+        {
+            // Attempt to correct the short names
+            var success = false;
+            for (int i = 0; i < 5; i++)
+            {
+                foreach (var keyValuePair in newShortNames)
+                {
+                    var nAvailable = longNamesAffected[keyValuePair.Key].Count(); // Contains namespace.
+                    var nUsed = keyValuePair.Value.Count() - 1; // Contains short name and then namespace.
+
+                    // If there are no namespace fragments, then this short name cannot be corrected.
+                    if (nAvailable == 0) continue;
+
+                    // If all of the namespace elements have been preappended, then no more changes are available.
+                    if (nAvailable == nUsed) continue;
+
+                    // Preappend the next namespace element.
+                    keyValuePair.Value.Insert(0, longNamesAffected[keyValuePair.Key][nAvailable - nUsed - 1]);
+                }
+
+                // Test if the names are now unique
+                var updatedShortNames = new List<string>();
+                foreach (var nameFragments in newShortNames)
+                {
+                    updatedShortNames.Add(string.Join("_", nameFragments.Value));
+                }
+                if (updatedShortNames.Distinct().Count() == updatedShortNames.Count())
+                {
+                    // Update the short names.
+                    foreach (var keyValuePair in newShortNames)
+                    {
+                        navigation[keyValuePair.Key].ShortName = string.Join("_", keyValuePair.Value);
+                    }
+                    success = true;
+                    break;
+                }
+            }
+            return success;
+        }
+
+        /// <summary>
+        /// Correct any generic class names to include the type names following the generic name.
+        /// The form is Generic<T,M> becomes GenericOfTAndM.
+        /// </summary>
+        /// <param name="navigation">The input map of long names and SchemaElements.</param>
+        private static void FlatternGenericNames(Dictionary<string, SchemaElement> navigation)
+        {
+            foreach (var keyValuePair in navigation)
+            {
+                if (!keyValuePair.Value.IsGeneric()) continue;
+                var genericSuffix = string.Empty;
+                foreach (var shortName in keyValuePair.Value.GenericTypes.Select(o => o.ShortName))
+                {
+                    if (genericSuffix.Length == 0)
+                    {
+                        genericSuffix = "Of";
+                    }
+                    else
+                    {
+                        genericSuffix = "And";
+                    }
+                    genericSuffix += shortName;
+                }
+                keyValuePair.Value.ShortName += genericSuffix;
+            }
+        }
+
+        /// <summary>
+        /// Create a basic OpenApiDocument object.
+        /// </summary>
+        /// <param name="options">The input Carter options.</param>
+        /// <param name="version">The version string for this OpenApi output.</param>
+        /// <returns>A basic OpenApiDocument.</returns>
+        private static OpenApiDocument CreateDocument(CarterOptions options, string version)
+        {
+            return new OpenApiDocument
                 {
                     Info = new OpenApiInfo
                     {
-                        Version = "3.0.0",
+                    Version = version,
                         Title = options.OpenApi.DocumentTitle
                     },
                     Servers = new List<OpenApiServer>(options.OpenApi.ServerUrls.Select(x => new OpenApiServer { Url = x })),
                     Paths = new OpenApiPaths(),
                     Components = new OpenApiComponents()
                 };
+        }
+
+        /// <summary>
+        /// Fill the OpenApiDocument document with the schema definitions for objects.
+        /// </summary>
+        /// <param name="navigation">The input SchemaElements that have been read from the input classes.</param>
+        /// <param name="document">The OpenApiDocument that is to be filled with the schema information.</param>
+        private static void AddSchema(Dictionary<string, SchemaElement> navigation, OpenApiDocument document)
+        {
+            foreach (var keyValuePair in navigation.OrderBy(o => o.Value.ShortName))
+            {
+                // Skip simple types and array types, since they are not objects.
+                if (keyValuePair.Value.IsSimple() || keyValuePair.Value.IsArray()) continue;
+
+                var schema = new OpenApiSchema
+                {
+                    Type = "object"
+                };
+                foreach (var memberKeyValue in keyValuePair.Value.DataMembers)
+                {
+                    var propertySchema = SchemaFromElement(memberKeyValue.Value);
+                    schema.Properties.Add(memberKeyValue.Key, propertySchema);
+                }
+                document.Components.Schemas.Add(keyValuePair.Value.ShortName, schema);
+            }
+        }
+
+        /// <summary>
+        /// A function to create an OpenApiSchema object from a SchemaElement.
+        /// </summary>
+        /// <param name="schemaElement">The input information.</param>
+        /// <returns>OpenApiSchema filled from input information.</returns>
+        private static OpenApiSchema SchemaFromElement(SchemaElement schemaElement)
+        {
+            var schema = new OpenApiSchema();
+            if (schemaElement.IsSimple())
+            {
+                schema.Type = GetOpenApiTypeMapping(schemaElement.ElementType.Name);
+            }
+            else if (schemaElement.IsArray())
+            {
+                schema.Type = "array";
+                var typeSchema = schemaElement.GenericTypes.FirstOrDefault();
+                schema.Items = SchemaFromElement(typeSchema);
+            }
+            else
+            {
+                schema.Reference = new OpenApiReference
+                {
+                    Id = schemaElement.ShortName,
+                    Type = ReferenceType.Schema
+                };
+            }
+            return schema;
+        }
+
+        private static void AddSecurityInformation(CarterOptions options, OpenApiDocument document)
+        {
                 foreach (var globalSecurity in options.OpenApi.GlobalSecurityDefinitions)
                 {
                     var req = new OpenApiSecurityRequirement
                     {
                         {
                             new OpenApiSecurityScheme
-                                { Reference = new OpenApiReference { Id = globalSecurity, Type = ReferenceType.SecurityScheme }, UnresolvedReference = true },
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Id = globalSecurity,
+                                Type = ReferenceType.SecurityScheme
+                            },
+                            UnresolvedReference = true
+                        },
                             new List<string>()
                         }
                     };
@@ -57,7 +372,17 @@ namespace Carter.OpenApi
 
                     document.Components.SecuritySchemes.Add(apiSecurity.Key, scheme);
                 }
+        }
 
+        /// <summary>
+        /// A function to write the path information into the OpenApiDocument.
+        /// </summary>
+        /// <param name="navigation">The input schema information.</param>
+        /// <param name="metaDatas"></param>
+        /// <param name="document">The OpenApiDocument that the path information will be written into.</param>
+        /// <param name="context">The HttpContext.</param>
+        private static void AddPaths(Dictionary<string, SchemaElement> navigation, Dictionary<(string verb, string path), RouteMetaData> metaDatas, OpenApiDocument document, HttpContext context)
+        {
                 foreach (var routeMetaData in metaDatas.GroupBy(pair => pair.Key.path))
                 {
                     var pathItem = new OpenApiPathItem();
@@ -82,7 +407,13 @@ namespace Carter.OpenApi
 
                         if (!string.IsNullOrWhiteSpace(methodRoute.Value.Tag))
                         {
-                            operation.Tags = new List<OpenApiTag> { new OpenApiTag { Name = methodRoute.Value.Tag } };
+                        operation.Tags = new List<OpenApiTag>
+                        {
+                            new OpenApiTag
+                            {
+                                Name = methodRoute.Value.Tag
+                            }
+                        };
                         }
 
                         if (!string.IsNullOrWhiteSpace(methodRoute.Value.SecuritySchema))
@@ -93,16 +424,23 @@ namespace Carter.OpenApi
                                 {
                                     {
                                         new OpenApiSecurityScheme
-                                            { Reference = new OpenApiReference { Id = methodRoute.Value.SecuritySchema, Type = ReferenceType.SecurityScheme }, UnresolvedReference = true },
+                                    {
+                                        Reference = new OpenApiReference
+                                        {
+                                            Id = methodRoute.Value.SecuritySchema,
+                                            Type = ReferenceType.SecurityScheme
+                                        },
+                                        UnresolvedReference = true
+                                    },
                                         new List<string>()
                                     }
                                 }
                             });
                         }
 
-                        CreateOpenApiRequestBody(document, methodRoute, operation, context);
+                    CreateOpenApiRequestBody(navigation, document, methodRoute, operation, context);
 
-                        CreateOpenApiResponseBody(document, methodRoute, operation);
+                    CreateOpenApiResponseBody(navigation, document, methodRoute, operation);
 
                         CreateOpenApiRouteConstraints(template, operation);
 
@@ -115,35 +453,9 @@ namespace Carter.OpenApi
 
                     document.Paths.Add("/" + templateName, pathItem);
                 }
-
-                context.Response.ContentType = "application/json; charset=utf-8";
-                document.SerializeAsJson(context.Response.Body, OpenApiSpecVersion.OpenApi3_0);
-                return Task.CompletedTask;
-            };
         }
 
-        private static OperationType CreateOpenApiOperationVerb(KeyValuePair<(string verb, string path), RouteMetaData> methodRoute)
-        {
-            switch (methodRoute.Key.verb)
-            {
-                case "GET":
-                    return OperationType.Get;
-                case "POST":
-                    return OperationType.Post;
-                case "PUT":
-                    return OperationType.Put;
-                case "DELETE":
-                    return OperationType.Delete;
-                case "HEAD":
-                    return OperationType.Head;
-                case "OPTIONS":
-                    return OperationType.Options;
-                case "PATCH":
-                    return OperationType.Patch;
-                default:
-                    return OperationType.Get;
-            }
-        }
+
 
         private static void CreateOpenApiQueryStringParameters(OpenApiOperation operation, QueryStringParameter[] queryStringParameters)
         {
@@ -160,7 +472,10 @@ namespace Carter.OpenApi
                     Required = queryStringParameter.Required,
                     Name = queryStringParameter.Name,
                     Description = queryStringParameter.Description,
-                    Schema = new OpenApiSchema { Type = GetOpenApiTypeMapping(queryStringParameter.Type.Name.ToLower()) }
+                    Schema = new OpenApiSchema
+                    {
+                        Type = GetOpenApiTypeMapping(queryStringParameter.Type.Name)
+                    }
                 });
             }
         }
@@ -174,167 +489,54 @@ namespace Carter.OpenApi
                     Name = x.Name,
                     In = ParameterLocation.Path,
                     Required = true,
-                    Schema = new OpenApiSchema { Type = GetOpenApiTypeMapping(x.InlineConstraints.FirstOrDefault()?.Constraint) }
+                    Schema = new OpenApiSchema
+                {
+                        Type = GetOpenApiTypeMapping(x.InlineConstraints.FirstOrDefault()?.Constraint)
+                    }
                 }).ToList();
-            }
-        }
-
-        private static void CreateOpenApiResponseBody(OpenApiDocument document, KeyValuePair<(string verb, string path), RouteMetaData> methodRoute, OpenApiOperation operation)
-        {
-            if (methodRoute.Value.Responses != null)
-            {
-                foreach (var valueStatusCode in methodRoute.Value.Responses)
-                {
-                    OpenApiResponse openApiResponse;
-                    if (valueStatusCode.Response == null)
-                    {
-                        openApiResponse = new OpenApiResponse { Description = valueStatusCode.Description };
-                    }
-                    else
-                    {
-                        bool arrayType = false;
-                        Type responseType;
-                        var responseTypeName = string.Empty;
-                        var singularTypeName = string.Empty;
-
-                        if (valueStatusCode.Response.IsArray() || valueStatusCode.Response.IsCollection() || valueStatusCode.Response.IsEnumerable())
-                        {
-                            arrayType = true;
-                            responseType = valueStatusCode.Response.GetElementType();
-                            if (responseType == null)
-                            {
-                                responseType = valueStatusCode.Response.GetGenericArguments().First();
-                                responseTypeName = responseType.Name + "s";
-                                singularTypeName = responseType.Name;
                             }
                         }
-                        else
-                        {
-                            responseType = valueStatusCode.Response;
-                            responseTypeName = responseType.Name.Replace("`1", ""); //If type has a generic constraint remove the `1 from PagedList<Foo>
-                        }
 
-                        var propertyInfos = responseType.GetProperties();
-                        var propNames = new List<(string Name, string Type, bool Nullable)>();
-                        foreach (var propertyInfo in propertyInfos)
+        private static void CreateOpenApiResponseBody(Dictionary<string, SchemaElement> navigation, OpenApiDocument document, KeyValuePair<(string verb, string path), RouteMetaData> methodRoute, OpenApiOperation operation)
                         {
-                            var propertyType = propertyInfo.PropertyType;
-                            var nullable = false;
-                            if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (methodRoute.Value.Responses == null)
                             {
-                                propertyType = propertyType.GetGenericArguments()[0];
-                                nullable = true;
-                            }
-                            propNames.Add((propertyInfo.Name.ToLower(), propertyType.Name.ToLower(), nullable));
-                        }
-
-                        var propObj = new OpenApiObject();
-
-                        foreach (var propertyInfo in propNames)
+                operation.Responses.Add("200", new OpenApiResponse
                         {
-                            propObj.Add(propertyInfo.Name, new OpenApiString("")); //TODO Could use Bogus to generate some data rather than empty string
-                        }
-
-                        var schema = new OpenApiSchema
-                        {
-                            Type = "object",
-                            Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema {
-                                Type = GetOpenApiTypeMapping(value.Type),
-                                Nullable = value.Nullable
-                            }),
-                            Example = propObj
-                        };
-
-                        openApiResponse = new OpenApiResponse
-                        {
-                            Description = valueStatusCode.Description,
-                            Content = new Dictionary<string, OpenApiMediaType>
-                            {
-                                {
-                                    "application/json",
-                                    new OpenApiMediaType
-                                    {
-                                        Schema = new OpenApiSchema { Reference = new OpenApiReference { Id = responseTypeName, Type = ReferenceType.Schema } }
-                                    }
-                                }
-                            }
-                        };
-
-                        if (!document.Components.Schemas.ContainsKey(responseTypeName))
-                        {
-                            if (!arrayType)
-                            {
-                                document.Components.Schemas.Add(responseTypeName, schema);
-                            }
-                            else
-                            {
-                                //Add component called "Directors" plural
-                                document.Components.Schemas.Add(responseTypeName,
-                                    new OpenApiSchema { Type = "array", Items = new OpenApiSchema { Reference = new OpenApiReference { Id = singularTypeName, Type = ReferenceType.Schema } } });
-
-                                //If not already added add component called "Director" singular
-                                if (!document.Components.Schemas.ContainsKey(singularTypeName))
-                                {
-                                    document.Components.Schemas.Add(singularTypeName, schema);
-                                }
-                            }
-                        }
-                    }
-
-                    operation.Responses.Add(valueStatusCode.Code.ToString(), openApiResponse);
-                }
-            }
-            else
-            {
-                operation.Responses.Add("200", new OpenApiResponse { Description = string.Empty });
-            }
-        }
-
-        private static void CreateOpenApiRequestBody(OpenApiDocument document, KeyValuePair<(string verb, string path), RouteMetaData> keyValuePair, OpenApiOperation operation, HttpContext context)
-        {
-            if (keyValuePair.Key.verb == "GET")
-            {
+                    Description = string.Empty
+                });
                 return;
-            }
-
-            if (keyValuePair.Value.Request != null)
-            {
-                bool arrayType = false;
-                Type requestType;
-
-                if (keyValuePair.Value.Request.IsArray() || keyValuePair.Value.Request.IsCollection() || keyValuePair.Value.Request.IsEnumerable())
-                {
-                    arrayType = true;
-                    requestType = keyValuePair.Value.Request.GetElementType();
-                    if (requestType == null)
-                    {
-                        requestType = keyValuePair.Value.Request.GetGenericArguments().First();
+                            }
+            foreach (var routeMetaDataResponse in methodRoute.Value.Responses)
+                                {
+                var openApiResponse = CreateOpenApiResponse(navigation, document, routeMetaDataResponse);
+                operation.Responses.Add(routeMetaDataResponse.Code.ToString(), openApiResponse);
+                        }
                     }
-                }
-                else
+
+        private static void CreateOpenApiRequestBody(Dictionary<string, SchemaElement> navigation, OpenApiDocument document, KeyValuePair<(string verb, string path), RouteMetaData> keyValuePair, OpenApiOperation operation, HttpContext context)
+            {
+            if (keyValuePair.Key.verb == "GET") return;
+            if (keyValuePair.Value.Request == null) return;
+
+            var fullName = keyValuePair.Value.Request.FullName;
+            var schemaElement = navigation.Values.Where(o => o.FullName == fullName).FirstOrDefault();
+            if (schemaElement == null) return;
+            var schema = SchemaFromElement(schemaElement);
+
+            AddValidationInformation(schema, context, schemaElement.ElementType);
+
+            var requestBody = new OpenApiRequestBody();
+            requestBody.Content.Add("application/json", new OpenApiMediaType
                 {
-                    requestType = keyValuePair.Value.Request;
+                Schema = schema 
+            });
+
+            operation.RequestBody = requestBody;
                 }
 
-                var propNames = requestType.GetProperties()
-                    .Select(x => (Name: x.Name.ToLower(), Type: x.PropertyType.Name.ToLower()))
-                    .ToList();
-
-                var arrbj = new OpenApiArray();
-                var propObj = new OpenApiObject();
-
-                foreach (var propertyInfo in propNames)
+        private static void AddValidationInformation(OpenApiSchema schema, HttpContext context, Type requestType)
                 {
-                    propObj.Add(propertyInfo.Name, new OpenApiString("")); //TODO Could use Bogus to generate some data rather than empty string
-                }
-
-                var schema = new OpenApiSchema
-                {
-                    Type = "object",
-                    Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema { Type = GetOpenApiTypeMapping(value.Type) }),
-                    Example = propObj
-                };
-
                 var validatorLocator = context.RequestServices.GetRequiredService<IValidatorLocator>();
 
                 var validator = validatorLocator.GetValidator(requestType);
@@ -433,42 +635,58 @@ namespace Carter.OpenApi
                         }
                     }
                 }
+        }
 
-                var arrayschema = new OpenApiSchema { Type = "array" };
-
-                if (arrayType)
+        public static OpenApiResponse CreateOpenApiResponse(Dictionary<string, SchemaElement> navigation, OpenApiDocument document, RouteMetaDataResponse valueStatusCode)
                 {
-                    arrbj.Add(propObj);
-                    arrayschema.Items = schema;
-                }
+            var openApiResponse = new OpenApiResponse
+            {
+                Description = valueStatusCode.Description
+            };
 
-                //var reqObj = arrayType ? new OpenApiObject { { requestType.Name.ToLower(), arrbj } } : propObj;
+            if (valueStatusCode.Response == null) return openApiResponse;
 
-                var requestBody = new OpenApiRequestBody();
-                requestBody.Content.Add("application/json",
+            var fullName = valueStatusCode.Response.FullName;
+            var schemaElement = navigation.Values.Where(o => o.FullName == fullName).FirstOrDefault();
+            if (schemaElement == null) return openApiResponse;
+
+            openApiResponse.Content = new Dictionary<string, OpenApiMediaType>
+            {
+                {
+                    "application/json",
                     new OpenApiMediaType
                     {
-                        //Example = reqObj,
-                        //Schema = arrayType ? arrayschema : schema
-                        Schema = new OpenApiSchema { Reference = new OpenApiReference { Id = requestType.Name, Type = ReferenceType.Schema } }
-                    });
-
-                operation.RequestBody = requestBody;
-
-                if (!document.Components.Schemas.ContainsKey(requestType.Name))
-                {
-                    document.Components.Schemas.Add(requestType.Name, schema);
+                        Schema = SchemaFromElement(schemaElement)
+                    }
                 }
-                else
+            };
+            return openApiResponse;
+        }
+
+        public static OpenApiSchema CreateOpenApiSchema()
                 {
-                    //TODO
-                    //Currently request schemas contain potentially more information in them via the validation properties.
-                    //If the response openapi processing has added the type as a component already we should override this here as it may contain more info
-                    //One solution to fix this if the response schema needs additional information is to mark each request/response schema accordingly to prevent the race condition of the response
-                    //schema getting listed with its additional data or the request schema getting listed with its validation additional data. Eg "Actors" becomes "Actors_Request" & "Actors_Response"
-                    document.Components.Schemas[requestType.Name] = schema;
-                }
+            var schema = new OpenApiSchema
+                {
+                Type = "object",
+                //Properties = propNames.ToDictionary(key => key.Name, value => new OpenApiSchema
+                //{
+                //    Type = GetOpenApiTypeMapping(value.Type),
+                //    Nullable = value.Nullable
+                //}),
+                Example = CreateExampleObject()
+            };
+            return schema;
             }
+
+        public static OpenApiObject CreateExampleObject()
+        {
+            var exampleObject = new OpenApiObject();
+
+            //foreach (var propertyInfo in propNames)
+            //{
+            //    propObj.Add(propertyInfo.Name, new OpenApiString("")); //TODO Could use Bogus to generate some data rather than empty string
+            //}
+            return exampleObject;
         }
 
         public static bool IsNumeric(this object value) =>
@@ -504,11 +722,34 @@ namespace Carter.OpenApi
             return inputString.Substring(0, 1).ToUpper() + inputString.Substring(1);
         }
 
+        private static OperationType CreateOpenApiOperationVerb(KeyValuePair<(string verb, string path), RouteMetaData> methodRoute)
+        {
+            switch (methodRoute.Key.verb)
+            {
+                case "GET":
+                    return OperationType.Get;
+                case "POST":
+                    return OperationType.Post;
+                case "PUT":
+                    return OperationType.Put;
+                case "DELETE":
+                    return OperationType.Delete;
+                case "HEAD":
+                    return OperationType.Head;
+                case "OPTIONS":
+                    return OperationType.Options;
+                case "PATCH":
+                    return OperationType.Patch;
+                default:
+                    return OperationType.Get;
+            }
+        }
+
         private static string GetOpenApiTypeMapping(string constraint)
         {
             if (constraint == null)
             {
-                return string.Empty;
+                return null;
             }
 
             switch (constraint)
@@ -521,18 +762,20 @@ namespace Carter.OpenApi
                 case "uint":
                 case "long":
                 case "ulong":
+                case "Int16":
+                case "Uint16":
                 case "int32":
                 case "uint32":
                 case "int64":
                 case "uint64":
-                case "int16":
-                case "uint16":
                     return "integer";
 
                 case "single":
-                case "decimal":
-                case "double":
                 case "float":
+                case "Double":
+                case "double":
+                case "Decimal":
+                case "decimal":
                     return "number";
 
                 case "boolean":
@@ -542,8 +785,11 @@ namespace Carter.OpenApi
                 case "datetime":
                     return "string";
 
-                default:
+                case "String":
                     return "string";
+
+                default:
+                    return null;
             }
         }
     }
