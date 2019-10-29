@@ -43,10 +43,9 @@ namespace Carter
             //Create a "startup scope" to resolve modules from so that they're cleaned up post-startup
             using (var scope = builder.ApplicationServices.CreateScope())
             {
-                var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>();
+                var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>().ToList();
 
                 //Get all instances of CarterModule to fetch and register declared routes
-
                 foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
                 {
                     var moduleLogger = scope.ServiceProvider
@@ -58,7 +57,7 @@ namespace Carter
                     var distinctPaths = module.Routes.Keys.Select(route => route.path).Distinct();
                     foreach (var path in distinctPaths)
                     {
-                        routeBuilder.MapRoute(path, CreateRouteHandler(path, module.GetType(), statusCodeHandlers.ToList(), moduleLogger));
+                        routeBuilder.MapRoute(path, CreateRouteHandler(path, module.GetType(), statusCodeHandlers, moduleLogger));
                     }
                 }
             }
