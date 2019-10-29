@@ -10,4 +10,4 @@ Intel Xeon E-2176M CPU 2.70GHz, 1 CPU, 12 logical and 6 physical cores
 ```
 |    Method |     Mean |     Error |    StdDev |
 |---------- |---------:|----------:|----------:|
-| AddCarter | 2.910 ms | 0.0350 ms | 0.0327 ms |
+| AddCarter | 2.774 ms | 0.0372 ms | 0.0311 ms |
