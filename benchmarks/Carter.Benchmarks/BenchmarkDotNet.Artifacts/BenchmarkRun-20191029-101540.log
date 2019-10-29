@@ -1,0 +1,282 @@
+// Validating benchmarks:
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 2 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// start dotnet restore  /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 in /home/ritasker/projects/Carter/benchmarks/Carter.Benchmarks/bin/Release/netcoreapp2.2/7a0aeaad-946f-4f9c-ac2f-39f1d69ab54d
+// command took 0.84s and exited with 0
+// start dotnet build -c Release  --no-restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 in /home/ritasker/projects/Carter/benchmarks/Carter.Benchmarks/bin/Release/netcoreapp2.2/7a0aeaad-946f-4f9c-ac2f-39f1d69ab54d
+// command took 1.66s and exited with 0
+// ***** Done, took 00:00:02 (2.58 sec)   *****
+// Found 1 benchmarks:
+//   AddCarterBenchmarks.AddCarter: DefaultJob
+
+// **************************
+// Benchmark: AddCarterBenchmarks.AddCarter: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet "7a0aeaad-946f-4f9c-ac2f-39f1d69ab54d.dll" --benchmarkName "Carter.Benchmarks.AddCarterBenchmarks.AddCarter" --job "Default" --benchmarkId 0 in /home/ritasker/projects/Carter/benchmarks/Carter.Benchmarks/bin/Release/netcoreapp2.2/7a0aeaad-946f-4f9c-ac2f-39f1d69ab54d/bin/Release/netcoreapp2.2
+Failed to set up high priority. Make sure you have the right permissions. Message: Permission denied
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// Runtime=.NET Core 2.2.7 (CoreCLR 4.6.28008.02, CoreFX 4.6.28008.03), 64bit RyuJIT
+// GC=Concurrent Workstation
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 235985.00 ns, 235.9850 us/op
+WorkloadJitting  1: 1 op, 82489924.00 ns, 82.4899 ms/op
+
+WorkloadPilot    1: 2 op, 5862751.00 ns, 2.9314 ms/op
+WorkloadPilot    2: 3 op, 8578817.00 ns, 2.8596 ms/op
+WorkloadPilot    3: 4 op, 11377792.00 ns, 2.8444 ms/op
+WorkloadPilot    4: 5 op, 14071054.00 ns, 2.8142 ms/op
+WorkloadPilot    5: 6 op, 16686641.00 ns, 2.7811 ms/op
+WorkloadPilot    6: 7 op, 19523277.00 ns, 2.7890 ms/op
+WorkloadPilot    7: 8 op, 22114595.00 ns, 2.7643 ms/op
+WorkloadPilot    8: 9 op, 23746128.00 ns, 2.6385 ms/op
+WorkloadPilot    9: 10 op, 28337466.00 ns, 2.8337 ms/op
+WorkloadPilot   10: 11 op, 32312693.00 ns, 2.9375 ms/op
+WorkloadPilot   11: 12 op, 35338971.00 ns, 2.9449 ms/op
+WorkloadPilot   12: 13 op, 39710998.00 ns, 3.0547 ms/op
+WorkloadPilot   13: 14 op, 43605758.00 ns, 3.1147 ms/op
+WorkloadPilot   14: 15 op, 45343349.00 ns, 3.0229 ms/op
+WorkloadPilot   15: 16 op, 48867351.00 ns, 3.0542 ms/op
+WorkloadPilot   16: 32 op, 95624943.00 ns, 2.9883 ms/op
+WorkloadPilot   17: 64 op, 194053504.00 ns, 3.0321 ms/op
+WorkloadPilot   18: 128 op, 389045201.00 ns, 3.0394 ms/op
+WorkloadPilot   19: 256 op, 773565847.00 ns, 3.0217 ms/op
+
+WorkloadWarmup   1: 256 op, 752506193.00 ns, 2.9395 ms/op
+WorkloadWarmup   2: 256 op, 761439760.00 ns, 2.9744 ms/op
+WorkloadWarmup   3: 256 op, 760681425.00 ns, 2.9714 ms/op
+WorkloadWarmup   4: 256 op, 762394897.00 ns, 2.9781 ms/op
+WorkloadWarmup   5: 256 op, 759613752.00 ns, 2.9672 ms/op
+WorkloadWarmup   6: 256 op, 759142230.00 ns, 2.9654 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 256 op, 759012896.00 ns, 2.9649 ms/op
+WorkloadActual   2: 256 op, 756876359.00 ns, 2.9565 ms/op
+WorkloadActual   3: 256 op, 753475984.00 ns, 2.9433 ms/op
+WorkloadActual   4: 256 op, 753493870.00 ns, 2.9433 ms/op
+WorkloadActual   5: 256 op, 752017677.00 ns, 2.9376 ms/op
+WorkloadActual   6: 256 op, 748387983.00 ns, 2.9234 ms/op
+WorkloadActual   7: 256 op, 744859414.00 ns, 2.9096 ms/op
+WorkloadActual   8: 256 op, 742900153.00 ns, 2.9020 ms/op
+WorkloadActual   9: 256 op, 742017947.00 ns, 2.8985 ms/op
+WorkloadActual  10: 256 op, 739533598.00 ns, 2.8888 ms/op
+WorkloadActual  11: 256 op, 740177359.00 ns, 2.8913 ms/op
+WorkloadActual  12: 256 op, 736952162.00 ns, 2.8787 ms/op
+WorkloadActual  13: 256 op, 734829140.00 ns, 2.8704 ms/op
+WorkloadActual  14: 256 op, 735829294.00 ns, 2.8743 ms/op
+WorkloadActual  15: 256 op, 734029712.00 ns, 2.8673 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 256 op, 759012896.00 ns, 2.9649 ms/op
+WorkloadResult   2: 256 op, 756876359.00 ns, 2.9565 ms/op
+WorkloadResult   3: 256 op, 753475984.00 ns, 2.9433 ms/op
+WorkloadResult   4: 256 op, 753493870.00 ns, 2.9433 ms/op
+WorkloadResult   5: 256 op, 752017677.00 ns, 2.9376 ms/op
+WorkloadResult   6: 256 op, 748387983.00 ns, 2.9234 ms/op
+WorkloadResult   7: 256 op, 744859414.00 ns, 2.9096 ms/op
+WorkloadResult   8: 256 op, 742900153.00 ns, 2.9020 ms/op
+WorkloadResult   9: 256 op, 742017947.00 ns, 2.8985 ms/op
+WorkloadResult  10: 256 op, 739533598.00 ns, 2.8888 ms/op
+WorkloadResult  11: 256 op, 740177359.00 ns, 2.8913 ms/op
+WorkloadResult  12: 256 op, 736952162.00 ns, 2.8787 ms/op
+WorkloadResult  13: 256 op, 734829140.00 ns, 2.8704 ms/op
+WorkloadResult  14: 256 op, 735829294.00 ns, 2.8743 ms/op
+WorkloadResult  15: 256 op, 734029712.00 ns, 2.8673 ms/op
+GC:  0 0 0 0 0
+
+// AfterAll
+
+Mean = 2.9100 ms, StdErr = 0.0084 ms (0.29%); N = 15, StdDev = 0.0327 ms
+Min = 2.8673 ms, Q1 = 2.8787 ms, Median = 2.9020 ms, Q3 = 2.9433 ms, Max = 2.9649 ms
+IQR = 0.0645 ms, LowerFence = 2.7819 ms, UpperFence = 3.0401 ms
+ConfidenceInterval = [2.8750 ms; 2.9450 ms] (CI 99.9%), Margin = 0.0350 ms (1.20% of Mean)
+Skewness = 0.25, Kurtosis = 1.49, MValue = 2
+
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  BenchmarkDotNet.Artifacts/results/Carter.Benchmarks.AddCarterBenchmarks-report.csv
+  BenchmarkDotNet.Artifacts/results/Carter.Benchmarks.AddCarterBenchmarks-report-github.md
+  BenchmarkDotNet.Artifacts/results/Carter.Benchmarks.AddCarterBenchmarks-report.html
+
+// * Detailed results *
+AddCarterBenchmarks.AddCarter: DefaultJob
+Runtime = .NET Core 2.2.7 (CoreCLR 4.6.28008.02, CoreFX 4.6.28008.03), 64bit RyuJIT; GC = Concurrent Workstation
+Mean = 2.9100 ms, StdErr = 0.0084 ms (0.29%); N = 15, StdDev = 0.0327 ms
+Min = 2.8673 ms, Q1 = 2.8787 ms, Median = 2.9020 ms, Q3 = 2.9433 ms, Max = 2.9649 ms
+IQR = 0.0645 ms, LowerFence = 2.7819 ms, UpperFence = 3.0401 ms
+ConfidenceInterval = [2.8750 ms; 2.9450 ms] (CI 99.9%), Margin = 0.0350 ms (1.20% of Mean)
+Skewness = 0.25, Kurtosis = 1.49, MValue = 2
+-------------------- Histogram --------------------
+[2.856 ms ; 2.976 ms) | @@@@@@@@@@@@@@@
+---------------------------------------------------
+
+// * Summary *
+
+BenchmarkDotNet=v0.11.5, OS=manjaro 
+Intel Xeon E-2176M CPU 2.70GHz, 1 CPU, 12 logical and 6 physical cores
+.NET Core SDK=3.1.100-preview1-014459
+  [Host]     : .NET Core 2.2.7 (CoreCLR 4.6.28008.02, CoreFX 4.6.28008.03), 64bit RyuJIT
+  DefaultJob : .NET Core 2.2.7 (CoreCLR 4.6.28008.02, CoreFX 4.6.28008.03), 64bit RyuJIT
+
+
+|    Method |     Mean |     Error |    StdDev |
+|---------- |---------:|----------:|----------:|
+| AddCarter | 2.910 ms | 0.0350 ms | 0.0327 ms |
+
+// * Legends *
+  Mean   : Arithmetic mean of all measurements
+  Error  : Half of 99.9% confidence interval
+  StdDev : Standard deviation of all measurements
+  1 ms   : 1 Millisecond (0.001 sec)
+
+// ***** BenchmarkRunner: End *****
+// ** Remained 1 benchmark(s) to run **
+Run time: 00:00:18 (18.16 sec), executed benchmarks: 1
+
+// Found 1 benchmarks:
+//   UseCarterBenchmarks.UseCarter: DefaultJob
+
+// **************************
+// Benchmark: UseCarterBenchmarks.UseCarter: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet "7a0aeaad-946f-4f9c-ac2f-39f1d69ab54d.dll" --benchmarkName "Carter.Benchmarks.UseCarterBenchmarks.UseCarter" --job "Default" --benchmarkId 1 in /home/ritasker/projects/Carter/benchmarks/Carter.Benchmarks/bin/Release/netcoreapp2.2/7a0aeaad-946f-4f9c-ac2f-39f1d69ab54d/bin/Release/netcoreapp2.2
+Failed to set up high priority. Make sure you have the right permissions. Message: Permission denied
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// Runtime=.NET Core 2.2.7 (CoreCLR 4.6.28008.02, CoreFX 4.6.28008.03), 64bit RyuJIT
+// GC=Concurrent Workstation
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 206032.00 ns, 206.0320 us/op
+WorkloadJitting  1: 1 op, 60602867.00 ns, 60.6029 ms/op
+
+WorkloadPilot    1: 2 op, 494789.00 ns, 247.3945 us/op
+WorkloadPilot    2: 3 op, 58069.00 ns, 19.3563 us/op
+WorkloadPilot    3: 4 op, 70765.00 ns, 17.6913 us/op
+WorkloadPilot    4: 5 op, 74967.00 ns, 14.9934 us/op
+WorkloadPilot    5: 6 op, 93023.00 ns, 15.5038 us/op
+WorkloadPilot    6: 7 op, 98855.00 ns, 14.1221 us/op
+WorkloadPilot    7: 8 op, 112818.00 ns, 14.1023 us/op
+WorkloadPilot    8: 9 op, 122344.00 ns, 13.5938 us/op
+WorkloadPilot    9: 10 op, 131618.00 ns, 13.1618 us/op
+WorkloadPilot   10: 11 op, 137270.00 ns, 12.4791 us/op
+WorkloadPilot   11: 12 op, 146334.00 ns, 12.1945 us/op
+WorkloadPilot   12: 13 op, 158797.00 ns, 12.2152 us/op
+WorkloadPilot   13: 14 op, 168397.00 ns, 12.0284 us/op
+WorkloadPilot   14: 15 op, 176539.00 ns, 11.7693 us/op
+WorkloadPilot   15: 16 op, 192421.00 ns, 12.0263 us/op
+WorkloadPilot   16: 32 op, 363009.00 ns, 11.3440 us/op
+WorkloadPilot   17: 64 op, 1008673.00 ns, 15.7605 us/op
+WorkloadPilot   18: 128 op, 1241855.00 ns, 9.7020 us/op
+WorkloadPilot   19: 256 op, 1984101.00 ns, 7.7504 us/op
+WorkloadPilot   20: 512 op, 4368894.00 ns, 8.5330 us/op
+WorkloadPilot   21: 1024 op, 8612602.00 ns, 8.4107 us/op
+WorkloadPilot   22: 2048 op, 19305668.00 ns, 9.4266 us/op
+WorkloadPilot   23: 4096 op, 46831317.00 ns, 11.4334 us/op
+WorkloadPilot   24: 8192 op, 94136272.00 ns, 11.4912 us/op
+WorkloadPilot   25: 16384 op, 184887010.00 ns, 11.2846 us/op
+WorkloadPilot   26: 32768 op, 385631205.00 ns, 11.7685 us/op
+WorkloadPilot   27: 65536 op, 851405319.00 ns, 12.9914 us/op
+
+WorkloadWarmup   1: 65536 op, 776986365.00 ns, 11.8559 us/op
+WorkloadWarmup   2: 65536 op, 792502949.00 ns, 12.0926 us/op
+WorkloadWarmup   3: 65536 op, 770472986.00 ns, 11.7565 us/op
+WorkloadWarmup   4: 65536 op, 791561954.00 ns, 12.0783 us/op
+WorkloadWarmup   5: 65536 op, 768914022.00 ns, 11.7327 us/op
+WorkloadWarmup   6: 65536 op, 783906608.00 ns, 11.9615 us/op
+
+// BeforeActualRun
+WorkloadActual   1: 65536 op, 778944792.00 ns, 11.8858 us/op
+WorkloadActual   2: 65536 op, 825605145.00 ns, 12.5977 us/op
+WorkloadActual   3: 65536 op, 813150255.00 ns, 12.4077 us/op
+WorkloadActual   4: 65536 op, 816384239.00 ns, 12.4570 us/op
+WorkloadActual   5: 65536 op, 817576799.00 ns, 12.4752 us/op
+WorkloadActual   6: 65536 op, 802089544.00 ns, 12.2389 us/op
+WorkloadActual   7: 65536 op, 795402931.00 ns, 12.1369 us/op
+WorkloadActual   8: 65536 op, 787217862.00 ns, 12.0120 us/op
+WorkloadActual   9: 65536 op, 807075086.00 ns, 12.3150 us/op
+WorkloadActual  10: 65536 op, 783258911.00 ns, 11.9516 us/op
+WorkloadActual  11: 65536 op, 803137303.00 ns, 12.2549 us/op
+WorkloadActual  12: 65536 op, 783632450.00 ns, 11.9573 us/op
+WorkloadActual  13: 65536 op, 796003841.00 ns, 12.1461 us/op
+WorkloadActual  14: 65536 op, 781165319.00 ns, 11.9196 us/op
+WorkloadActual  15: 65536 op, 795340501.00 ns, 12.1359 us/op
+
+// AfterActualRun
+WorkloadResult   1: 65536 op, 778944792.00 ns, 11.8858 us/op
+WorkloadResult   2: 65536 op, 825605145.00 ns, 12.5977 us/op
+WorkloadResult   3: 65536 op, 813150255.00 ns, 12.4077 us/op
+WorkloadResult   4: 65536 op, 816384239.00 ns, 12.4570 us/op
+WorkloadResult   5: 65536 op, 817576799.00 ns, 12.4752 us/op
+WorkloadResult   6: 65536 op, 802089544.00 ns, 12.2389 us/op
+WorkloadResult   7: 65536 op, 795402931.00 ns, 12.1369 us/op
+WorkloadResult   8: 65536 op, 787217862.00 ns, 12.0120 us/op
+WorkloadResult   9: 65536 op, 807075086.00 ns, 12.3150 us/op
+WorkloadResult  10: 65536 op, 783258911.00 ns, 11.9516 us/op
+WorkloadResult  11: 65536 op, 803137303.00 ns, 12.2549 us/op
+WorkloadResult  12: 65536 op, 783632450.00 ns, 11.9573 us/op
+WorkloadResult  13: 65536 op, 796003841.00 ns, 12.1461 us/op
+WorkloadResult  14: 65536 op, 781165319.00 ns, 11.9196 us/op
+WorkloadResult  15: 65536 op, 795340501.00 ns, 12.1359 us/op
+GC:  0 0 0 0 0
+
+// AfterAll
+
+Mean = 12.1928 us, StdErr = 0.0579 us (0.48%); N = 15, StdDev = 0.2243 us
+Min = 11.8858 us, Q1 = 11.9573 us, Median = 12.1461 us, Q3 = 12.4077 us, Max = 12.5977 us
+IQR = 0.4504 us, LowerFence = 11.2817 us, UpperFence = 13.0833 us
+ConfidenceInterval = [11.9530 us; 12.4326 us] (CI 99.9%), Margin = 0.2398 us (1.97% of Mean)
+Skewness = 0.22, Kurtosis = 1.65, MValue = 2
+
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  BenchmarkDotNet.Artifacts/results/Carter.Benchmarks.UseCarterBenchmarks-report.csv
+  BenchmarkDotNet.Artifacts/results/Carter.Benchmarks.UseCarterBenchmarks-report-github.md
+  BenchmarkDotNet.Artifacts/results/Carter.Benchmarks.UseCarterBenchmarks-report.html
+
+// * Detailed results *
+UseCarterBenchmarks.UseCarter: DefaultJob
+Runtime = .NET Core 2.2.7 (CoreCLR 4.6.28008.02, CoreFX 4.6.28008.03), 64bit RyuJIT; GC = Concurrent Workstation
+Mean = 12.1928 us, StdErr = 0.0579 us (0.48%); N = 15, StdDev = 0.2243 us
+Min = 11.8858 us, Q1 = 11.9573 us, Median = 12.1461 us, Q3 = 12.4077 us, Max = 12.5977 us
+IQR = 0.4504 us, LowerFence = 11.2817 us, UpperFence = 13.0833 us
+ConfidenceInterval = [11.9530 us; 12.4326 us] (CI 99.9%), Margin = 0.2398 us (1.97% of Mean)
+Skewness = 0.22, Kurtosis = 1.65, MValue = 2
+-------------------- Histogram --------------------
+[11.829 us ; 12.317 us) | @@@@@@@@@@@
+[12.317 us ; 12.677 us) | @@@@
+---------------------------------------------------
+
+// * Summary *
+
+BenchmarkDotNet=v0.11.5, OS=manjaro 
+Intel Xeon E-2176M CPU 2.70GHz, 1 CPU, 12 logical and 6 physical cores
+.NET Core SDK=3.1.100-preview1-014459
+  [Host]     : .NET Core 2.2.7 (CoreCLR 4.6.28008.02, CoreFX 4.6.28008.03), 64bit RyuJIT
+  DefaultJob : .NET Core 2.2.7 (CoreCLR 4.6.28008.02, CoreFX 4.6.28008.03), 64bit RyuJIT
+
+
+|    Method |     Mean |     Error |    StdDev |
+|---------- |---------:|----------:|----------:|
+| UseCarter | 12.19 us | 0.2398 us | 0.2243 us |
+
+// * Legends *
+  Mean   : Arithmetic mean of all measurements
+  Error  : Half of 99.9% confidence interval
+  StdDev : Standard deviation of all measurements
+  1 us   : 1 Microsecond (0.000001 sec)
+
+// ***** BenchmarkRunner: End *****
+// ** Remained 0 benchmark(s) to run **
+Run time: 00:01:49 (109.19 sec), executed benchmarks: 1
+
+Global total time: 00:02:09 (129.94 sec), executed benchmarks: 2
+// * Artifacts cleanup *

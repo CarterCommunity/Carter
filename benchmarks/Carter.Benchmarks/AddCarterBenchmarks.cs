@@ -3,7 +3,6 @@ namespace Carter.Benchmarks
     using BenchmarkDotNet.Attributes;
     using Microsoft.Extensions.DependencyInjection;
 
-    [InProcess, MemoryDiagnoser]
     public class AddCarterBenchmarks
     {
         private ServiceCollection services;
