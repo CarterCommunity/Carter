@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Carter.OpenApi
 {
-    internal class SchemaElement
+    class SchemaElement
     {
         public string FullName { get; set; }
         public string ShortName { get; set; }
