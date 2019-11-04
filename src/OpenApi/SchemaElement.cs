@@ -38,5 +38,19 @@ namespace Carter.OpenApi
                 ElementType == typeof(string) ||
                 ElementType == typeof(decimal));
         }
+
+        public bool IsSimpleNullable()
+        {
+            if (!IsNullable())
+            {
+                return false;
+            }
+            return Nullable.GetUnderlyingType(ElementType).IsPrimitive;
+        }
+
+        public bool IsNullable()
+        {
+            return Nullable.GetUnderlyingType(ElementType) != null;
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace Carter.OpenApi
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Carter.Request;
     using FluentValidation.Validators;
@@ -48,9 +49,12 @@ namespace Carter.OpenApi
             var navigation = new Dictionary<string, SchemaElement>();
             foreach (var routeMetaData in metaDatas)
             {
-                if (routeMetaData.Value.Request != null)
+                if (routeMetaData.Value.Requests != null)
                 {
-                    ReadTypeInformation(routeMetaData.Value.Request, navigation);
+                    foreach (var request in routeMetaData.Value.Requests)
+                    {
+                        ReadTypeInformation(request.Request, navigation);
+                    }
                 }
                 if (routeMetaData.Value.Responses != null)
                 {
@@ -97,8 +101,9 @@ namespace Carter.OpenApi
                 ElementType = type
             };
 
-            // Prevent the navigation from including the properties of a string.
-            if (fullName == "System.String")
+            // Prevent the navigation from including the properties of a string and
+            // simple nullable types
+            if (fullName == "System.String" || schemaElement.IsSimpleNullable())
             {
                 navigation.Add(fullName, schemaElement);
                 return;
@@ -112,6 +117,15 @@ namespace Carter.OpenApi
                 ReadTypeInformation(genericType, navigation);
                 var genericTypeElement = navigation[genericType.FullName];
                 navigation[fullName].GenericTypes.Add(genericTypeElement);
+            }
+
+            // Arrays do not have GenericTypeArguments.
+            if (navigation[fullName].IsArray() && navigation[fullName].GenericTypes.Count() == 0)
+            {
+                var elementType = type.GetElementType();
+                ReadTypeInformation(elementType, navigation);
+                var elementTypeElement = navigation[elementType.FullName];
+                navigation[fullName].GenericTypes.Add(elementTypeElement);
             }
 
             foreach (var propertyInfo in type.GetProperties())
@@ -327,7 +341,7 @@ namespace Carter.OpenApi
             foreach (var keyValuePair in navigation.OrderBy(o => o.Value.ShortName))
             {
                 // Skip simple types and array types, since they are not objects.
-                if (keyValuePair.Value.IsSimple() || keyValuePair.Value.IsArray())
+                if (keyValuePair.Value.IsSimple() || keyValuePair.Value.IsSimpleNullable() || keyValuePair.Value.IsArray())
                 {
                     continue;
                 }
@@ -339,6 +353,14 @@ namespace Carter.OpenApi
                 foreach (var memberKeyValue in keyValuePair.Value.DataMembers)
                 {
                     var propertySchema = SchemaFromElement(memberKeyValue.Value);
+                    var propertyInfo = keyValuePair.Value.ElementType.GetProperties().Where(o => CamelCase(o.Name) == memberKeyValue.Key).SingleOrDefault();
+                    object[] attribute = propertyInfo.GetCustomAttributes(typeof(ApiSchemaAttributes), true);
+                    if (attribute.Length > 0)
+                    {
+                        var myAttribute = (ApiSchemaAttributes)attribute[0];
+                        propertySchema.Format = myAttribute.Format;
+                    }
+                    
                     schema.Properties.Add(memberKeyValue.Key, propertySchema);
                 }
                 document.Components.Schemas.Add(keyValuePair.Value.ShortName, schema);
@@ -361,6 +383,11 @@ namespace Carter.OpenApi
             if (schemaElement.IsSimple())
             {
                 schema.Type = GetOpenApiTypeMapping(schemaElement.ElementType.Name);
+            }
+            else if (schemaElement.IsSimpleNullable())
+            {
+                schema.Type = GetOpenApiTypeMapping(Nullable.GetUnderlyingType(schemaElement.ElementType).Name);
+                schema.Nullable = true;
             }
             else if (schemaElement.IsArray())
             {
@@ -444,7 +471,7 @@ namespace Carter.OpenApi
                     var operation = new OpenApiOperation
                     {
                         Description = methodRoute.Value.Description,
-                        OperationId = methodRoute.Value.OperationId
+                        OperationId = methodRoute.Value.OperationId,
                     };
 
                     if (!string.IsNullOrWhiteSpace(methodRoute.Value.Tag))
@@ -562,27 +589,53 @@ namespace Carter.OpenApi
             {
                 return;
             }
-            if (keyValuePair.Value.Request == null)
+            if (keyValuePair.Value.Requests == null)
+            {
+                return;
+            }
+            if (keyValuePair.Value.Requests.Count() == 0)
             {
                 return;
             }
 
-            var fullName = keyValuePair.Value.Request.FullName;
+            var requestBody = new OpenApiRequestBody();
+            foreach (var requestMetaData in keyValuePair.Value.Requests)
+            {
+                var openApiMediaType = new OpenApiMediaType();
+                if (requestMetaData.Request == null)
+                {
+                    continue;
+                }
+                var fullName = requestMetaData.Request.FullName;
             var schemaElement = navigation.Values.Where(o => o.FullName == fullName).FirstOrDefault();
             if (schemaElement == null)
             {
-                return;
+                    continue;
             }
             var schema = SchemaFromElement(schemaElement);
 
             AddValidationInformation(schema, context, schemaElement.ElementType);
+                openApiMediaType.Schema = schema;
 
-            var requestBody = new OpenApiRequestBody();
-            requestBody.Content.Add("application/json", new OpenApiMediaType
+                var mediaType = requestMetaData.MediaType;
+                if (string.IsNullOrWhiteSpace(mediaType))
             {
-                Schema = schema
-            });
+                    mediaType = "application/json";
+                }
 
+                var format = requestMetaData.Format;
+                if (string.IsNullOrWhiteSpace(format))
+                {
+                    format = "string";
+                }
+
+                openApiMediaType.Schema.Format = format;
+
+                if (!requestBody.Content.ContainsKey(mediaType))
+                {
+                    requestBody.Content.Add(mediaType, openApiMediaType);
+                }
+            }
             operation.RequestBody = requestBody;
         }
 
@@ -720,6 +773,11 @@ namespace Carter.OpenApi
             return openApiResponse;
         }
 
+        /// <summary>
+        /// A function to set the first letter in the input string to lower case.
+        /// </summary>
+        /// <param name="inputString"></param>
+        /// <returns>A copy of the inputString with the first letter set to lower case.</returns>
         public static string CamelCase(string inputString)
         {
             if (inputString == null)
