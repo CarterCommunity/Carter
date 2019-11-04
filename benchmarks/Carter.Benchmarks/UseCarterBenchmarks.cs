@@ -1,8 +1,12 @@
 namespace Carter.Benchmarks
 {
+    using System;
     using BenchmarkDotNet.Attributes;
     using Microsoft.AspNetCore.Builder.Internal;
+    using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Logging.Abstractions;
 
     public class UseCarterBenchmarks
     {
@@ -12,7 +16,11 @@ namespace Carter.Benchmarks
         public void Setup()
         {
             var serviceCollection = new ServiceCollection();
-            serviceCollection.AddLogging();
+
+            serviceCollection.Configure((Action<RouteOptions>)(options => { }));
+
+            serviceCollection.AddSingleton<ILoggerFactory, LoggerFactory>();
+            serviceCollection.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
             serviceCollection.AddCarter();
             var serviceProvider = serviceCollection.BuildServiceProvider();
             this.app = new ApplicationBuilder(serviceProvider);
