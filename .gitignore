@@ -7,4 +7,4 @@ codeship.aes
 /*.user
 
 # benchmark logs
-/**/BenchmarkDotNet.Artifacts/Carter.Benchmarks.UseCarterBenchmarks-*.log
+**/*/BenchmarkDotNet.Artifacts/*.log
