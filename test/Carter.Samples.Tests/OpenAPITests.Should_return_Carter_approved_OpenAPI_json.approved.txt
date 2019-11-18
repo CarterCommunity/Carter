@@ -236,15 +236,21 @@
   "components": {
     "schemas": {
       "Actor": {
+        "required": [
+          "name"
+        ],
         "type": "object",
         "properties": {
           "name": {
+            "minLength": 1,
             "type": "string"
           },
           "id": {
             "type": "integer"
           },
           "age": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
             "type": "integer"
           }
         }
@@ -258,9 +264,13 @@
         }
       },
       "CastMember": {
+        "required": [
+          "name"
+        ],
         "type": "object",
         "properties": {
           "name": {
+            "minLength": 1,
             "type": "string"
           }
         }

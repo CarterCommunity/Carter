@@ -30,7 +30,7 @@ namespace Carter.OpenApi
                     return Task.CompletedTask;
                 }
                 var document = CreateDocument(options, "3.0.0");
-                AddSchema(schemaNavigation, document);
+                AddSchema(schemaNavigation, document, context);
                 AddSecurityInformation(options, document);
                 AddPaths(schemaNavigation, metaDatas, document, context);
                 context.Response.ContentType = "application/json; charset=utf-8";
@@ -336,7 +336,7 @@ namespace Carter.OpenApi
         /// </summary>
         /// <param name="navigation">The input SchemaElements that have been read from the input classes.</param>
         /// <param name="document">The OpenApiDocument that is to be filled with the schema information.</param>
-        private static void AddSchema(Dictionary<string, SchemaElement> navigation, OpenApiDocument document)
+        private static void AddSchema(Dictionary<string, SchemaElement> navigation, OpenApiDocument document, HttpContext context)
         {
             foreach (var keyValuePair in navigation.OrderBy(o => o.Value.ShortName))
             {
@@ -350,6 +350,7 @@ namespace Carter.OpenApi
                 {
                     Type = "object"
                 };
+                
                 foreach (var memberKeyValue in keyValuePair.Value.DataMembers)
                 {
                     var propertySchema = SchemaFromElement(memberKeyValue.Value);
@@ -360,9 +361,11 @@ namespace Carter.OpenApi
                         var myAttribute = (ApiSchemaAttributes)attribute[0];
                         propertySchema.Format = myAttribute.Format;
                     }
-                    
+
                     schema.Properties.Add(memberKeyValue.Key, propertySchema);
+                    AddValidationInformation(schema, context, keyValuePair.Value.ElementType);
                 }
+
                 document.Components.Schemas.Add(keyValuePair.Value.ShortName, schema);
             }
         }
