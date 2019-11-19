@@ -6,7 +6,7 @@ namespace Carter.Tests.ContentNegotiation
     {
         public NegotiatorModule()
         {
-            this.Get("/negotiate", (req, res, routeData) => res.Negotiate(new { FirstName = "Jim" }));
+            this.Get("/negotiate", (req, res) => res.Negotiate(new { FirstName = "Jim" }));
         }
     }
 }

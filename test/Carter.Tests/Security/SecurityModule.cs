@@ -8,7 +8,7 @@
         {
             this.RequiresAuthorization();
 
-            this.Get("/secure", async (request, response, routeData) => { await response.WriteAsync("secure"); });
+            this.Get("/secure", async (request, response) => { await response.WriteAsync("secure"); });
         }
     }
 }

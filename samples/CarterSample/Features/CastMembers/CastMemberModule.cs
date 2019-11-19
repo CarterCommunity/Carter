@@ -1,5 +1,7 @@
 ﻿namespace CarterSample.Features.CastMembers
 {
+    using System;
+    using System.Threading.Tasks;
     using Carter;
     using Carter.ModelBinding;
     using Carter.Response;
@@ -11,7 +13,7 @@
     {
         public CastMemberModule()
         {
-            this.Post("/castmembers", async (req, res, routeData) =>
+            this.Post("/castmembers", async (req, res) =>
             {
                 var result = await req.BindAndValidate<CastMember>();
 
@@ -24,7 +26,7 @@
                 await res.WriteAsync("OK");
             });
 
-            this.Get<GetCastMembers>("/castmembers", (request, response, routeData) =>
+            this.Get<GetCastMembers>((string)"/castmembers", (request, response) =>
             {
                 var castMembers = new[] { new CastMember { Name = "Samuel L Jackson" }, new CastMember { Name = "John Travolta" } };
 

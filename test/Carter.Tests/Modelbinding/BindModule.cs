@@ -9,13 +9,13 @@ namespace Carter.Tests.Modelbinding
     {
         public BindModule()
         {
-            this.Post("/bind", async (req, res, routeData) =>
+            this.Post("/bind", async (req, res) =>
             {
                 var model = await req.Bind<TestModel>();
                 await res.Negotiate(model);
             });
 
-            this.Post("/bindandvalidate", async (req, res, routeData) =>
+            this.Post("/bindandvalidate", async (req, res) =>
             {
                 var model = await req.BindAndValidate<TestModel>();
                 if (!model.ValidationResult.IsValid)
@@ -28,7 +28,7 @@ namespace Carter.Tests.Modelbinding
                 await res.Negotiate(model.Data);
             });
 
-            this.Post("/novalidator", async (req, res, routeData) =>
+            this.Post("/novalidator", async (req, res) =>
             {
                 var model = await req.BindAndValidate<TestModelNoValidator>();
                 if (!model.ValidationResult.IsValid)
@@ -40,7 +40,7 @@ namespace Carter.Tests.Modelbinding
                 await res.Negotiate(model);
             });
 
-            this.Post("/duplicatevalidator", async (req, res, routeData) =>
+            this.Post("/duplicatevalidator", async (req, res) =>
             {
                 var model = await req.BindAndValidate<DuplicateTestModel>();
                 if (!model.ValidationResult.IsValid)
@@ -52,7 +52,7 @@ namespace Carter.Tests.Modelbinding
                 await res.Negotiate(model.Data);
             });
 
-            this.Post("/bindandsave", async (req, res, routeData) =>
+            this.Post("/bindandsave", async (req, res) =>
             {
                 var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
@@ -61,7 +61,7 @@ namespace Carter.Tests.Modelbinding
                 await res.Negotiate(new PathTestModel { Path = filePath });
             });
 
-            this.Post("/bindandsavecustomname", async (req, res, routeData) =>
+            this.Post("/bindandsavecustomname", async (req, res) =>
             {
                 var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
@@ -70,7 +70,7 @@ namespace Carter.Tests.Modelbinding
                 await res.Negotiate(new PathTestModel { Path = filePath });
             });
 
-            this.Post("/bindfail", async (req, res, routeData) =>
+            this.Post("/bindfail", async (req, res) =>
             {
                 var model = await req.Bind<TestModel>();
                 await res.Negotiate(model);
