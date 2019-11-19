@@ -7,7 +7,7 @@
     {
         public HomeModule()
         {
-            Get("/", async (req, res, routeData) => await res.WriteAsync("Hello from Carter!"));
+            Get("/", async (req, res) => await res.WriteAsync("Hello from Carter!"));
         }
     }
 }

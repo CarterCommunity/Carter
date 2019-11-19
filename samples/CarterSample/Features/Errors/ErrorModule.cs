@@ -9,12 +9,12 @@ namespace CarterSample.Features.Errors
     {
         public ErrorModule()
         {
-            this.Get("/error", (req, res, routeData) =>
+            this.Get("/error", (req, res) =>
             {
                 throw new Exception("oops");
             });
 
-            this.Get("/errorhandler", (req, res, routeData) =>
+            this.Get("/errorhandler", (req, res) =>
             {
                 string error = string.Empty;
                 var feature = req.HttpContext.Features.Get<IExceptionHandlerFeature>();

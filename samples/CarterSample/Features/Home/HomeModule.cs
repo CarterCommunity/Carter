@@ -9,7 +9,7 @@ namespace CarterSample.Features.Home
     {
         public HomeModule()
         {
-            this.Get("/", (req, res, routeData) =>
+            this.Get("/", (req, res) =>
             {
                 res.StatusCode = 409;
                 return res.WriteAsync("There's no place like 127.0.0.1");

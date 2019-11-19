@@ -2,6 +2,7 @@
 {
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
     using Xunit;
@@ -16,12 +17,17 @@
                     {
                         x.AddCarter(configurator: c =>
                             c.WithModule<TestModule>()
-                             .WithModule<MultipleShortCircuitOnOff>()
-                             .WithModule<MultipleShortCircuitModule>()
-                             .WithModule<ShortCircuitModule>()
-                             .WithModule<TestModuleBaseClass>());
+                                .WithModule<MultipleShortCircuitOnOff>()
+                                .WithModule<MultipleShortCircuitModule>()
+                                .WithModule<ShortCircuitModule>()
+                                .WithModule<TestModuleBaseClass>()
+                                );
                     })
-                    .Configure(x => x.UseCarter())
+                    .Configure(x =>
+                    {
+                        x.UseRouting();
+                        x.UseEndpoints(builder => builder.MapCarter());
+                    })
             );
             this.httpClient = this.server.CreateClient();
         }
@@ -229,6 +235,8 @@
             var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, "/head"));
 
             Assert.Equal(200, (int)response.StatusCode);
+            Assert.Null(response.Content.Headers.ContentLength);
+
         }
 
         [Fact]
@@ -236,7 +244,9 @@
         {
             var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, "/"));
 
+
             Assert.Equal(200, (int)response.StatusCode);
+            Assert.Null(response.Content.Headers.ContentLength);
         }
 
         [Fact]
@@ -245,6 +255,8 @@
             var response = await this.httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, "/test/"));
 
             Assert.Equal(200, (int)response.StatusCode);
+            Assert.Null(response.Content.Headers.ContentLength);
+
         }
 
         [Fact]
@@ -283,19 +295,6 @@
         {
             var response = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod("PATCH"), "/test/"));
             Assert.Equal(200, (int)response.StatusCode);
-        }
-
-        [Fact]
-        public async Task Should_return_POST_request_body_AsString()
-        {
-            const string content = "Hello";
-
-            var response = await this.httpClient.PostAsync("/asstring", new StringContent(content));
-
-            var body = await response.Content.ReadAsStringAsync();
-
-            Assert.Equal(200, (int)response.StatusCode);
-            Assert.Contains(content, body);
         }
 
         [Fact]

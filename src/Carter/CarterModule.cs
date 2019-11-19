@@ -4,6 +4,7 @@ namespace Carter
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Carter.OpenApi;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
 
@@ -12,11 +13,15 @@ namespace Carter
     /// </summary>
     public class CarterModule
     {
-        internal readonly Dictionary<(string verb, string path), RequestDelegate> Routes;
+        internal readonly Dictionary<(string verb, string path), (RequestDelegate handler, RouteConventions conventions)> Routes;
 
         internal readonly Dictionary<(string verb, string path), RouteMetaData> RouteMetaData;
 
         private readonly string basePath;
+
+        internal bool RequiresAuth { get; set; }
+
+        internal string[] AuthPolicies { get; set; } = Array.Empty<string>();
 
         /// <summary>
         /// A handler that can be invoked before the defined route
@@ -41,11 +46,10 @@ namespace Carter
         /// <param name="basePath">A base path to group routes in your <see cref="CarterModule"/></param>
         protected CarterModule(string basePath)
         {
-            this.Routes = new Dictionary<(string verb, string path), RequestDelegate>(RouteComparer.Comparer);
+            this.Routes = new Dictionary<(string verb, string path), (RequestDelegate handler, RouteConventions conventions)>(RouteComparer.Comparer);
             this.RouteMetaData = new Dictionary<(string verb, string path), RouteMetaData>(RouteComparer.Comparer);
 
-            var cleanPath = this.RemoveStartingSlash(basePath);
-            this.basePath = this.RemoveEndingSlash(cleanPath);
+            this.basePath = basePath;
         }
 
         /// <summary>
@@ -53,10 +57,10 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Get(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected IEndpointConventionBuilder Get(string path, Func<HttpRequest, HttpResponse, Task> handler)
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Get(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Get(path, RequestDelegate);
         }
 
         /// <summary>
@@ -64,12 +68,13 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Get(string path, RequestDelegate handler)
+        protected IEndpointConventionBuilder Get(string path, RequestDelegate handler)
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Get, path), handler);
-            this.Routes.Add((HttpMethods.Head, path), handler);
+            var conventions = new RouteConventions();
+            this.Routes.Add((HttpMethods.Get, path), (handler, conventions));
+            this.Routes.Add((HttpMethods.Head, path), (handler, conventions));
+            return conventions;
         }
 
         /// <summary>
@@ -78,10 +83,10 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Get<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Get<T>(string path, Func<HttpRequest, HttpResponse, Task> handler) where T : RouteMetaData
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Get<T>(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Get<T>(path, RequestDelegate);
         }
 
         /// <summary>
@@ -90,14 +95,15 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Get<T>(string path, RequestDelegate handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Get<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Get, path), handler);
-            this.Routes.Add((HttpMethods.Head, path), handler);
+            var conventions = new RouteConventions();
+            this.Routes.Add((HttpMethods.Get, path), (handler, conventions));
+            this.Routes.Add((HttpMethods.Head, path), (handler, conventions));
 
             this.RouteMetaData.Add((HttpMethods.Get, path), Activator.CreateInstance<T>());
+            return conventions;
         }
 
         /// <summary>
@@ -105,10 +111,10 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Post(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected IEndpointConventionBuilder Post(string path, Func<HttpRequest, HttpResponse, Task> handler)
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Post(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Post(path, RequestDelegate);
         }
 
         /// <summary>
@@ -116,11 +122,13 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Post(string path, RequestDelegate handler)
+        protected IEndpointConventionBuilder Post(string path, RequestDelegate handler)
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Post, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Post, path), (handler, conventions));
+            return conventions;
         }
 
         /// <summary>
@@ -129,10 +137,10 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Post<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Post<T>(string path, Func<HttpRequest, HttpResponse, Task> handler) where T : RouteMetaData
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Post<T>(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Post<T>(path, RequestDelegate);
         }
 
         /// <summary>
@@ -141,13 +149,16 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Post<T>(string path, RequestDelegate handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Post<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Post, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Post, path), (handler, conventions));
 
             this.RouteMetaData.Add((HttpMethods.Post, path), Activator.CreateInstance<T>());
+
+            return conventions;
         }
 
         /// <summary>
@@ -155,10 +166,10 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Delete(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected IEndpointConventionBuilder Delete(string path, Func<HttpRequest, HttpResponse, Task> handler)
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Delete(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Delete(path, RequestDelegate);
         }
 
         /// <summary>
@@ -166,11 +177,14 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Delete(string path, RequestDelegate handler)
+        protected IEndpointConventionBuilder Delete(string path, RequestDelegate handler)
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Delete, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Delete, path), (handler, conventions));
+
+            return conventions;
         }
 
         /// <summary>
@@ -179,10 +193,10 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Delete<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Delete<T>(string path, Func<HttpRequest, HttpResponse, Task> handler) where T : RouteMetaData
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Delete<T>(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Delete<T>(path, RequestDelegate);
         }
 
         /// <summary>
@@ -191,13 +205,16 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Delete<T>(string path, RequestDelegate handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Delete<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Delete, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Delete, path), (handler, conventions));
 
             this.RouteMetaData.Add((HttpMethods.Delete, path), Activator.CreateInstance<T>());
+
+            return conventions;
         }
 
         /// <summary>
@@ -205,10 +222,10 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Put(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected IEndpointConventionBuilder Put(string path, Func<HttpRequest, HttpResponse, Task> handler)
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Put(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Put(path, RequestDelegate);
         }
 
         /// <summary>
@@ -216,11 +233,14 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Put(string path, RequestDelegate handler)
+        protected IEndpointConventionBuilder Put(string path, RequestDelegate handler)
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Put, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Put, path), (handler, conventions));
+
+            return conventions;
         }
 
         /// <summary>
@@ -229,10 +249,10 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Put<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Put<T>(string path, Func<HttpRequest, HttpResponse, Task> handler) where T : RouteMetaData
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Put<T>(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Put<T>(path, RequestDelegate);
         }
 
         /// <summary>
@@ -241,13 +261,16 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Put<T>(string path, RequestDelegate handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Put<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Put, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Put, path), (handler, conventions));
 
             this.RouteMetaData.Add((HttpMethods.Put, path), Activator.CreateInstance<T>());
+
+            return conventions;
         }
 
         /// <summary>
@@ -255,10 +278,10 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Head(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected IEndpointConventionBuilder Head(string path, Func<HttpRequest, HttpResponse, Task> handler)
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Head(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Head(path, RequestDelegate);
         }
 
         /// <summary>
@@ -266,11 +289,13 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Head(string path, RequestDelegate handler)
+        protected IEndpointConventionBuilder Head(string path, RequestDelegate handler)
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Head, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Head, path), (handler, conventions));
+            return conventions;
         }
 
         /// <summary>
@@ -279,10 +304,10 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Head<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Head<T>(string path, Func<HttpRequest, HttpResponse, Task> handler) where T : RouteMetaData
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Head<T>(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Head<T>(path, RequestDelegate);
         }
 
         /// <summary>
@@ -291,13 +316,15 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Head<T>(string path, RequestDelegate handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Head<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Head, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Head, path), (handler, conventions));
 
             this.RouteMetaData.Add((HttpMethods.Head, path), Activator.CreateInstance<T>());
+            return conventions;
         }
 
         /// <summary>
@@ -305,11 +332,11 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Patch(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected IEndpointConventionBuilder Patch(string path, Func<HttpRequest, HttpResponse, Task> handler)
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
 
-            this.Patch(path, RequestDelegate);
+            return this.Patch(path, RequestDelegate);
         }
 
         /// <summary>
@@ -317,11 +344,14 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Patch(string path, RequestDelegate handler)
+        protected IEndpointConventionBuilder Patch(string path, RequestDelegate handler)
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Patch, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Patch, path), (handler, conventions));
+
+            return conventions;
         }
 
         /// <summary>
@@ -330,10 +360,10 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Patch<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Patch<T>(string path, Func<HttpRequest, HttpResponse, Task> handler) where T : RouteMetaData
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Patch<T>(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Patch<T>(path, RequestDelegate);
         }
 
         /// <summary>
@@ -342,13 +372,15 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Patch<T>(string path, RequestDelegate handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Patch<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Patch, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Patch, path), (handler, conventions));
 
             this.RouteMetaData.Add((HttpMethods.Patch, path), Activator.CreateInstance<T>());
+            return conventions;
         }
 
         /// <summary>
@@ -356,10 +388,10 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Options(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler)
+        protected IEndpointConventionBuilder Options(string path, Func<HttpRequest, HttpResponse, Task> handler)
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Options(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Options(path, RequestDelegate);
         }
 
         /// <summary>
@@ -367,11 +399,13 @@ namespace Carter
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
-        protected void Options(string path, RequestDelegate handler)
+        protected IEndpointConventionBuilder Options(string path, RequestDelegate handler)
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Options, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Options, path), (handler, conventions));
+            return conventions;
         }
 
         /// <summary>
@@ -380,10 +414,10 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Options<T>(string path, Func<HttpRequest, HttpResponse, RouteData, Task> handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Options<T>(string path, Func<HttpRequest, HttpResponse, Task> handler) where T : RouteMetaData
         {
-            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response, httpContext.GetRouteData());
-            this.Options<T>(path, RequestDelegate);
+            Task RequestDelegate(HttpContext httpContext) => handler(httpContext.Request, httpContext.Response);
+            return this.Options<T>(path, RequestDelegate);
         }
 
         /// <summary>
@@ -392,23 +426,15 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.RouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected void Options<T>(string path, RequestDelegate handler) where T : RouteMetaData
+        protected IEndpointConventionBuilder Options<T>(string path, RequestDelegate handler) where T : RouteMetaData
         {
-            path = this.RemoveStartingSlash(path);
             path = this.PrependBasePath(path);
-            this.Routes.Add((HttpMethods.Options, path), handler);
+            var conventions = new RouteConventions();
+
+            this.Routes.Add((HttpMethods.Options, path), (handler, conventions));
 
             this.RouteMetaData.Add((HttpMethods.Options, path), Activator.CreateInstance<T>());
-        }
-
-        private string RemoveStartingSlash(string path)
-        {
-            return path.StartsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Substring(1) : path;
-        }
-
-        private string RemoveEndingSlash(string path)
-        {
-            return path.EndsWith("/", StringComparison.OrdinalIgnoreCase) ? path.Remove(path.Length - 1) : path;
+            return conventions;
         }
 
         private string PrependBasePath(string path)
@@ -418,7 +444,7 @@ namespace Carter
                 return path;
             }
 
-            return $"{this.basePath}/{path}";
+            return $"{this.basePath}{path}";
         }
 
         /// <summary>

@@ -5,6 +5,7 @@
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
     using Xunit;
@@ -16,8 +17,11 @@
             this.server = new TestServer(
                 new WebHostBuilder()
                     .ConfigureServices(x => { x.AddCarter(configurator: c => c.WithModule<StreamModule>()); })
-                    .Configure(x => x.UseCarter())
-            );
+                    .Configure(x =>
+                    {
+                        x.UseRouting();
+                        x.UseEndpoints(builder => builder.MapCarter());
+                    }));
             this.httpClient = this.server.CreateClient();
         }
 

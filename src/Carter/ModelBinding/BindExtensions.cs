@@ -5,27 +5,25 @@ namespace Carter.ModelBinding
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using Carter.Request;
     using FluentValidation.Results;
     using Microsoft.AspNetCore.Http;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
     public static class BindExtensions
     {
-        private static readonly JsonSerializer JsonSerializer = new JsonSerializer();
-
         /// <summary>
         /// Bind the incoming request body to a model and validate it
         /// </summary>
         /// <param name="request">Current <see cref="HttpRequest"/></param>
         /// <typeparam name="T">Model type</typeparam>
         /// <returns><see cref="ValidationResult"/> and bound model</returns>
-        public static (ValidationResult ValidationResult, T Data) BindAndValidate<T>(this HttpRequest request)
+        public static async Task<(ValidationResult ValidationResult, T Data)> BindAndValidate<T>(this HttpRequest request)
         {
-            var model = request.Bind<T>();
-            if (model == null)
+            var model = await request.Bind<T>();
+
+            if (EqualityComparer<T>.Default.Equals(model, default))
             {
                 model = Activator.CreateInstance<T>();
             }
@@ -40,11 +38,11 @@ namespace Carter.ModelBinding
         /// <param name="request">Current <see cref="HttpRequest"/></param>
         /// <typeparam name="T">Model type</typeparam>
         /// <returns>Bound model</returns>
-        public static T Bind<T>(this HttpRequest request)
+        public static async Task<T> Bind<T>(this HttpRequest request)
         {
             if (request.HasFormContentType)
             {
-                var res = JObject.FromObject(request.Form.ToDictionary(key => key.Key, val =>
+                var res = request.Form.ToDictionary(key => key.Key, val =>
                 {
                     var type = typeof(T);
                     var propertyType = type.GetProperty(val.Key)?.PropertyType;
@@ -61,23 +59,24 @@ namespace Carter.ModelBinding
                         {
                             colType = propertyType.GetGenericArguments().First();
                         }
-                        return val.Value.Select(y => 
-                        {
-                            return ConvertToType(y, colType);
-                        });
+
+                        return val.Value.Select(y => { return ConvertToType(y, colType); });
                     }
 
                     return ConvertToType(val.Value[0], propertyType);
-                }));
+                });
 
-                var instance = res.ToObject<T>();
-                return instance;
+                var json = JsonSerializer.Serialize(res);
+                return JsonSerializer.Deserialize<T>(json);
             }
 
-            using (var streamReader = new StreamReader(request.Body))
-            using (var jsonTextReader = new JsonTextReader(streamReader))
+            try
             {
-                return JsonSerializer.Deserialize<T>(jsonTextReader);
+                return await JsonSerializer.DeserializeAsync<T>(request.Body);
+            }
+            catch (JsonException)
+            {
+                return default;
             }
         }
 
@@ -91,25 +90,29 @@ namespace Carter.ModelBinding
                 {
                     return DateTime.Parse(value, CultureInfo.InvariantCulture);
                 }
+
                 if (type == typeof(Guid) || underlyingType == typeof(Guid))
                 {
                     return new Guid(value);
                 }
+
                 if (type == typeof(Uri) || underlyingType == typeof(Uri))
                 {
                     if (Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out Uri uri))
                     {
                         return uri;
                     }
+
                     return null;
                 }
             }
-            else 
+            else
             {
                 if (type == typeof(Guid))
                 {
                     return default(Guid);
                 }
+
                 if (underlyingType != null)
                 {
                     return null;
@@ -120,6 +123,7 @@ namespace Carter.ModelBinding
             {
                 return Convert.ChangeType(value, underlyingType);
             }
+
             return Convert.ChangeType(value, type);
         }
 

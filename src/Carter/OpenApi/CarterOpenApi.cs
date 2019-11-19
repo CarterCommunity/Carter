@@ -7,6 +7,7 @@ namespace Carter.OpenApi
     using Carter.Request;
     using FluentValidation.Validators;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.Features;
     using Microsoft.AspNetCore.Routing.Template;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.OpenApi;
@@ -114,6 +115,13 @@ namespace Carter.OpenApi
                     }
 
                     document.Paths.Add("/" + templateName, pathItem);
+                }
+
+                var syncIOFeature = context.Features.Get<IHttpBodyControlFeature>();
+
+                if (syncIOFeature != null)
+                {
+                    syncIOFeature.AllowSynchronousIO = true;
                 }
 
                 context.Response.ContentType = "application/json; charset=utf-8";

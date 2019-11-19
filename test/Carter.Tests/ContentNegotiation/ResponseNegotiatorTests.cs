@@ -5,6 +5,7 @@ namespace Carter.Tests.ContentNegotiation
     using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
@@ -21,11 +22,15 @@ namespace Carter.Tests.ContentNegotiation
                     {
                         x.AddCarter(configurator: c =>
                             c.WithModule<NegotiatorModule>()
-                             .WithResponseNegotiator<TestResponseNegotiator>()
-                             .WithResponseNegotiator<TestJsonResponseNegotiator>()
-                             .WithResponseNegotiator<TestXmlResponseNegotiator>());
+                                .WithResponseNegotiator<TestResponseNegotiator>()
+                                .WithResponseNegotiator<TestJsonResponseNegotiator>()
+                                .WithResponseNegotiator<TestXmlResponseNegotiator>());
                     })
-                    .Configure(x => x.UseCarter())
+                    .Configure(x =>
+                    {
+                        x.UseRouting();
+                        x.UseEndpoints(builder => builder.MapCarter());
+                    })
             );
             this.httpClient = this.server.CreateClient();
         }
@@ -142,9 +147,9 @@ namespace Carter.Tests.ContentNegotiation
     internal class TestJsonResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept) => accept
-                                                              .MediaType.ToString()
-                                                              .IndexOf("application/vnd.badger+json",
-                                                                  StringComparison.OrdinalIgnoreCase) >= 0;
+            .MediaType.ToString()
+            .IndexOf("application/vnd.badger+json",
+                StringComparison.OrdinalIgnoreCase) >= 0;
 
         public async Task Handle(HttpRequest req, HttpResponse res, object model,
             CancellationToken cancellationToken = default(CancellationToken))

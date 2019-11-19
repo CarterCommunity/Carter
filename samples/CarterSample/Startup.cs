@@ -26,19 +26,19 @@ namespace CarterSample
             config.Bind(appconfig);
 
             app.UseExceptionHandler("/errorhandler");
-
+            app.UseRouting();
             app.UseSwaggerUI(opt =>
             {
                 opt.RoutePrefix = "openapi/ui";
                 opt.SwaggerEndpoint("/openapi", "Carter OpenAPI Sample");
             });
 
-            app.UseCarter(this.GetOptions(app.ServerFeatures.Get<IServerAddressesFeature>().Addresses));
+            app.UseEndpoints(builder=>builder.MapCarter(this.GetOptions(app.ServerFeatures.Get<IServerAddressesFeature>().Addresses)));
         }
 
         private CarterOptions GetOptions(ICollection<string> addresses)
         {
-            return new CarterOptions(ctx => this.GetBeforeHook(ctx), ctx => this.GetAfterHook(ctx),
+            return new CarterOptions(
                 new OpenApiOptions("Carter <3 OpenApi", addresses,
                     new Dictionary<string, OpenApiSecurity>
                     {

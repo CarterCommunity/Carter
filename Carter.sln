@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carter", "src\Carter.csproj", "{A6D020CF-1722-4AB3-A8B3-69F54319AD6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carter", "src\Carter\Carter.csproj", "{A6D020CF-1722-4AB3-A8B3-69F54319AD6A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarterSample", "samples\CarterSample\CarterSample.csproj", "{2C511F74-490A-4804-A826-DC9626C669E9}"
 EndProject

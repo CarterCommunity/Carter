@@ -5,11 +5,13 @@ namespace Carter.Tests.Modelbinding
     using System.Dynamic;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Text;
     using System.Threading.Tasks;
     using FluentValidation.Results;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
     using Newtonsoft.Json;
@@ -29,7 +31,11 @@ namespace Carter.Tests.Modelbinding
                                 .WithValidator<DuplicateTestModelOne>()
                                 .WithValidator<DuplicateTestModelTwo>());
                     })
-                    .Configure(x => x.UseCarter())
+                    .Configure(x =>
+                    {
+                        x.UseRouting();
+                        x.UseEndpoints(builder => builder.MapCarter());
+                    })
             );
             this.httpClient = server.CreateClient();
         }
@@ -178,7 +184,7 @@ namespace Carter.Tests.Modelbinding
         {
             var res = await this.httpClient.PostAsync("/bind",
                 new StringContent(
-                    "{\"MyIntProperty\":\"911\",\"MyStringProperty\":\"Vincent Vega\"}",
+                    "{\"MyIntProperty\":911,\"MyStringProperty\":\"Vincent Vega\"}",
                     Encoding.UTF8, "application/json"));
             var body = await res.Content.ReadAsStringAsync();
             var model = JsonConvert.DeserializeObject<TestModel>(body);
@@ -210,7 +216,7 @@ namespace Carter.Tests.Modelbinding
         {
             var res = await this.httpClient.PostAsync("/bindandvalidate",
                 new StringContent(
-                    "{\"MyIntProperty\":\"911\",\"MyStringProperty\":\"Vincent Vega\"}",
+                    "{\"MyIntProperty\":911,\"MyStringProperty\":\"Vincent Vega\"}",
                     Encoding.UTF8, "application/json"));
 
             var body = await res.Content.ReadAsStringAsync();
@@ -286,6 +292,34 @@ namespace Carter.Tests.Modelbinding
                         "application/json")));
 
             Assert.IsType<InvalidOperationException>(ex);
+        }
+
+        [Fact]
+        public async Task Should_return_default_T_when_invalid_json()
+        {
+            var res = await this.httpClient.PostAsync("/bindfail",
+                new StringContent(
+                    "{\"MyIntProperty\":\"911\"}",
+                    Encoding.UTF8, "application/json"));
+            var body = await res.Content.ReadAsStringAsync();
+            var model = JsonConvert.DeserializeObject<TestModel>(body);
+
+            Assert.Equal(default, model);
+        }
+
+        [Fact]
+        public async Task Should_return_validation_failures_on_validation_after_bind_failure()
+        {
+            var res = await this.httpClient.PostAsync("/bindandvalidate",
+                new StringContent(
+                    "{\"MyIntProperty\":\"911\",\"MyStringProperty\":\"Vincent Vega\"}",
+                    Encoding.UTF8, "application/json"));
+
+            var body = await res.Content.ReadAsStringAsync();
+            var model = JsonConvert.DeserializeObject<List<ValidationFailure>>(body);
+
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, res.StatusCode);
+            Assert.Equal(2, model.Count);
         }
     }
 }

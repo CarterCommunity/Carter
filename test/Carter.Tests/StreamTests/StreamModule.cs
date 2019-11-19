@@ -9,7 +9,7 @@
     {
         public StreamModule()
         {
-            this.Get("/downloadwithcd", async (request, response, routeData) =>
+            this.Get("/downloadwithcd", async (request, response) =>
             {
                 using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("hi")))
                 {
@@ -18,7 +18,7 @@
                 }
             });
 
-            this.Get("/download", async (request, response, routeData) =>
+            this.Get("/download", async (request, response) =>
             {
                 using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("hi")))
                 {
@@ -26,7 +26,7 @@
                 }
             });
 
-            this.Get("/downloadrange", async (request, response, routeData) =>
+            this.Get("/downloadrange", async (request, response) =>
             {
                 using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("0123456789")))
                 {

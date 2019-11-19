@@ -9,46 +9,50 @@ namespace Carter.Tests.Modelbinding
     {
         public BindModule()
         {
-            this.Post("/bind", (req, res, routeData) =>
+            this.Post("/bind", async (req, res) =>
             {
-                var model = req.Bind<TestModel>();
-                return res.Negotiate(model);
+                var model = await req.Bind<TestModel>();
+                await res.Negotiate(model);
             });
 
-            this.Post("/bindandvalidate", (req, res, routeData) =>
+            this.Post("/bindandvalidate", async (req, res) =>
             {
-                var model = req.BindAndValidate<TestModel>();
+                var model = await req.BindAndValidate<TestModel>();
                 if (!model.ValidationResult.IsValid)
                 {
-                    return res.Negotiate(model.ValidationResult.GetFormattedErrors());
+                    res.StatusCode = 422;
+                    await res.Negotiate(model.ValidationResult.GetFormattedErrors());
+                    return;
                 }
 
-                return res.Negotiate(model.Data);
+                await res.Negotiate(model.Data);
             });
 
-            this.Post("/novalidator", (req, res, routeData) =>
+            this.Post("/novalidator", async (req, res) =>
             {
-                var model = req.BindAndValidate<TestModelNoValidator>();
+                var model = await req.BindAndValidate<TestModelNoValidator>();
                 if (!model.ValidationResult.IsValid)
                 {
-                    return res.Negotiate(model.ValidationResult.GetFormattedErrors());
+                    await res.Negotiate(model.ValidationResult.GetFormattedErrors());
+                    return;
                 }
 
-                return res.Negotiate(model);
+                await res.Negotiate(model);
             });
 
-            this.Post("/duplicatevalidator", (req, res, routeData) =>
+            this.Post("/duplicatevalidator", async (req, res) =>
             {
-                var model = req.BindAndValidate<DuplicateTestModel>();
+                var model = await req.BindAndValidate<DuplicateTestModel>();
                 if (!model.ValidationResult.IsValid)
                 {
-                    return res.Negotiate(model.ValidationResult.GetFormattedErrors());
+                    await res.Negotiate(model.ValidationResult.GetFormattedErrors());
+                    return;
                 }
 
-                return res.Negotiate(model.Data);
+                await res.Negotiate(model.Data);
             });
 
-            this.Post("/bindandsave", async (req, res, routeData) =>
+            this.Post("/bindandsave", async (req, res) =>
             {
                 var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
@@ -57,13 +61,19 @@ namespace Carter.Tests.Modelbinding
                 await res.Negotiate(new PathTestModel { Path = filePath });
             });
 
-            this.Post("/bindandsavecustomname", async (req, res, routeData) =>
+            this.Post("/bindandsavecustomname", async (req, res) =>
             {
                 var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
                 await req.BindAndSaveFile(filePath, "mycustom.txt");
 
                 await res.Negotiate(new PathTestModel { Path = filePath });
+            });
+
+            this.Post("/bindfail", async (req, res) =>
+            {
+                var model = await req.Bind<TestModel>();
+                await res.Negotiate(model);
             });
         }
     }

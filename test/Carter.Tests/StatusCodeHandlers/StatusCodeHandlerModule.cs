@@ -6,7 +6,7 @@ namespace Carter.Tests.StatusCodeHandlers
     {
         public StatusCodeHandlerModule()
         {
-            this.Get("/statushandler", async (req, res, routeData) =>
+            this.Get("/statushandler", async (req, res) =>
             {
                 res.StatusCode = 418;
                 await res.WriteAsync("Hello");

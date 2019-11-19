@@ -8,7 +8,7 @@ namespace Carter.Tests.Security
         {
             this.RequiresPolicy("reallysecurepolicy");
 
-            this.Get("/securepolicy", async (request, response, routeData) => { await response.WriteAsync("secure"); });
+            this.Get("/securepolicy", async (request, response) => { await response.WriteAsync("secure"); });
         }
     }
 }
