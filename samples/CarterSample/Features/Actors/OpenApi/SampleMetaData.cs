@@ -5,7 +5,13 @@ namespace CarterSample.Features.Actors
 
     public class SampleMetaData : RouteMetaData
     {
-        public override Type Request { get; } = typeof(Foo);
+        public override RouteMetaDataRequest[] Requests { get; } =
+        {
+            new RouteMetaDataRequest
+            {
+                Request = typeof(Foo),
+            }
+        };
 
         public override RouteMetaDataResponse[] Responses { get; } =
         {

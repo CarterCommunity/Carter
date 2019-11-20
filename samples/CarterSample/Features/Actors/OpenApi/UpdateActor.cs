@@ -7,7 +7,13 @@ namespace CarterSample.Features.Actors.OpenApi
     {
         public override string Tag { get; } = "Actors";
         
-        public override Type Request { get; } = typeof(Actor);
+        public override RouteMetaDataRequest[] Requests { get; } =
+        {
+            new RouteMetaDataRequest
+            {
+                Request = typeof(Actor),
+            }
+        };
 
         public override string Description { get; } = "Update an existing actor";
 
