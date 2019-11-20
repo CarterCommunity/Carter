@@ -4,9 +4,9 @@
 
 <a href="https://join.slack.com/t/cartercommunity/shared_invite/enQtMzY2Nzc0NjU2MTgyLWRjYzJiNTljY2NiZjM1ZWVmODZhYjg3YjZhOTNiNzdkNzg4OThkNTY2MzJjY2ViMWMyZDJkMDFlNGRiZjY5MTQ"><img src="./slack.svg" width="140px"/></a>
 
-Carter is a library that allows [Nancy-esque](http://nancyfx.org) routing for use with ASP.Net Core. 
+Carter is framework that is a thin layer of extension methods and functionality over ASP.NET Core allowing code to be more explicit and most importantly more enjoyable.
 
-This is not a framework, it simply builds on top of [Microsoft.AspNetCore.Routing](https://github.com/aspnet/Routing) allowing you to have more elegant routing rather than have attribute routing, convention routing, ASP.Net Controllers or `IRouteBuilder` extensions. 
+Carter simply builds on top of ASP.NET Core allowing you to have more elegant routing rather than have attribute routing, convention routing, ASP.Net Controllers. 
 
 For a better understanding, take a good look at the [samples](https://github.com/CarterCommunity/Carter/tree/master/samples) inside this repo.  The sample demonstrates usages of elegant extensions around common ASP.Net Core types as shown below.  
 
@@ -14,7 +14,6 @@ Other extensions include:
 
 * `Bind/BindAndValidate<T>` - [FluentValidation](https://github.com/JeremySkinner/FluentValidation) extensions to validate incoming HTTP requests.
 * `BindFile/BindFiles/BindFileAndSave/BindFilesAndSave` - Allows you easily get access to a file/files that has been uploaded or alternatively you can call `BindFilesAndSave` and this will save it to a path you specify
-* Global `Before/After` hooks for every request.
 * `Before/After` hooks to the routes defined in a Carter module.
 * Routes to use in common ASP.Net Core middleware eg. `app.UseExceptionHandler("/errorhandler");`.
 * `IStatusCodeHandler`s are also an option as the ASP.Net Core `UseStatusCodePages` middleware is not elegant enough IMO. `IStatusCodeHandler`s allow you to define what happens when one of your routes returns a specific status code.  An example usage is shown in the sample.
@@ -24,9 +23,9 @@ Other extensions include:
 
   (i)
   ```csharp
-  this.Get("/actors/{id:int}", async (req, res, routeData) =>
+  this.Get("/actors/{id:int}", async (req, res) =>
   {
-      var person = actorProvider.Get(routeData.As<int>("id"));
+      var person = actorProvider.Get(req.RouteValues.As<int>("id"));
       await res.Negotiate(person);
   });
   ``` 
@@ -34,7 +33,7 @@ Other extensions include:
   ```csharp
   this.Get("/actors/{id:int}", async (ctx) =>
   {
-      var person = actorProvider.Get(ctx.GetRouteData().As<int>("id"));
+      var person = actorProvider.Get(ctx.Request.RouteValues.As<int>("id"));
       await ctx.Response.Negotiate(person);
   });
   ```
@@ -46,7 +45,7 @@ Carter supports OpenApi out of the box.  Simply call `/openapi` from your API an
 To configure your routes for OpenApi simply supply the meta data class on your routes for example:
 
 ```csharp
-this.Get<GetActors>("/actors", async (req, res, routeData) =>
+this.Get<GetActors>("/actors", async (req, res) =>
 {
     var people = actorProvider.Get();
     await res.AsJson(people);
@@ -116,7 +115,8 @@ public class Startup
 
     public void Configure(IApplicationBuilder app)
     {
-        app.UseCarter();
+        app.UseRouting();
+        app.UseEndpoints(builder => builder.MapCarter());
     }
 }
 ```
@@ -128,7 +128,7 @@ public class Startup
     {
         public HomeModule()
         {
-            Get("/", async (req, res, routeData) => await res.WriteAsync("Hello from Carter!"));
+            Get("/", async (req, res) => await res.WriteAsync("Hello from Carter!"));
         }
     }
 ```
@@ -148,7 +148,8 @@ public class Startup
 
     public void Configure(IApplicationBuilder app)
     {
-        app.UseCarter();
+        app.UseRouting();
+        app.UseEndpoints(builder => builder.MapCarter());
     }
 }
 
@@ -156,19 +157,19 @@ public class ActorsModule : CarterModule
 {
     public ActorsModule(IActorProvider actorProvider)
     {
-        this.Get("/actors", async (req, res, routeData) =>
+        this.Get("/actors", async (req, res) =>
         {
             var people = actorProvider.Get();
             await res.AsJson(people);
         });
 
-        this.Get("/actors/{id:int}", async (req, res, routeData) =>
+        this.Get("/actors/{id:int}", async (req, res) =>
         {
-            var person = actorProvider.Get(routeData.As<int>("id"));
+            var person = actorProvider.Get(req.RouteValues.As<int>("id"));
             await res.Negotiate(person);
         });
 
-        this.Put("/actors/{id:int}", async (req, res, routeData) =>
+        this.Put("/actors/{id:int}", async (req, res) =>
         {
             var result = req.BindAndValidate<Actor>();
 
@@ -184,7 +185,7 @@ public class ActorsModule : CarterModule
             res.StatusCode = 204;
         });
 
-        this.Post("/actors", async (req, res, routeData) =>
+        this.Post("/actors", async (req, res) =>
         {
             var result = req.BindAndValidate<Actor>();
 

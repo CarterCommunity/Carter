@@ -1,8 +1,16 @@
 image: ubuntu
 
-version: 3.7.0-ci{build}
+version: 5.0.0-ci{build}
 
 max_jobs: 1
+
+install:
+  - wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+  - sudo dpkg -i packages-microsoft-prod.deb
+  - sudo add-apt-repository universe
+  - sudo apt-get update
+  - sudo apt-get install -y apt-transport-https
+  - sudo apt-get install -y dotnet-sdk-3.0
 
 dotnet_csproj:
   patch: true
@@ -19,7 +27,7 @@ build:
   verbosity: minimal
 
 nuget:
-  disable_publish_on_pr: true
+  disable_publish_on_pr: false
 
 pull_requests:
   do_not_increment_build_number: true
@@ -33,3 +41,6 @@ environment:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 skip_branch_with_pr: true
+test_script: 
+  - dotnet test test/Carter.Tests
+  - dotnet test test/Carter.Samples.Tests

@@ -1,8 +1,11 @@
 ﻿namespace CarterSample.Features.CastMembers
 {
+    using System;
+    using System.Threading.Tasks;
     using Carter;
     using Carter.ModelBinding;
     using Carter.Response;
+    using CarterSample.Features.CastMembers.OpenApi;
     using Microsoft.AspNetCore.Http;
     using ValidatorOnlyProject;
 
@@ -10,16 +13,24 @@
     {
         public CastMemberModule()
         {
-            this.Post("/castmembers", (req, res, routeData) =>
+            this.Post("/castmembers", async (req, res) =>
             {
-                var result = req.BindAndValidate<CastMember>();
+                var result = await req.BindAndValidate<CastMember>();
 
                 if (!result.ValidationResult.IsValid)
                 {
-                    return res.AsJson(result.ValidationResult.GetFormattedErrors());
+                    await res.AsJson(result.ValidationResult.GetFormattedErrors());
+                    return;
                 }
 
-                return res.WriteAsync("OK");
+                await res.WriteAsync("OK");
+            });
+
+            this.Get<GetCastMembers>((string)"/castmembers", (request, response) =>
+            {
+                var castMembers = new[] { new CastMember { Name = "Samuel L Jackson" }, new CastMember { Name = "John Travolta" } };
+
+                return response.AsJson(castMembers);
             });
         }
     }

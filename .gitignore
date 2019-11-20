@@ -4,3 +4,4 @@ obj/
 .vscode/
 .idea/
 codeship.aes
+/*.user

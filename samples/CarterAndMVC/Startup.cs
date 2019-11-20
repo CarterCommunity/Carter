@@ -9,17 +9,16 @@ namespace CarterAndMVC
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCarter();
-            services.AddMvcCore();
+            services.AddControllers();
         }
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseCarter();
-            app.UseMvc(routes =>
+            app.UseRouting();
+            app.UseEndpoints(builder =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                builder.MapDefaultControllerRoute();
+                builder.MapCarter();
             });
         }
     }

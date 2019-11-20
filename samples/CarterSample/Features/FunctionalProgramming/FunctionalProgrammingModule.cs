@@ -11,7 +11,7 @@
     {
         public FunctionalProgrammingModule() : base("/functional")
         {
-            this.Get("/directors", (req, res, routeData) =>
+            this.Get("/directors", (req, res) =>
             {
                 var handler = RouteHandlers.ListDirectorsHandler;
 
@@ -26,11 +26,11 @@
                 return res.AsJson(directors);
             });
 
-            this.Get("/directors/{id:int}", (req, res, routeData) =>
+            this.Get("/directors/{id:int}", (req, res) =>
             {
                 var handler = RouteHandlers.GetDirectorByIdHandler;
 
-                var director = handler(routeData.As<int>("id"));
+                var director = handler(req.RouteValues.As<int>("id"));
 
                 if (director == null)
                 {
@@ -41,9 +41,9 @@
                 return res.AsJson(director);
             });
 
-            this.Post("/directors", async (req, res, routeData) =>
+            this.Post("/directors", async (req, res) =>
             {
-                var result = req.BindAndValidate<Director>();
+                var result = await req.BindAndValidate<Director>();
 
                 if (!result.ValidationResult.IsValid)
                 {
@@ -60,9 +60,9 @@
                 res.Headers["Location"] = "/" + id;
             });
 
-            this.Put("/directors/{id:int}", async (req, res, routeData) =>
+            this.Put("/directors/{id:int}", async (req, res) =>
             {
-                var result = req.BindAndValidate<Director>();
+                var result = await req.BindAndValidate<Director>();
 
                 if (!result.ValidationResult.IsValid)
                 {
@@ -91,13 +91,13 @@
                 }
             });
 
-            this.Delete("/directors/{id:int}", (req, res, routeData) =>
+            this.Delete("/directors/{id:int}", (req, res) =>
             {
                 var handler = RouteHandlers.DeleteDirectorHandler;
 
                 try
                 {
-                    handler(routeData.As<int>("id"));
+                    handler(req.RouteValues.As<int>("id"));
 
                     res.StatusCode = 204;
                     return Task.CompletedTask;

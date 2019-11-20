@@ -6,26 +6,27 @@ namespace CarterSample.Features.Actors
     using Carter.ModelBinding;
     using Carter.Request;
     using Carter.Response;
+    using CarterSample.Features.Actors.OpenApi;
 
     public class ActorsModule : CarterModule
     {
         public ActorsModule(IActorProvider actorProvider)
         {
-            this.Get<GetActors>("/actors", (req, res, routeData) =>
+            this.Get<GetActors>("/actors", (req, res) =>
             {
                 var people = actorProvider.Get();
                 return res.AsJson(people);
             });
 
-            this.Get<GetActorById>("/actors/{id:int}", (req, res, routeData) =>
+            this.Get<GetActorById>("/actors/{id:int}", (req, res) =>
             {
-                var person = actorProvider.Get(routeData.As<int>("id"));
+                var person = actorProvider.Get(req.RouteValues.As<int>("id"));
                 return res.Negotiate(person);
             });
 
-            this.Put<UpdateActor>("/actors/{id:int}", async (req, res, routeData) =>
+            this.Put<UpdateActor>("/actors/{id:int}", async (req, res) =>
             {
-                var result = req.BindAndValidate<Actor>();
+                var result = await req.BindAndValidate<Actor>();
 
                 if (!result.ValidationResult.IsValid)
                 {
@@ -39,9 +40,9 @@ namespace CarterSample.Features.Actors
                 res.StatusCode = 204;
             });
 
-            this.Post<AddActor>("/actors", async (req, res, routeData) =>
+            this.Post<AddActor>("/actors", async (req, res) =>
             {
-                var result = req.BindAndValidate<Actor>();
+                var result = await req.BindAndValidate<Actor>();
 
                 if (!result.ValidationResult.IsValid)
                 {
@@ -56,20 +57,26 @@ namespace CarterSample.Features.Actors
                 await res.Negotiate(result.Data);
             });
 
-            this.Delete<DeleteActor>("/actors/{id:int}", (req, res, routeData) =>
+            this.Delete<DeleteActor>("/actors/{id:int}", (req, res) =>
             {
-                actorProvider.Delete(routeData.As<int>("id"));
+                actorProvider.Delete(req.RouteValues.As<int>("id"));
                 res.StatusCode = 204;
                 return Task.CompletedTask;
             });
 
-            this.Get("/actors/download", async (request, response, routeData) =>
+            this.Get("/actors/download", async (request, response) =>
             {
                 using (var video = new FileStream("earth.mp4", FileMode.Open)) //24406813
                 {
                     await response.FromStream(video, "video/mp4");
                 }
             });
+
+            this.Get<EmptyOpenApiMetaData>("/empty", (request, response) => Task.CompletedTask);
+
+            this.Get<SampleMetaData>("/actors/sample", (request, response) => Task.CompletedTask);
+
+            this.Post<NoValidatorMetaData>("/actors/sample", (request, response) => Task.CompletedTask);
         }
     }
 }

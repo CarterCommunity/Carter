@@ -1,6 +1,6 @@
-namespace CarterSample.Features.Actors
+namespace CarterSample.Features.Actors.OpenApi
 {
-    using Carter;
+    using Carter.OpenApi;
 
     public class GetActorById : RouteMetaData
     {
@@ -21,5 +21,7 @@ namespace CarterSample.Features.Actors
         };
 
         public override string Tag { get; } = "Actors";
+
+        public override string OperationId { get; } = "Actors_GetActorById";
     }
 }

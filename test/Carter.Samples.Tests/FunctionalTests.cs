@@ -22,19 +22,18 @@ namespace Carter.Samples.Tests
 
     public class FunctionalTests
     {
-        private TestServer server;
-
-        private HttpClient client;
+        private readonly HttpClient client;
 
         public FunctionalTests()
         {
             var featureCollection = new FeatureCollection();
             featureCollection.Set<IServerAddressesFeature>(new ServerAddressesFeature());
-            this.server = new TestServer(WebHost.CreateDefaultBuilder()
+
+            var server = new TestServer(WebHost.CreateDefaultBuilder()
                     .UseStartup<Startup>(), featureCollection
             );
 
-            this.client = this.server.CreateClient();
+            this.client = server.CreateClient();
         }
 
         [Fact]
