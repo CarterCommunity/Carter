@@ -35,7 +35,13 @@ namespace Carter.Samples.Tests
         public async Task Should_return_Carter_approved_OpenAPI_json()
         {
             ShouldlyConfiguration.DiffTools.RegisterDiffTool(new DiffTool("diffmerge",
-                new DiffToolConfig { LinuxPath = "/usr/local/bin", MacPath = "/usr/local/bin/diffmerge", WindowsPath = "/usr/local/bin" }, (received, approved, exists) => { return approved; }));
+                new DiffToolConfig
+                {
+                    LinuxPath = "/usr/local/bin",
+                    MacPath = "/usr/local/bin/diffmerge",
+                    WindowsPath = "/usr/local/bin"
+                },
+                (received, approved, exists) => { return approved; }));
 
             var res = await this.client.GetAsync("/openapi");
 

@@ -5,6 +5,12 @@ namespace CarterSample.Features.Actors
 
     public class NoValidatorMetaData : RouteMetaData
     {
-        public override Type Request { get; } = typeof(Foo);
+        public override RouteMetaDataRequest[] Requests { get; } =
+        {
+            new RouteMetaDataRequest
+            {
+                Request = typeof(Foo),
+            }
+        };
     }
 }
