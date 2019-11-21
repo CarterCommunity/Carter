@@ -87,6 +87,10 @@ I have been a huge fan of, and core contributor to [Nancy](http://nancyfx.org), 
 
 I was also trying to think of a derivative name, and I had recently listened to the song Empire State of Mind where Jay-Z declares he is the new Sinatra. His real name is Shaun Carter so I took Carter and here we are!
 
+### CI Builds
+
+If you'd like to try the latest builds from the master branch add `https://ci.appveyor.com/nuget/carterci` to your Nuget.config and pick up the latest and greatest version of Carter.
+
 ### Getting Started
 
 You can get started using either the template or by adding the package manually to a new or existing application
