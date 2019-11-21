@@ -4,7 +4,7 @@
         <Version>5.0.0-alpha</Version>
         <VersionPrefix>5.0.0-alpha</VersionPrefix>
         <Authors>Jonathan Channon</Authors>
-        <Description>Carter is a library that allows Nancy-esque routing for use with ASP.Net Core.</Description>
+        <Description>Carter is framework that is a thin layer of extension methods and functionality over ASP.NET Core allowing code to be more explicit and most importantly more enjoyable.</Description>
         <PackageTags>asp.net core;nancy;.net core;routing;carter</PackageTags>
         <PackageProjectUrl>https://github.com/CarterCommunity/Carter</PackageProjectUrl>
         <PackageIcon>carterlogo.png</PackageIcon>
