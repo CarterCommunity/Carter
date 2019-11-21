@@ -37,6 +37,14 @@ Other extensions include:
       await ctx.Response.Negotiate(person);
   });
   ```
+#### Endpoint Routing
+
+Carter supports endpoint routing and all the extensions `IEndpointConventionBuilder` offers so for example you can define a route with authorization required like so:
+
+```csharp
+this.Get("/", (req, res) => res.WriteAsync("There's no place like 127.0.0.1")).RequireAuthorization();
+```
+
   
 ### OpenApi
 
