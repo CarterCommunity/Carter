@@ -9,13 +9,21 @@ namespace CarterSample
 
     public class Startup
     {
+        private readonly AppConfiguration appconfig;
+
+        public Startup(IConfiguration config)
+        {
+            this.appconfig = new AppConfiguration();
+            config.Bind(this.appconfig);
+        }
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IActorProvider, ActorProvider>();
 
             services.AddCarter(options =>
             {
-                options.OpenApi.DocumentTitle = "Carter <3 OpenApi";
+                options.OpenApi.DocumentTitle = this.appconfig.CarterOptions.OpenApi.DocumentTitle; 
                 options.OpenApi.ServerUrls = new[] { "http://localhost:5000" };
                 options.OpenApi.Securities = new Dictionary<string, OpenApiSecurity>
                 {
@@ -26,11 +34,8 @@ namespace CarterSample
             });
         }
 
-        public void Configure(IApplicationBuilder app, IConfiguration config)
+        public void Configure(IApplicationBuilder app)
         {
-            var appconfig = new AppConfiguration();
-            config.Bind(appconfig);
-
             app.UseExceptionHandler("/errorhandler");
 
             app.UseRouting();

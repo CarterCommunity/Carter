@@ -14,4 +14,9 @@
     <ProjectReference Include="../../src/Carter/Carter.csproj" />
     <ProjectReference Include="../ValidatorOnlyProject/ValidatorOnlyProject.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
