@@ -8,11 +8,13 @@ namespace Carter
     /// </summary>
     public class CarterOptions
     {
+        public CarterOptions()
+        {
+            
+        }
         /// <summary>
         /// Initializes <see cref="CarterOptions"/>
         /// </summary>
-        /// <param name="before">A global before handler which is invoked before all routes</param>
-        /// <param name="after">A global after handler which is invoked after all routes</param>
         /// <param name="openApiOptions">A <see cref="OpenApiOptions"/> instance to configure OpenApi</param>
         public CarterOptions(OpenApiOptions openApiOptions = null)
         {
@@ -22,7 +24,7 @@ namespace Carter
         /// <summary>
         /// Options for configuring the OpenAPI response
         /// </summary>
-        public OpenApiOptions OpenApi { get; }
+        public OpenApiOptions OpenApi { get; set;}
     }
 
     /// <summary>

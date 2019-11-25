@@ -12,6 +12,7 @@ namespace Carter
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using static OpenApi.CarterOpenApi;
 
     public static class CarterExtensions
@@ -22,7 +23,7 @@ namespace Carter
         /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
         /// <param name="options">A <see cref="CarterOptions"/> instance.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
-        public static IEndpointConventionBuilder MapCarter(this IEndpointRouteBuilder builder, CarterOptions options = null)
+        public static IEndpointConventionBuilder MapCarter(this IEndpointRouteBuilder builder)
         {
             var carterConfigurator = builder.ServiceProvider.GetService<CarterConfigurator>();
 
@@ -69,6 +70,7 @@ namespace Carter
                 }
             }
 
+            var options = builder.ServiceProvider.GetRequiredService<IOptions<CarterOptions>>().Value;
             builders.Add(builder.MapGet("openapi", BuildOpenApiResponse(options, routeMetaData)));
 
             return new CompositeConventionBuilder(builders);
@@ -134,17 +136,20 @@ namespace Carter
         /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
         /// <param name="assemblyCatalog">Optional <see cref="DependencyContextAssemblyCatalog"/> containing assemblies to add to the services collection. If not provided, the default catalog of assemblies is added, which includes Assembly.GetEntryAssembly.</param>
         /// <param name="configurator">Optional <see cref="CarterConfigurator"/> to enable registration of specific types within Carter</param>
-        public static void AddCarter(this IServiceCollection services, DependencyContextAssemblyCatalog assemblyCatalog = null, Action<CarterConfigurator> configurator = null)
+        public static void AddCarter(this IServiceCollection services, Action<CarterOptions> options = null, DependencyContextAssemblyCatalog assemblyCatalog = null,
+            Action<CarterConfigurator> configurator = null)
         {
-            assemblyCatalog = assemblyCatalog ?? new DependencyContextAssemblyCatalog();
+            assemblyCatalog ??= new DependencyContextAssemblyCatalog();
 
             var config = new CarterConfigurator();
             configurator?.Invoke(config);
 
-            WireupCarter(services, assemblyCatalog, config);
+            options ??= carterOptions => { };
+
+            WireupCarter(services, assemblyCatalog, config, options);
         }
 
-        private static void WireupCarter(this IServiceCollection services, DependencyContextAssemblyCatalog assemblyCatalog, CarterConfigurator carterConfigurator)
+        private static void WireupCarter(this IServiceCollection services, DependencyContextAssemblyCatalog assemblyCatalog, CarterConfigurator carterConfigurator, Action<CarterOptions> options)
         {
             var assemblies = assemblyCatalog.GetAssemblies();
 
@@ -156,6 +161,8 @@ namespace Carter
 
             var responseNegotiators = GetResponseNegotiators(carterConfigurator, assemblies);
 
+            services.Configure(options);
+            
             services.AddSingleton(carterConfigurator);
 
             foreach (var validator in validators)
