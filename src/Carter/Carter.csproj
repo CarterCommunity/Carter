@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>netcoreapp3.0</TargetFramework>
-        <Version>5.0.0-alpha</Version>
-        <VersionPrefix>5.0.0-alpha</VersionPrefix>
+        <Version>5.0.0</Version>
+        <VersionPrefix>5.0.0</VersionPrefix>
         <Authors>Jonathan Channon</Authors>
         <Description>Carter is framework that is a thin layer of extension methods and functionality over ASP.NET Core allowing code to be more explicit and most importantly more enjoyable.</Description>
         <PackageTags>asp.net core;nancy;.net core;routing;carter</PackageTags>

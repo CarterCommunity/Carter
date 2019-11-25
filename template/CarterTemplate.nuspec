@@ -2,7 +2,7 @@
 <package>
     <metadata>
         <id>CarterTemplate</id>
-        <version>4.2.0</version>
+        <version>5.0.0</version>
         <title>Carter Template for dotnet-new</title>
         <summary>A dotnet-new template for Carter applications.</summary>
         <description>A dotnet-new template for Carter applications.</description>
@@ -11,7 +11,7 @@
         <projectUrl>https://github.com/CarterCommunity/Carter</projectUrl>
         <iconUrl>https://github.com/CarterCommunity/Media/raw/master/carterlogo.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <license type="expression">MIT</license>
+        <licenseUrl>https://github.com/CarterCommunity/Carter/blob/master/LICENSE</licenseUrl>
         <releaseNotes></releaseNotes>
         <language>en-GB</language>
         <tags>carter nancyfx nancy dotnet new template</tags>

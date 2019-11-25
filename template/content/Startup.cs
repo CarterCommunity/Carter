@@ -10,10 +10,12 @@ namespace CarterTemplate
         {
             services.AddCarter();
         }
-        
+
         public void Configure(IApplicationBuilder app)
         {
-            app.UseCarter();
+            app.UseRouting();
+
+            app.UseEndpoints(builder => builder.MapCarter());
         }
     }
 }
