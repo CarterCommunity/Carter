@@ -13,11 +13,17 @@ namespace CarterSample
         {
             services.AddSingleton<IActorProvider, ActorProvider>();
 
-            services.AddCarter(options => options.OpenApi = new OpenApiOptions("Carter <3 OpenApi", new[] { "http://localhost:5000" }, new Dictionary<string, OpenApiSecurity>
+            services.AddCarter(options =>
             {
-                { "BearerAuth", new OpenApiSecurity { BearerFormat = "JWT", Type = OpenApiSecurityType.http, Scheme = "bearer" } },
-                { "ApiKey", new OpenApiSecurity { Type = OpenApiSecurityType.apiKey, Name = "X-API-KEY", In = OpenApiIn.header } }
-            }, new[] { "BearerAuth" }));
+                options.OpenApi.DocumentTitle = "Carter <3 OpenApi";
+                options.OpenApi.ServerUrls = new[] { "http://localhost:5000" };
+                options.OpenApi.Securities = new Dictionary<string, OpenApiSecurity>
+                {
+                    { "BearerAuth", new OpenApiSecurity { BearerFormat = "JWT", Type = OpenApiSecurityType.http, Scheme = "bearer" } },
+                    { "ApiKey", new OpenApiSecurity { Type = OpenApiSecurityType.apiKey, Name = "X-API-KEY", In = OpenApiIn.header } }
+                };
+                options.OpenApi.GlobalSecurityDefinitions = new[] { "BearerAuth" };
+            });
         }
 
         public void Configure(IApplicationBuilder app, IConfiguration config)
