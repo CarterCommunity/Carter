@@ -18,14 +18,10 @@ namespace Carter.Samples.Tests
 
         public OpenAPITests()
         {
-            var featureCollection = new FeatureCollection();
-            var feature = new ServerAddressesFeature();
-            feature.Addresses.Add("http://localhost");
-            feature.Addresses.Add("https://localhost");
-            featureCollection.Set<IServerAddressesFeature>(feature);
+          
 
             var server = new TestServer(WebHost.CreateDefaultBuilder()
-                    .UseStartup<Startup>(), featureCollection
+                    .UseStartup<Startup>()
             );
 
             this.client = server.CreateClient();
