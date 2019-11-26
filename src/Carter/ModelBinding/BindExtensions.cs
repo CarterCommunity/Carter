@@ -23,11 +23,6 @@ namespace Carter.ModelBinding
         {
             var model = await request.Bind<T>();
 
-            if (EqualityComparer<T>.Default.Equals(model, default))
-            {
-                model = Activator.CreateInstance<T>();
-            }
-
             var validationResult = request.Validate(model);
             return (validationResult, model);
         }
@@ -76,7 +71,7 @@ namespace Carter.ModelBinding
             }
             catch (JsonException)
             {
-                return default;
+                return typeof(T).IsValueType == false ? Activator.CreateInstance<T>() : default;
             }
         }
 

@@ -9,6 +9,7 @@ namespace Carter.Tests.Modelbinding
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Text;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using FluentValidation.Results;
     using Microsoft.AspNetCore.Builder;
@@ -295,16 +296,17 @@ namespace Carter.Tests.Modelbinding
         }
 
         [Fact]
-        public async Task Should_return_default_T_when_invalid_json()
+        public async Task Should_return_default_instance_when_invalid_json()
         {
             var res = await this.httpClient.PostAsync("/bindfail",
                 new StringContent(
                     "{\"MyIntProperty\":\"911\"}",
                     Encoding.UTF8, "application/json"));
             var body = await res.Content.ReadAsStringAsync();
-            var model = JsonConvert.DeserializeObject<TestModel>(body);
 
-            Assert.Equal(default, model);
+            Assert.Equal(
+                System.Text.Json.JsonSerializer.Serialize(new TestModel(),new JsonSerializerOptions{IgnoreNullValues=true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase}),
+                body);
         }
 
         [Fact]

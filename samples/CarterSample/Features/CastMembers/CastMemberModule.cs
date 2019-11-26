@@ -1,6 +1,7 @@
 ﻿namespace CarterSample.Features.CastMembers
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Carter;
     using Carter.ModelBinding;
@@ -26,11 +27,11 @@
                 await res.WriteAsync("OK");
             });
 
-            this.Get<GetCastMembers>((string)"/castmembers", (request, response) =>
+            this.Get<GetCastMembers>("/castmembers", async(request, response) =>
             {
                 var castMembers = new[] { new CastMember { Name = "Samuel L Jackson" }, new CastMember { Name = "John Travolta" } };
 
-                return response.AsJson(castMembers);
+                await response.AsJson(castMembers);
             });
         }
     }

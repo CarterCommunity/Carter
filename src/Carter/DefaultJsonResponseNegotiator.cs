@@ -21,10 +21,11 @@
             return accept.MediaType.ToString().IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        public Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken)
+        public async Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken)
         {
             res.ContentType = "application/json; charset=utf-8";
-            return res.WriteAsync(JsonSerializer.Serialize(model, this.jsonSettings), cancellationToken);
+
+            await JsonSerializer.SerializeAsync(res.Body, model, model == null ? typeof(object) : model.GetType(), this.jsonSettings, cancellationToken);
         }
     }
 }
