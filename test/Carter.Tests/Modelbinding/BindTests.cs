@@ -195,6 +195,20 @@ namespace Carter.Tests.Modelbinding
         }
 
         [Fact]
+        public async Task Should_return_instance_of_T_irrespectively_of_casing()
+        {
+            var res = await this.httpClient.PostAsync("/bind",
+                new StringContent(
+                    "{\"myIntProperty\":911,\"myStringProperty\":\"Vincent Vega\"}",
+                    Encoding.UTF8, "application/json"));
+            var body = await res.Content.ReadAsStringAsync();
+            var model = JsonConvert.DeserializeObject<TestModel>(body);
+
+            Assert.Equal(911, model.MyIntProperty);
+            Assert.Equal("Vincent Vega", model.MyStringProperty);
+        }
+
+        [Fact]
         public async Task Should_return_default_value_of_property_if_property_not_found_on_binding_form()
         {
             var res = await this.httpClient.PostAsync("/bind",
