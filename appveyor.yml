@@ -5,6 +5,8 @@ version: 5.0.0-ci{build}
 max_jobs: 1
 
 install:
+  - sudo apt update
+  - sudo apt install snapd
   - sudo snap install dotnet-sdk --classic
 
 dotnet_csproj:
