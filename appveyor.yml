@@ -6,8 +6,8 @@ max_jobs: 1
 
 install:
   - sudo apt update
-  - sudo apt install snapd
-  - sudo snap install dotnet-sdk --classic
+  - sudo apt install snapd -y
+  - sudo snap install -y dotnet-sdk --classic
 
 dotnet_csproj:
   patch: true
