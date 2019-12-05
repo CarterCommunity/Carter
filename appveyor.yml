@@ -5,12 +5,7 @@ version: 5.0.0-ci{build}
 max_jobs: 1
 
 install:
-  - wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-  - sudo dpkg -i packages-microsoft-prod.deb
-  - sudo add-apt-repository universe
-  - sudo apt-get update
-  - sudo apt-get install -y apt-transport-https
-  - sudo apt-get install -y dotnet-sdk-3.1
+  - sudo snap install dotnet-sdk --classic
 
 dotnet_csproj:
   patch: true
