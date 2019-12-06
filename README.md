@@ -2,7 +2,7 @@
 
 [![NuGet Version](http://img.shields.io/nuget/v/Carter.svg?style=flat)](https://www.nuget.org/packages/carter) 
 
-<a href="https://join.slack.com/t/cartercommunity/shared_invite/enQtMzY2Nzc0NjU2MTgyLWRjYzJiNTljY2NiZjM1ZWVmODZhYjg3YjZhOTNiNzdkNzg4OThkNTY2MzJjY2ViMWMyZDJkMDFlNGRiZjY5MTQ"><img src="./slack.svg" width="140px"/></a>
+<a href="https://join.slack.com/t/cartercommunity/shared_invite/enQtMzY2Nzc0NjU2MTgyLWY3M2Y2Yjk3NzViN2Y3YTQ4ZDA5NWFlMTYxMTIwNDFkMTc5YWEwMDFiOWUyM2Q4ZmY5YmRkODYyYTllZDViMmE"><img src="./slack.svg" width="140px"/></a>
 
 Carter is a framework that is a thin layer of extension methods and functionality over ASP.NET Core allowing the code to be more explicit and most importantly more enjoyable.
 
