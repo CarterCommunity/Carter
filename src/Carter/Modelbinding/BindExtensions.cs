@@ -65,15 +65,8 @@ namespace Carter.ModelBinding
                 return JsonSerializer.Deserialize<T>(json);
             }
 
-            try
-            {
-                var binder = (IModelBinder)request.HttpContext.RequestServices.GetService(typeof(IModelBinder));
-                return await binder.Bind<T>(request);
-            }
-            catch (Exception)
-            {
-                return typeof(T).IsValueType == false ? Activator.CreateInstance<T>() : default;
-            }
+            var binder = (IModelBinder)request.HttpContext.RequestServices.GetService(typeof(IModelBinder));
+            return await binder.Bind<T>(request);
         }
 
         private static object ConvertToType(string value, Type type)

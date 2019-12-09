@@ -1,5 +1,6 @@
 namespace Carter.ModelBinding
 {
+    using System;
     using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
@@ -8,7 +9,14 @@ namespace Carter.ModelBinding
     {
         public async Task<T> Bind<T>(HttpRequest request)
         {
-            return await JsonSerializer.DeserializeAsync<T>(request.Body);
+            try
+            {
+                return await JsonSerializer.DeserializeAsync<T>(request.Body);
+            }
+            catch (JsonException)
+            {
+                return typeof(T).IsValueType == false ? Activator.CreateInstance<T>() : default;
+            }
         }
     }
 }

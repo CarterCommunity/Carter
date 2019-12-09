@@ -5,6 +5,7 @@ namespace Carter
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Carter.ModelBinding;
     using Carter.OpenApi;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
@@ -191,6 +192,8 @@ namespace Carter
             }
 
             services.AddSingleton<IResponseNegotiator, DefaultJsonResponseNegotiator>();
+
+            services.AddSingleton<IModelBinder, DefaultJsonModelBinder>();
         }
 
         private static IEnumerable<Type> GetResponseNegotiators(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
