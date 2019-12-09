@@ -67,9 +67,10 @@ namespace Carter.ModelBinding
 
             try
             {
-                return await JsonSerializer.DeserializeAsync<T>(request.Body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var binder = (IModelBinder)request.HttpContext.RequestServices.GetService(typeof(IModelBinder));
+                return await binder.Bind<T>(request);
             }
-            catch (JsonException)
+            catch (Exception)
             {
                 return typeof(T).IsValueType == false ? Activator.CreateInstance<T>() : default;
             }
