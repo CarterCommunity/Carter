@@ -67,7 +67,7 @@ namespace Carter.ModelBinding
 
             try
             {
-                return await JsonSerializer.DeserializeAsync<T>(request.Body, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                return await JsonSerializer.DeserializeAsync<T>(request.Body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
             catch (JsonException)
             {
