@@ -15,3 +15,5 @@ jobs:
         dotnet-version: 3.1.100
     - name: Build with dotnet
       run: dotnet build --configuration Release
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
