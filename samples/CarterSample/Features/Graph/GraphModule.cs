@@ -8,10 +8,6 @@ namespace CarterSample.Features.Graph
 
     public class GraphModule : CarterModule
     {
-        private readonly DfaGraphWriter graphWriter;
-
-        private readonly EndpointDataSource endpointDataSource;
-
         public GraphModule(DfaGraphWriter graphWriter, EndpointDataSource endpointDataSource)
         {
             this.Get("/graph", async context =>
