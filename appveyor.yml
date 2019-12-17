@@ -8,6 +8,7 @@ install:
   - sudo apt update
   - sudo apt install snapd -y
   - sudo snap install dotnet-sdk --classic
+  - source ~/.bashrc
   - dotnet --version
 
 dotnet_csproj:
