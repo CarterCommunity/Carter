@@ -7,7 +7,7 @@ max_jobs: 1
 install:
   - sudo apt update
   - sudo apt install snapd -y
-  - sudo snap install dotnet-sdk --classic
+  - snap install dotnet-sdk --classic
   - source ~/.bashrc
   - source ~/.profile
   - dotnet --version
