@@ -1,36 +1,29 @@
 namespace Carter.Tests.ModelBinding.NewtonsoftBinding
 {
     using System.Net.Http;
+    using System.Text;
     using System.Threading.Tasks;
-    using Carter.ModelBinding;
-    using Carter.Tests.Modelbinding;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
-    using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
     using Xunit;
 
-    public class NewtonsoftTests
+    public class CustomModelBinderTests
     {
         private readonly HttpClient httpClient;
 
-        public NewtonsoftTests()
+        public CustomModelBinderTests()
         {
-            JsonConvert.DefaultSettings = () => new JsonSerializerSettings {
-                ContractResolver = new NewtonsoftJsonUtils.PrivateSetterCamelCasePropertyNamesContractResolver(),
-                Converters = new JsonConverter[] {new StringEnumConverter()},
-            };
-            
             var server = new TestServer(
                 new WebHostBuilder()
                     .ConfigureServices(x =>
                     {
                         x.AddCarter(configurator: c =>
-                            c.WithModule<NewtonsoftModule>());
-
-                        x.AddSingleton<IModelBinder, NewtonsoftJsonModelBinder>();
+                        {
+                            c.WithModule<CustomModelBinderModule>();
+                            c.WithModelBinder<CustomModelBinder>();
+                        });
                     })
                     .Configure(x =>
                     {
@@ -42,14 +35,14 @@ namespace Carter.Tests.ModelBinding.NewtonsoftBinding
         }
 
         [Fact]
-        public async Task Model_with_private_getter_should_parse()
+        public async Task Should_use_custom_modelbinder()
         {
-            var request = JsonConvert.SerializeObject(new ModelOnlyNewtonsoftCanParse("hello"));
-            var res = await this.httpClient.PostAsync("/bind", 
-                 new StringContent(request));
+            var request = JsonConvert.SerializeObject(new ModelOnlyNewtonsoftCanParse("hello"), NewtonsoftJsonUtils.JsonSerializerSettings);
+            
+            var res = await this.httpClient.PostAsync("/bind",new StringContent(request, Encoding.UTF8, "application/json"));
 
-            Assert.True(res.IsSuccessStatusCode);
             var json = await res.Content.ReadAsStringAsync();
+
             var model = JsonConvert.DeserializeObject<ModelOnlyNewtonsoftCanParse>(json, NewtonsoftJsonUtils.JsonSerializerSettings);
 
             Assert.Equal("world", model.PublicSetterProperty);

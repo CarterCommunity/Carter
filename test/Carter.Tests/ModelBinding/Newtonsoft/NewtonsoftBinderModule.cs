@@ -4,13 +4,13 @@ namespace Carter.Tests.ModelBinding.NewtonsoftBinding
     using Carter.Response;
     using Carter.Tests.Modelbinding;
 
-    public class NewtonsoftModule : CarterModule
+    public class NewtonsoftBinderModule : CarterModule
     {
-        public NewtonsoftModule()
+        public NewtonsoftBinderModule()
         {
             this.Post("/bind", async (req, res) =>
             {
-                var model = await req.Bind<ModelOnlyNewtonsoftCanParse>();
+                var model = await req.Bind<TestModel>();
                 await res.Negotiate(model);
             });
         }

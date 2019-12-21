@@ -10,6 +10,7 @@ namespace Carter.ModelBinding
     using Carter.Request;
     using FluentValidation.Results;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.DependencyInjection;
 
     public static class BindExtensions
     {
