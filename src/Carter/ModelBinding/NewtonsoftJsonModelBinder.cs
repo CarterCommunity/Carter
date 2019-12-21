@@ -1,14 +1,15 @@
-namespace Carter.Tests.ModelBinding.NewtonsoftBinding
+namespace Carter.ModelBinding
 {
     using System.IO;
     using System.Threading.Tasks;
-    using Carter.ModelBinding;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Features;
     using Newtonsoft.Json;
 
     public class NewtonsoftJsonModelBinder : IModelBinder
     {
+        private static readonly JsonSerializer TheJsonSerializer = new JsonSerializer();
+
         public Task<T> Bind<T>(HttpRequest request)
         {
             var syncIOFeature = request.HttpContext.Features.Get<IHttpBodyControlFeature>();
@@ -19,10 +20,8 @@ namespace Carter.Tests.ModelBinding.NewtonsoftBinding
 
             using var streamReader = new StreamReader(request.Body);
             using var jsonTextReader = new JsonTextReader(streamReader);
-
-            return Task.FromResult(
-                JsonSerializer.Create(NewtonsoftJsonUtils.JsonSerializerSettings)
-                    .Deserialize<T>(jsonTextReader));
+            
+            return Task.FromResult(TheJsonSerializer.Deserialize<T>(jsonTextReader));
         }
     }
 }

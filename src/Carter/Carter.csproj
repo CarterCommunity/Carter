@@ -24,5 +24,6 @@
         <PackageReference Include="Microsoft.OpenApi" Version="1.1.4" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19554-01" PrivateAssets="all" />
         <PackageReference Include="MinVer" Version="2.0.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     </ItemGroup>
 </Project>
