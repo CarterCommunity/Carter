@@ -2,6 +2,7 @@ namespace Carter
 {
     using System;
     using System.Collections.Generic;
+    using Carter.ModelBinding;
     using FluentValidation;
     using Microsoft.Extensions.Logging;
 
@@ -25,7 +26,9 @@ namespace Carter
         internal List<Type> StatusCodeHandlerTypes { get; }
 
         internal List<Type> ResponseNegotiatorTypes { get; }
-        
+
+        internal Type ModelBinder { get; set; }
+
         internal void LogDiscoveredCarterTypes(ILogger logger)
         {
             foreach (var validator in this.ValidatorTypes)
@@ -138,6 +141,17 @@ namespace Carter
         {
             responseNegotiators.MustDeriveFrom<IResponseNegotiator>();
             this.ResponseNegotiatorTypes.AddRange(responseNegotiators);
+            return this;
+        }
+        
+        /// <summary>
+        /// Register a specific <see cref="IModelBinder"/>
+        /// </summary>
+        /// <typeparam name="T">The <see cref="IModelBinder"/> to register</typeparam>
+        /// <returns><see cref="CarterConfigurator"/></returns>
+        public CarterConfigurator WithModelBinder<T>() where T : IModelBinder
+        {
+            this.ModelBinder = typeof(T);
             return this;
         }
     }
