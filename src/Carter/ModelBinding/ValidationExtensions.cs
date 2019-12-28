@@ -26,6 +26,29 @@ namespace Carter.ModelBinding
         }
 
         /// <summary>
+        /// Performs validation on the specified <paramref name="model"/> instance
+        /// </summary>
+        /// <typeparam name="T">The type of the <paramref name="model"/> that is being validated</typeparam>
+        /// <param name="request">Current <see cref="HttpRequest"/></param>
+        /// <param name="model">The model instance that is being validated</param>
+        /// <param name="result"><see cref="ValidationResult"/></param>
+        /// <returns>true if there's a validator associated with the <paramref name="model"/></returns>
+        public static bool TryValidate<T>(this HttpRequest request, T model, out ValidationResult result)
+        {
+            var validatorLocator = request.HttpContext.RequestServices.GetService<IValidatorLocator>();
+            var validator = validatorLocator?.GetValidator<T>();
+
+            if (validator == null)
+            {
+                result = null;
+                return false;
+            }
+
+            result = validator.Validate(model);
+            return true;
+        }
+
+        /// <summary>
         /// Retrieve formatted validation errors
         /// </summary>
         /// <param name="result"><see cref="ValidationResult"/></param>
