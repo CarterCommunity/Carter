@@ -72,7 +72,10 @@ namespace Carter
             }
 
             var options = builder.ServiceProvider.GetRequiredService<IOptions<CarterOptions>>().Value;
-            builders.Add(builder.MapGet("openapi", BuildOpenApiResponse(options, routeMetaData)));
+            if (options.OpenApi.Enabled)
+            {
+                builders.Add(builder.MapGet("openapi", BuildOpenApiResponse(options, routeMetaData)));
+            }
 
             return new CompositeConventionBuilder(builders);
         }
