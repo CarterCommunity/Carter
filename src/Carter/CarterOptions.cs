@@ -46,6 +46,11 @@ namespace Carter
         /// The global security definitions that apply to the api that OpenApi describes
         /// </summary>
         public IEnumerable<string> GlobalSecurityDefinitions { get; set; } = Array.Empty<string>();
+
+        /// <summary>
+        /// Determines if OpenAPI should be mapped and enabled. True by default.
+        /// </summary>
+        public bool Enabled { get; set; } = true;
     }
 
     /// <summary>
