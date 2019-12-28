@@ -5,3 +5,4 @@ obj/
 .idea/
 codeship.aes
 /*.user
+.DS_Store
