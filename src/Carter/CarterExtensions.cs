@@ -34,7 +34,7 @@ namespace Carter
 
             var builders = new List<IEndpointConventionBuilder>();
 
-            var routeMetaData = new Dictionary<(string verb, string path), RouteMetaData>();
+            var routeMetaData = new Dictionary<(string verb, string path), IRouteMetaData>();
 
             //Create a "startup scope" to resolve modules from
             using (var scope = builder.ServiceProvider.CreateScope())
