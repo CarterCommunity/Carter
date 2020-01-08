@@ -89,7 +89,7 @@ I was also trying to think of a derivative name, and I had recently listened to 
 
 ### CI Builds
 
-If you'd like to try the latest builds from the master branch add `https://ci.appveyor.com/nuget/carterci` to your NuGet.config and pick up the latest and greatest version of Carter.
+If you'd like to try the latest builds from the master branch add `https://f.feedz.io/carter/carter/nuget/index.json` to your NuGet.config and pick up the latest and greatest version of Carter.
 
 ### Getting Started
 
