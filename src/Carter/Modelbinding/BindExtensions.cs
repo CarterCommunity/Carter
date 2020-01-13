@@ -10,6 +10,7 @@ namespace Carter.ModelBinding
     using Carter.Request;
     using FluentValidation.Results;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.DependencyInjection;
 
     public static class BindExtensions
     {
@@ -65,14 +66,8 @@ namespace Carter.ModelBinding
                 return JsonSerializer.Deserialize<T>(json);
             }
 
-            try
-            {
-                return await JsonSerializer.DeserializeAsync<T>(request.Body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            }
-            catch (JsonException)
-            {
-                return typeof(T).IsValueType == false ? Activator.CreateInstance<T>() : default;
-            }
+            var binder = (IModelBinder)request.HttpContext.RequestServices.GetService(typeof(IModelBinder));
+            return await binder.Bind<T>(request);
         }
 
         private static object ConvertToType(string value, Type type)

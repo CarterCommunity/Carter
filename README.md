@@ -1,6 +1,6 @@
 # Carter
 
-[![NuGet Version](http://img.shields.io/nuget/v/Carter.svg?style=flat)](https://www.nuget.org/packages/carter) 
+[![NuGet Version](http://img.shields.io/nuget/v/Carter.svg?style=flat)](https://www.nuget.org/packages/carter) [![feedz.io](https://img.shields.io/badge/endpoint.svg?url=https%3A%2F%2Ff.feedz.io%2Fcarter%2Fcarter%2Fshield%2FCarter%2Flatest)](https://f.feedz.io/carter/carter/packages/Carter/latest/download)
 
 <a href="https://join.slack.com/t/cartercommunity/shared_invite/enQtMzY2Nzc0NjU2MTgyLWY3M2Y2Yjk3NzViN2Y3YTQ4ZDA5NWFlMTYxMTIwNDFkMTc5YWEwMDFiOWUyM2Q4ZmY5YmRkODYyYTllZDViMmE"><img src="./slack.svg" width="140px"/></a>
 
@@ -89,7 +89,7 @@ I was also trying to think of a derivative name, and I had recently listened to 
 
 ### CI Builds
 
-If you'd like to try the latest builds from the master branch add `https://ci.appveyor.com/nuget/carterci` to your NuGet.config and pick up the latest and greatest version of Carter.
+If you'd like to try the latest builds from the master branch add `https://f.feedz.io/carter/carter/nuget/index.json` to your NuGet.config and pick up the latest and greatest version of Carter.
 
 ### Getting Started
 

@@ -11,6 +11,7 @@ namespace Carter.Tests.Modelbinding
     using System.Text;
     using System.Text.Json;
     using System.Threading.Tasks;
+    using Carter.ModelBinding;
     using FluentValidation.Results;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -27,10 +28,13 @@ namespace Carter.Tests.Modelbinding
                     .ConfigureServices(x =>
                     {
                         x.AddCarter(configurator: c =>
+                        {
                             c.WithModule<BindModule>()
                                 .WithValidator<TestModelValidator>()
                                 .WithValidator<DuplicateTestModelOne>()
-                                .WithValidator<DuplicateTestModelTwo>());
+                                .WithValidator<DuplicateTestModelTwo>();
+                            c.WithModelBinder<DefaultJsonModelBinder>();
+                        });
                     })
                     .Configure(x =>
                     {

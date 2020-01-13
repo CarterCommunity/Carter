@@ -5,6 +5,7 @@ namespace Carter
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Carter.ModelBinding;
     using Carter.OpenApi;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
@@ -71,7 +72,10 @@ namespace Carter
             }
 
             var options = builder.ServiceProvider.GetRequiredService<IOptions<CarterOptions>>().Value;
-            builders.Add(builder.MapGet("openapi", BuildOpenApiResponse(options, routeMetaData)));
+            if (options.OpenApi.Enabled)
+            {
+                builders.Add(builder.MapGet("openapi", BuildOpenApiResponse(options, routeMetaData)));
+            }
 
             return new CompositeConventionBuilder(builders);
         }
@@ -161,6 +165,8 @@ namespace Carter
 
             var responseNegotiators = GetResponseNegotiators(carterConfigurator, assemblies);
 
+            var modelBinder = GetModelBinder(carterConfigurator, assemblies);
+
             services.Configure(options);
             
             services.AddSingleton(carterConfigurator);
@@ -190,7 +196,40 @@ namespace Carter
                 services.AddSingleton(typeof(IResponseNegotiator), negotiator);
             }
 
+            if (modelBinder != null)
+            {
+                services.AddSingleton(typeof(IModelBinder), modelBinder);
+            }
+            else
+            {
+                services.AddSingleton<IModelBinder, DefaultJsonModelBinder>();
+            }
+
             services.AddSingleton<IResponseNegotiator, DefaultJsonResponseNegotiator>();
+        }
+
+        private static Type GetModelBinder(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
+        {
+            Type modelBinder;
+            if (carterConfigurator.ModelBinder == null)
+            {
+                modelBinder = assemblies.SelectMany(x => x.GetTypes()
+                    .Where(t =>
+                        !t.IsAbstract &&
+                        typeof(IModelBinder).IsAssignableFrom(t) &&
+                        t != typeof(IModelBinder) &&
+                        t != typeof(NewtonsoftJsonModelBinder) &&
+                        t != typeof(DefaultJsonModelBinder)
+                    )).FirstOrDefault();
+
+                carterConfigurator.ModelBinder = modelBinder;
+            }
+            else
+            {
+                modelBinder = carterConfigurator.ModelBinder;
+            }
+
+            return modelBinder;
         }
 
         private static IEnumerable<Type> GetResponseNegotiators(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
