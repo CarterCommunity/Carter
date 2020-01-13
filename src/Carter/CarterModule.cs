@@ -95,14 +95,22 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.IRouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected IEndpointConventionBuilder Get<T>(string path, RequestDelegate handler) where T : IRouteMetaData
+        protected IEndpointConventionBuilder Get<T>(string path, RequestDelegate handler) where T : IRouteMetaData => Get(path, handler, Activator.CreateInstance<T>());
+
+        /// <summary>
+        /// Declares a route for GET requests
+        /// </summary>
+        /// <param name="path">The path for your route</param>
+        /// <param name="handler">The handler that is invoked when the route is hit</param>
+        /// <param name="metadata">The metadata describing the handler</param>
+        protected IEndpointConventionBuilder Get(string path, RequestDelegate handler, IRouteMetaData metaData)
         {
             path = this.PrependBasePath(path);
             var conventions = new RouteConventions();
             this.Routes.Add((HttpMethods.Get, path), (handler, conventions));
             this.Routes.Add((HttpMethods.Head, path), (handler, conventions));
 
-            this.RouteMetaData.Add((HttpMethods.Get, path), Activator.CreateInstance<T>());
+            this.RouteMetaData.Add((HttpMethods.Get, path), metaData);
             return conventions;
         }
 
@@ -149,14 +157,22 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.IRouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected IEndpointConventionBuilder Post<T>(string path, RequestDelegate handler) where T : IRouteMetaData
+        protected IEndpointConventionBuilder Post<T>(string path, RequestDelegate handler) where T : IRouteMetaData => Post(path, handler, Activator.CreateInstance<T>());
+
+        /// <summary>
+        /// Declares a route for POST requests
+        /// </summary>
+        /// <param name="path">The path for your route</param>
+        /// <param name="handler">The handler that is invoked when the route is hit</param>
+        /// <param name="metadata">The metadata describing the handler</param>
+        protected IEndpointConventionBuilder Post(string path, RequestDelegate handler, IRouteMetaData metadata)
         {
             path = this.PrependBasePath(path);
             var conventions = new RouteConventions();
 
             this.Routes.Add((HttpMethods.Post, path), (handler, conventions));
 
-            this.RouteMetaData.Add((HttpMethods.Post, path), Activator.CreateInstance<T>());
+            this.RouteMetaData.Add((HttpMethods.Post, path), metadata);
 
             return conventions;
         }
@@ -205,14 +221,22 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.IRouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected IEndpointConventionBuilder Delete<T>(string path, RequestDelegate handler) where T : IRouteMetaData
+        protected IEndpointConventionBuilder Delete<T>(string path, RequestDelegate handler) where T : IRouteMetaData => Delete(path, handler, Activator.CreateInstance<T>());
+
+        /// <summary>
+        /// Declares a route for DELETE requests
+        /// </summary>
+        /// <param name="path">The path for your route</param>
+        /// <param name="handler">The handler that is invoked when the route is hit</param>
+        /// <param name="metadata">The metadata describing the handler</param>
+        protected IEndpointConventionBuilder Delete(string path, RequestDelegate handler, IRouteMetaData metaData)
         {
             path = this.PrependBasePath(path);
             var conventions = new RouteConventions();
 
             this.Routes.Add((HttpMethods.Delete, path), (handler, conventions));
 
-            this.RouteMetaData.Add((HttpMethods.Delete, path), Activator.CreateInstance<T>());
+            this.RouteMetaData.Add((HttpMethods.Delete, path), metaData);
 
             return conventions;
         }
@@ -261,14 +285,22 @@ namespace Carter
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.IRouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected IEndpointConventionBuilder Put<T>(string path, RequestDelegate handler) where T : IRouteMetaData
+        protected IEndpointConventionBuilder Put<T>(string path, RequestDelegate handler) where T : IRouteMetaData => Put(path, handler, Activator.CreateInstance<T>());
+
+        /// <summary>
+        /// Declares a route for POST requests
+        /// </summary>
+        /// <param name="path">The path for your route</param>
+        /// <param name="handler">The handler that is invoked when the route is hit</param>
+        /// <param name="metaData">The metadata about the handler</param>
+        protected IEndpointConventionBuilder Put(string path, RequestDelegate handler, IRouteMetaData metaData)
         {
             path = this.PrependBasePath(path);
             var conventions = new RouteConventions();
 
             this.Routes.Add((HttpMethods.Put, path), (handler, conventions));
 
-            this.RouteMetaData.Add((HttpMethods.Put, path), Activator.CreateInstance<T>());
+            this.RouteMetaData.Add((HttpMethods.Put, path), metaData);
 
             return conventions;
         }
@@ -299,7 +331,7 @@ namespace Carter
         }
 
         /// <summary>
-        /// Declares a route for POST requests
+        /// Declares a route for HEAD requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
@@ -311,19 +343,27 @@ namespace Carter
         }
 
         /// <summary>
-        /// Declares a route for POST requests
+        /// Declares a route for HEAD requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.IRouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected IEndpointConventionBuilder Head<T>(string path, RequestDelegate handler) where T : IRouteMetaData
+        protected IEndpointConventionBuilder Head<T>(string path, RequestDelegate handler) where T : IRouteMetaData => Head(path, handler, Activator.CreateInstance<T>());
+
+        /// <summary>
+        /// Declares a route for HEAD requests
+        /// </summary>
+        /// <param name="path">The path for your route</param>
+        /// <param name="handler">The handler that is invoked when the route is hit</param>
+        /// <param name="metaData">Metadata describing the handler</param>
+        protected IEndpointConventionBuilder Head(string path, RequestDelegate handler, IRouteMetaData metaData)
         {
             path = this.PrependBasePath(path);
             var conventions = new RouteConventions();
 
             this.Routes.Add((HttpMethods.Head, path), (handler, conventions));
 
-            this.RouteMetaData.Add((HttpMethods.Head, path), Activator.CreateInstance<T>());
+            this.RouteMetaData.Add((HttpMethods.Head, path), metaData);
             return conventions;
         }
 
@@ -355,7 +395,7 @@ namespace Carter
         }
 
         /// <summary>
-        /// Declares a route for POST requests
+        /// Declares a route for PATCH requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
@@ -367,19 +407,27 @@ namespace Carter
         }
 
         /// <summary>
-        /// Declares a route for POST requests
+        /// Declares a route for PATCH requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.IRouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected IEndpointConventionBuilder Patch<T>(string path, RequestDelegate handler) where T : IRouteMetaData
+        protected IEndpointConventionBuilder Patch<T>(string path, RequestDelegate handler) where T : IRouteMetaData => Patch(path, handler, Activator.CreateInstance<T>());
+
+        /// <summary>
+        /// Declares a route for PATCH requests
+        /// </summary>
+        /// <param name="path">The path for your route</param>
+        /// <param name="handler">The handler that is invoked when the route is hit</param>
+        /// <param name="metaData">Metadata describing the handler</param>
+        protected IEndpointConventionBuilder Patch(string path, RequestDelegate handler, IRouteMetaData metaData)
         {
             path = this.PrependBasePath(path);
             var conventions = new RouteConventions();
 
             this.Routes.Add((HttpMethods.Patch, path), (handler, conventions));
 
-            this.RouteMetaData.Add((HttpMethods.Patch, path), Activator.CreateInstance<T>());
+            this.RouteMetaData.Add((HttpMethods.Patch, path), metaData);
             return conventions;
         }
 
@@ -409,7 +457,7 @@ namespace Carter
         }
 
         /// <summary>
-        /// Declares a route for POST requests
+        /// Declares a route for OPTIONS requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
@@ -421,19 +469,27 @@ namespace Carter
         }
 
         /// <summary>
-        /// Declares a route for POST requests
+        /// Declares a route for OPTIONS requests
         /// </summary>
         /// <param name="path">The path for your route</param>
         /// <param name="handler">The handler that is invoked when the route is hit</param>
         /// <typeparam name="T">The <see cref="OpenApi.IRouteMetaData"/> implementation for OpenApi use</typeparam>
-        protected IEndpointConventionBuilder Options<T>(string path, RequestDelegate handler) where T : IRouteMetaData
+        protected IEndpointConventionBuilder Options<T>(string path, RequestDelegate handler) where T : IRouteMetaData => Options(path, handler, Activator.CreateInstance<T>());
+
+        /// <summary>
+        /// Declares a route for OPTIONS requests
+        /// </summary>
+        /// <param name="path">The path for your route</param>
+        /// <param name="handler">The handler that is invoked when the route is hit</param>
+        /// <param name="metaData">Metadata describing the handler</param>
+        protected IEndpointConventionBuilder Options(string path, RequestDelegate handler, IRouteMetaData metaData)
         {
             path = this.PrependBasePath(path);
             var conventions = new RouteConventions();
 
             this.Routes.Add((HttpMethods.Options, path), (handler, conventions));
 
-            this.RouteMetaData.Add((HttpMethods.Options, path), Activator.CreateInstance<T>());
+            this.RouteMetaData.Add((HttpMethods.Options, path), metaData);
             return conventions;
         }
 
