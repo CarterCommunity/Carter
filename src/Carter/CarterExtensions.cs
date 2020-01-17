@@ -7,6 +7,7 @@ namespace Carter
     using System.Threading.Tasks;
     using Carter.ModelBinding;
     using Carter.OpenApi;
+    using Carter.Response;
     using FluentValidation;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
@@ -242,7 +243,8 @@ namespace Carter
                         !t.IsAbstract &&
                         typeof(IResponseNegotiator).IsAssignableFrom(t) &&
                         t != typeof(IResponseNegotiator) &&
-                        t != typeof(DefaultJsonResponseNegotiator)
+                        t != typeof(DefaultJsonResponseNegotiator) &&
+                        t != typeof(NewtonsoftJsonResponseNegotiator)
                     ));
 
                 carterConfigurator.ResponseNegotiatorTypes.AddRange(responseNegotiators);
