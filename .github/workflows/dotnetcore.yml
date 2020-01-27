@@ -19,7 +19,7 @@ jobs:
       run: dotnet build --configuration Release --nologo
     - name: Run tests
       run: dotnet test --configuration Release --no-build --nologo
-    - if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    - if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || contains('tags', github.ref))
       name: Push CI
       run: ./push.sh ${{ secrets.FEEDZ_KEY }}
 env:
