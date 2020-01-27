@@ -291,15 +291,9 @@ namespace Carter.Tests.Modelbinding
         [Fact]
         public async Task Should_return_validation_failure_result_when_no_validator_found()
         {
-            var res = await this.httpClient.PostAsync("/novalidator",
+            Assert.ThrowsAsync<NullReferenceException>(async() =>  await this.httpClient.PostAsync("/novalidator",
                 new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}",
-                    Encoding.UTF8, "application/json"));
-            var body = await res.Content.ReadAsStringAsync();
-            var model = JsonConvert.DeserializeObject<List<ExpandoObject>>(body);
-            dynamic first = model.First();
-            Assert.Single(model);
-            Assert.Equal("No validator found", first.errorMessage);
-            Assert.Equal("TestModelNoValidator", first.propertyName);
+                    Encoding.UTF8, "application/json")));
         }
 
         [Fact]
