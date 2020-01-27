@@ -1,4 +1,4 @@
-﻿namespace Carter
+﻿namespace Carter.Response
 {
     using System;
     using System.Text.Json;
