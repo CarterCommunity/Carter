@@ -1,5 +1,6 @@
 namespace Carter.ModelBinding
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using FluentValidation.Results;
@@ -21,7 +22,7 @@ namespace Carter.ModelBinding
             var validator = validatorLocator.GetValidator<T>();
 
             return validator == null
-                ? new ValidationResult(new[] { new ValidationFailure(typeof(T).Name, "No validator found") })
+                ? throw new NullReferenceException("")//new ValidationResult(new[] { new ValidationFailure(typeof(T).Name, "No validator found") })
                 : validator.Validate(model);
         }
 
