@@ -291,7 +291,7 @@ namespace Carter.Tests.Modelbinding
         [Fact]
         public async Task Should_return_validation_failure_result_when_no_validator_found()
         {
-            Assert.ThrowsAsync<NullReferenceException>(async() =>  await this.httpClient.PostAsync("/novalidator",
+            await Assert.ThrowsAsync<NullReferenceException>(async() =>  await this.httpClient.PostAsync("/novalidator",
                 new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}",
                     Encoding.UTF8, "application/json")));
         }
