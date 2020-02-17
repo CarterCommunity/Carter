@@ -6,3 +6,6 @@
  - Run `mono nuget.exe pack carter-template.nuspec`
  - Run `dotnet new -i /path/to/foo.nupkg`
  - Publish to nuget
+
+
+**Update** https://github.com/NuGet/Home/issues/8018#issuecomment-585964934
