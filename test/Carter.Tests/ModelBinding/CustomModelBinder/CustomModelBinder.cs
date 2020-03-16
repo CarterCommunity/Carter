@@ -5,11 +5,17 @@ namespace Carter.Tests.ModelBinding.NewtonsoftBinding
     using Carter.ModelBinding;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Features;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
 
-    public class CustomModelBinder : IModelBinder
+    public class CustomModelBinder : ModelBinderBase
     {
-        public Task<T> Bind<T>(HttpRequest request)
+        public CustomModelBinder(ILoggerFactory loggerFactory)
+            : base(loggerFactory)
+        {
+        }
+
+        protected override Task<T> BindCore<T>(HttpRequest request)
         {
             var syncIOFeature = request.HttpContext.Features.Get<IHttpBodyControlFeature>();
             if (syncIOFeature != null)

@@ -1,22 +1,22 @@
 namespace Carter.ModelBinding
 {
-    using System;
     using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
 
-    public class DefaultJsonModelBinder : IModelBinder
+    public sealed class DefaultJsonModelBinder : ModelBinderBase
     {
-        public async Task<T> Bind<T>(HttpRequest request)
+        public DefaultJsonModelBinder(ILoggerFactory loggerFactory)
+            : base(loggerFactory)
         {
-            try
-            {
-                return await JsonSerializer.DeserializeAsync<T>(request.Body, new JsonSerializerOptions{PropertyNameCaseInsensitive = true});
-            }
-            catch (JsonException)
-            {
-                return typeof(T).IsValueType == false ? Activator.CreateInstance<T>() : default;
-            }
+            HandleExceptionWithDefaultValue<JsonException>();
+        }
+
+        protected override async  Task<T> BindCore<T>(HttpRequest request)
+        {
+            return await JsonSerializer.DeserializeAsync<T>(request.Body,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
     }
 }
