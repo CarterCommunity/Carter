@@ -77,6 +77,8 @@ namespace CarterSample.Features.Actors
             this.Get<SampleMetaData>("/actors/sample", (request, response) => Task.CompletedTask);
 
             this.Post<NoValidatorMetaData>("/actors/sample", (request, response) => Task.CompletedTask);
+
+            this.Get<GetSimpleNullables>("/nullable", (request, response) => Task.CompletedTask);
         }
     }
 }
