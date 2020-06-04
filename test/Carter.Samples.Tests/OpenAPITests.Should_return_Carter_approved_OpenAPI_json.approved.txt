@@ -228,6 +228,30 @@
           }
         }
       }
+    },
+    "/nullable": {
+      "get": {
+        "tags": [
+          "SimpleNullable"
+        ],
+        "description": "Gets a SimpleNullable object",
+        "operationId": "SimpleNullable",
+        "responses": {
+          "200": {
+            "description": "A list of SimpleNullables",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SimpleNullable"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -297,6 +321,34 @@
             "items": {
               "$ref": "#/components/schemas/Foo"
             }
+          }
+        }
+      },
+      "SimpleNullable": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "nullableId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "nullableBool": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "nullableInt": {
+            "type": "integer",
+            "nullable": true
+          },
+          "nullableDouble": {
+            "type": "number",
+            "nullable": true
+          },
+          "nullableFloat": {
+            "type": "number",
+            "nullable": true
           }
         }
       }

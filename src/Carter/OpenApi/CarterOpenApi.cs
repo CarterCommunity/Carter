@@ -110,10 +110,17 @@ namespace Carter.OpenApi
                 ElementType = type
             };
 
-            // Prevent the navigation from including the properties of a string and
-            // simple nullable types
-            if (fullName == "System.String" || schemaElement.IsSimpleNullable())
+            // Prevent the navigation from including the properties of a string.
+            if (fullName == "System.String")
             {
+                navigation.Add(fullName, schemaElement);
+                return;
+            }
+
+            // Prevent the navigation from including the properties of a simple nullable type.
+            if (schemaElement.IsSimpleNullable())
+            {
+                schemaElement.ShortName = "NullableOf" + Nullable.GetUnderlyingType(schemaElement.ElementType).Name;
                 navigation.Add(fullName, schemaElement);
                 return;
             }
