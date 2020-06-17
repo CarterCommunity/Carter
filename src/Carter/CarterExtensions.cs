@@ -44,18 +44,16 @@ namespace Carter
                 var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>().ToList();
 
                 //Get all instances of CarterModule to fetch and register declared routes
-                foreach (var module in scope.ServiceProvider.GetServices<CarterModule>())
-                {
-                    var moduleLogger = scope.ServiceProvider
-                        .GetService<ILoggerFactory>()
-                        .CreateLogger(module.GetType());
-
+                foreach (var module in scope.ServiceProvider.GetServices<CarterModule>()) {
+                    
+                    var carterLogger = loggerFactory.CreateLogger("Carter");
+                    
                     routeMetaData = routeMetaData.Concat(module.RouteMetaData).ToDictionary(x => x.Key, x => x.Value);
 
                     foreach (var route in module.Routes)
                     {
                         var conventionBuilder = builder.MapMethods(route.Key.path, new[] { route.Key.verb },
-                            CreateRouteHandler(route.Key.path, module.GetType(), statusCodeHandlers, moduleLogger));
+                            CreateRouteHandler(route.Key.path, module.GetType(), statusCodeHandlers, carterLogger));
 
                         if (module.AuthPolicies.Any())
                         {
@@ -86,6 +84,11 @@ namespace Carter
         {
             return async ctx =>
             {
+                using var moduleLogger = logger.BeginScope(new
+                {
+                    ModuleType = moduleType.Name
+                });
+                
                 // Now in per-request scope
                 var module = ctx.RequestServices.GetRequiredService(moduleType) as CarterModule;
 

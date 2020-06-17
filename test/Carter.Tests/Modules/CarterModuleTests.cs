@@ -5,16 +5,25 @@
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using Xunit;
+    using Xunit.Abstractions;
 
     public class CarterModuleTests
     {
-        public CarterModuleTests()
+        public CarterModuleTests(ITestOutputHelper outputHelper)
         {
             this.server = new TestServer(
                 new WebHostBuilder()
                     .ConfigureServices(x =>
                     {
+                        x.AddLogging(b =>
+                        {
+                            b.AddXUnit(outputHelper, x => x.IncludeScopes = true);
+                            b.SetMinimumLevel(LogLevel.Debug);
+                        });
+                        
                         x.AddCarter(configurator: c =>
                             c.WithModule<TestModule>()
                                 .WithModule<MultipleShortCircuitOnOff>()
