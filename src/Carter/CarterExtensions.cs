@@ -43,11 +43,10 @@ namespace Carter
             {
                 var statusCodeHandlers = scope.ServiceProvider.GetServices<IStatusCodeHandler>().ToList();
 
+                var carterLogger = loggerFactory.CreateLogger("Carter");
+
                 //Get all instances of CarterModule to fetch and register declared routes
-                foreach (var module in scope.ServiceProvider.GetServices<CarterModule>()) {
-                    
-                    var carterLogger = loggerFactory.CreateLogger("Carter");
-                    
+                foreach(var module in scope.ServiceProvider.GetServices<CarterModule>()) {
                     routeMetaData = routeMetaData.Concat(module.RouteMetaData).ToDictionary(x => x.Key, x => x.Value);
 
                     foreach (var route in module.Routes)
