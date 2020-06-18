@@ -83,9 +83,9 @@ namespace Carter
         {
             return async ctx =>
             {
-                using var moduleLogger = logger.BeginScope(new
+                using var moduleScope = logger.BeginScope(new Dictionary<string, object>()
                 {
-                    ModuleType = moduleType.Name
+                    ["ModuleType"] = moduleType.Name
                 });
                 
                 // Now in per-request scope
