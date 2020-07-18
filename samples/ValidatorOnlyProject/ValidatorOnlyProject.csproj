@@ -3,6 +3,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="8.5.1" />
+    <PackageReference Include="FluentValidation" Version="9.0.1" />
   </ItemGroup>
 </Project>

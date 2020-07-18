@@ -3,6 +3,7 @@ namespace Carter.ModelBinding
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using FluentValidation;
     using FluentValidation.Results;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
@@ -23,7 +24,7 @@ namespace Carter.ModelBinding
 
             return validator == null
                 ? throw new NullReferenceException("")//new ValidationResult(new[] { new ValidationFailure(typeof(T).Name, "No validator found") })
-                : validator.Validate(model);
+                : validator.Validate(new ValidationContext<T>(model));
         }
 
         /// <summary>
