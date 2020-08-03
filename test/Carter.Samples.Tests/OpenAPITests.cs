@@ -23,7 +23,7 @@ namespace Carter.Samples.Tests
             this.client = server.CreateClient();
         }
 
-        [Fact(Skip = "Diff tool nonsense")]
+        [Fact]
         public async Task Should_return_Carter_approved_OpenAPI_json()
         {
             ShouldlyConfiguration.DiffTools.RegisterDiffTool(new DiffTool("diffmerge",
