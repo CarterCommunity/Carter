@@ -30,7 +30,7 @@ namespace Carter.OpenApi
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     return Task.CompletedTask;
                 }
-                var document = CreateDocument(options, "3.0.0");
+                var document = CreateDocument(options);
                 AddSchema(schemaNavigation, document, context);
                 AddSecurityInformation(options, document);
                 AddPaths(schemaNavigation, metaDatas, document, context);
@@ -330,15 +330,14 @@ namespace Carter.OpenApi
         /// Create a basic OpenApiDocument object.
         /// </summary>
         /// <param name="options">The input Carter options.</param>
-        /// <param name="version">The version string for this OpenApi output.</param>
         /// <returns>A basic OpenApiDocument.</returns>
-        private static OpenApiDocument CreateDocument(CarterOptions options, string version)
+        private static OpenApiDocument CreateDocument(CarterOptions options)
         {
             return new OpenApiDocument
             {
                 Info = new OpenApiInfo
                 {
-                    Version = version,
+                    Version = options.OpenApi.Version,
                     Title = options.OpenApi.DocumentTitle
                 },
                 Servers = new List<OpenApiServer>(options.OpenApi.ServerUrls.Select(x => new OpenApiServer { Url = x })),

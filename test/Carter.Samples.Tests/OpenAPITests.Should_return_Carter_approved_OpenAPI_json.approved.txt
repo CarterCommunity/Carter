@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Carter <3 OpenApi",
-    "version": "3.0.0"
+    "version": "1.0.0"
   },
   "servers": [
     {

@@ -5,8 +5,6 @@ namespace Carter.Samples.Tests
     using CarterSample;
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Hosting.Server.Features;
-    using Microsoft.AspNetCore.Http.Features;
     using Microsoft.AspNetCore.TestHost;
     using Shouldly;
     using Shouldly.Configuration;
@@ -18,9 +16,7 @@ namespace Carter.Samples.Tests
 
         public OpenAPITests()
         {
-          
-
-            var server = new TestServer(WebHost.CreateDefaultBuilder()
+          var server = new TestServer(WebHost.CreateDefaultBuilder()
                     .UseStartup<Startup>()
             );
 

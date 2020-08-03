@@ -33,6 +33,11 @@ namespace Carter
         public string DocumentTitle { get; set; } = "Carter <3 OpenApi";
 
         /// <summary>
+        /// The version of the API defined by the OpenApi document
+        /// </summary>
+        public string Version { get; set; } = "1.0.0";
+
+        /// <summary>
         /// The servers property of the OpenApi document
         /// </summary>
         public IEnumerable<string> ServerUrls { get; set; } = Array.Empty<string>();
