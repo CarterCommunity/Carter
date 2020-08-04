@@ -1,8 +1,7 @@
-namespace Carter.Tests.ModelBinding.NewtonsoftBinding
+namespace Carter.Tests.ModelBinding.Newtonsoft
 {
     using Carter.ModelBinding;
     using Carter.Response;
-    using Carter.Tests.Modelbinding;
 
     public class NewtonsoftBinderModule : CarterModule
     {

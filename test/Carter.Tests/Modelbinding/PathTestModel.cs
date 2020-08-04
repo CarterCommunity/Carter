@@ -1,4 +1,4 @@
-namespace Carter.Tests.Modelbinding
+namespace Carter.Tests.ModelBinding
 {
     public class PathTestModel
     {

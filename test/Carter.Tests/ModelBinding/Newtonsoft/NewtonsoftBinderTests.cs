@@ -1,14 +1,13 @@
-namespace Carter.Tests.ModelBinding.NewtonsoftBinding
+namespace Carter.Tests.ModelBinding.Newtonsoft
 {
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
     using Carter.ModelBinding;
-    using Carter.Tests.Modelbinding;
+    using global::Newtonsoft.Json;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
-    using Newtonsoft.Json;
     using Xunit;
 
     public class NewtonsoftBinderTests

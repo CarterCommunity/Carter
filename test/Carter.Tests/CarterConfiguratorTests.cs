@@ -1,7 +1,7 @@
 namespace Carter.Tests
 {
     using Carter.Tests.ContentNegotiation;
-    using Carter.Tests.Modelbinding;
+    using Carter.Tests.ModelBinding;
     using Carter.Tests.StatusCodeHandlers;
     using Xunit;
 

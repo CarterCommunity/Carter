@@ -42,7 +42,7 @@ namespace Carter.ModelBinding
                 var res = request.Form.ToDictionary(key => key.Key, val =>
                 {
                     var type = typeof(T);
-                    var propertyType = type.GetProperty(val.Key, BindingFlags.IgnoreCase)?.PropertyType;
+                    var propertyType = type.GetProperty(val.Key, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public)?.PropertyType;
 
                     if (propertyType == null)
                     {
