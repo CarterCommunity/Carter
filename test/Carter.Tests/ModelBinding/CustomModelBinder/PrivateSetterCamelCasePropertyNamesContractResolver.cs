@@ -1,8 +1,8 @@
-namespace Carter.Tests.ModelBinding.NewtonsoftBinding
+namespace Carter.Tests.ModelBinding.CustomModelBinder
 {
     using System.Reflection;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
+    using global::Newtonsoft.Json;
+    using global::Newtonsoft.Json.Serialization;
 
     public class PrivateSetterCamelCasePropertyNamesContractResolver : CamelCasePropertyNamesContractResolver
     {

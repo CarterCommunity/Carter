@@ -1,8 +1,8 @@
-namespace Carter.Tests.ModelBinding.NewtonsoftBinding
+namespace Carter.Tests.ModelBinding.CustomModelBinder
 {
     using System.Reflection;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
+    using global::Newtonsoft.Json;
+    using global::Newtonsoft.Json.Converters;
 
     public static class NewtonsoftJsonUtils
     {

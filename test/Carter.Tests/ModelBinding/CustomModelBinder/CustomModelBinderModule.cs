@@ -1,4 +1,4 @@
-namespace Carter.Tests.ModelBinding.NewtonsoftBinding
+namespace Carter.Tests.ModelBinding.CustomModelBinder
 {
     using Carter.ModelBinding;
     using Carter.Response;

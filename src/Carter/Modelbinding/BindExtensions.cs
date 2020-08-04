@@ -5,6 +5,7 @@ namespace Carter.ModelBinding
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Text.Json;
     using System.Threading.Tasks;
     using Carter.Request;
@@ -41,7 +42,7 @@ namespace Carter.ModelBinding
                 var res = request.Form.ToDictionary(key => key.Key, val =>
                 {
                     var type = typeof(T);
-                    var propertyType = type.GetProperty(val.Key)?.PropertyType;
+                    var propertyType = type.GetProperty(val.Key, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public)?.PropertyType;
 
                     if (propertyType == null)
                     {
@@ -56,14 +57,17 @@ namespace Carter.ModelBinding
                             colType = propertyType.GetGenericArguments().First();
                         }
 
-                        return val.Value.Select(y => { return ConvertToType(y, colType); });
+                        return val.Value.Select(y => ConvertToType(y, colType));
                     }
 
                     return ConvertToType(val.Value[0], propertyType);
                 });
 
                 var json = JsonSerializer.Serialize(res);
-                return JsonSerializer.Deserialize<T>(json);
+                return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
             }
 
             var binder = (IModelBinder)request.HttpContext.RequestServices.GetService(typeof(IModelBinder));
