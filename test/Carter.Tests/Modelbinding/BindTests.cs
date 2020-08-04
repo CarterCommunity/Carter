@@ -54,7 +54,7 @@ namespace Carter.Tests.ModelBinding
                 new FormUrlEncodedContent(
                     new[]
                     {
-                        new KeyValuePair<string, string>("MyIntProperty", "1"),
+                        new KeyValuePair<string, string>("myintproperty", "1"),
                         new KeyValuePair<string, string>("MyStringProperty", "hi there"),
                         new KeyValuePair<string, string>("MyDoubleProperty", "2.3"),
                         new KeyValuePair<string, string>("MyArrayProperty", "1"),

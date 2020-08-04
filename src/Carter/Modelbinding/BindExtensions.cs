@@ -64,7 +64,10 @@ namespace Carter.ModelBinding
                 });
 
                 var json = JsonSerializer.Serialize(res);
-                return JsonSerializer.Deserialize<T>(json);
+                return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
             }
 
             var binder = (IModelBinder)request.HttpContext.RequestServices.GetService(typeof(IModelBinder));
