@@ -83,11 +83,6 @@ namespace Carter
         {
             return async ctx =>
             {
-                using var moduleScope = logger.BeginScope(new Dictionary<string, object>()
-                {
-                    ["ModuleType"] = moduleType.Name
-                });
-                
                 // Now in per-request scope
                 var module = ctx.RequestServices.GetRequiredService(moduleType) as CarterModule;
 
@@ -118,7 +113,8 @@ namespace Carter
                 if (shouldContinue)
                 {
                     // run the route handler
-                    logger.LogDebug("Executing module route handler for {Method} /{Path}", ctx.Request.Method, path);
+                    logger.LogDebug("Executing {ModuleType} route handler for {Method} {Path}", 
+                        moduleType.Namespace, ctx.Request.Method, path);
                     await routeHandler.handler(ctx);
 
                     // run after handler
