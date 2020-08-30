@@ -290,9 +290,10 @@ namespace Carter.Tests.ModelBinding
         [Fact]
         public async Task Should_return_validation_failure_result_when_no_validator_found()
         {
-            await Assert.ThrowsAsync<NullReferenceException>(async() =>  await this.httpClient.PostAsync("/novalidator",
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(async() =>  await this.httpClient.PostAsync("/novalidator",
                 new StringContent("{\"MyIntProperty\":\"-1\",\"MyStringProperty\":\"\"}",
                     Encoding.UTF8, "application/json")));
+            Assert.Equal("Cannot find validator for model of type 'TestModelNoValidator'", ex.Message);
         }
 
         [Fact]

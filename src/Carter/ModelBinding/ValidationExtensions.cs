@@ -23,7 +23,7 @@ namespace Carter.ModelBinding
             var validator = validatorLocator.GetValidator<T>();
 
             return validator == null
-                ? throw new NullReferenceException("")//new ValidationResult(new[] { new ValidationFailure(typeof(T).Name, "No validator found") })
+                ? throw new InvalidOperationException($"Cannot find validator for model of type '{typeof(T).Name}'")
                 : validator.Validate(new ValidationContext<T>(model));
         }
 
