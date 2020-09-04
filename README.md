@@ -1,6 +1,6 @@
 # Carter
 
-[![NuGet Version](http://img.shields.io/nuget/v/Carter.svg?style=flat)](https://www.nuget.org/packages/carter) [![feedz.io](https://img.shields.io/badge/endpoint.svg?url=https%3A%2F%2Ff.feedz.io%2Fcarter%2Fcarter%2Fshield%2FCarter%2Flatest)](https://f.feedz.io/carter/carter/packages/Carter/latest/download)
+[![NuGet Version](http://img.shields.io/nuget/v/Carter.svg?style=flat)](https://www.nuget.org/packages/carter) [![feedz.io](https://img.shields.io/badge/endpoint.svg?url=https%3A%2F%2Ff.feedz.io%2Fcarter%2Fcarter%2Fshield%2FCarter%2Flatest)](https://f.feedz.io/carter/carter/packages/Carter/latest/download) [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FCarterCommunity%2FCarter%2Fbadge&style=flat)](https://actions-badge.atrox.dev/CarterCommunity/Carter/goto)
 
 <a href="https://join.slack.com/t/cartercommunity/shared_invite/enQtMzY2Nzc0NjU2MTgyLWY3M2Y2Yjk3NzViN2Y3YTQ4ZDA5NWFlMTYxMTIwNDFkMTc5YWEwMDFiOWUyM2Q4ZmY5YmRkODYyYTllZDViMmE"><img src="./slack.svg" width="140px"/></a>
 
