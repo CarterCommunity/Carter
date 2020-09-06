@@ -1,4 +1,5 @@
 on: 
+  workflow_dispatch:
   milestone:
     types: [closed]
 name: Milestone Closure
@@ -12,3 +13,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         USE_MILESTONE_TITLE: "true"
+        OUTPUT_FOLDER: temp_release_notes
