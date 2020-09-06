@@ -1,11 +1,7 @@
 # How to build a template on OSX
 
- - Download the latest Nuget CommandLine tool.
- - Ensure mono is installed
- - Ensure there is no bin/obj directory or .DS_Store files in existance before you pack
- - Run `mono nuget.exe pack carter-template.nuspec`
- - Run `dotnet new -i /path/to/foo.nupkg`
+ - Use the `template\Template.csproj` to run `dotnet pack`
+ - Run `dotnet new -i /path/to/foo.nupkg` to test it
+ - Run `dotnet new carter`
+ - Run `dotnet new -u /path/to/foo.nupkg`
  - Publish to nuget
-
-
-**Update** https://github.com/NuGet/Home/issues/8018#issuecomment-585964934

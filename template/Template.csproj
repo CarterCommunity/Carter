@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <PackageType>Template</PackageType>
+        <PackageVersion>5.2.0</PackageVersion>
+        <PackageId>CarterTemplate</PackageId>
+        <Description>A dotnet-new template for Carter applications.</Description>
+        <Authors>Jonathan Channon</Authors>
+        <PackageTags>asp.net core;nancy;.net core;routing;carter;carter template;</PackageTags>
+        <PackageProjectUrl>https://github.com/CarterCommunity/Carter</PackageProjectUrl>
+        <PackageIcon>carterlogo.png</PackageIcon>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <LangVersion>latest</LangVersion>
+        <IncludeContentInPack>true</IncludeContentInPack>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <ContentTargetFolders>content</ContentTargetFolders>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <Content Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**"/>
+        <Compile Remove="**\*"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\media\carterlogo.png" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Carter" Version="5.2.0"/>
+    </ItemGroup>
+</Project>
