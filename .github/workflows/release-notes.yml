@@ -14,14 +14,14 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         USE_MILESTONE_TITLE: "true"
         OUTPUT_FOLDER: temp_release_notes
+    - name: Commit Release Notes
     - run: |
-        cat releasenotes/releasenotes.md 
-        ls -al
-        whoami
-        cat releasenotes/releasenotes.md >> temp_release_notes/*.md
-        cp  temp_release_notes/*.md releasenotes/releasenotes.md
+        mkdir my_owned_releasenotes
+        cp  temp_release_notes/*.md my_owned_releasenotes
+        cat releasenotes/releasenotes.md >> my_owned_releasenotes/*.md
+        cp  my_owned_releasenotes/*.md releasenotes/releasenotes.md
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add .
+        git add releasenotes/releasenotes.md
         git commit -m "Generated Release Notes"
         git push
