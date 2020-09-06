@@ -14,7 +14,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         USE_MILESTONE_TITLE: "true"
         OUTPUT_FOLDER: temp_release_notes
-    - uses: actions/checkout@v2
     - run: |
         cat releasenotes/releasenotes.md >> temp_release_notes/*.md
         cp  temp_release_notes/*.md releasenotes/releasenotes.md
