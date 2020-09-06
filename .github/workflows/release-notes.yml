@@ -24,4 +24,4 @@ jobs:
         git config user.email github-actions@github.com
         git add releasenotes/releasenotes.md
         git commit -m "Generated Release Notes"
-        git push
+        git push origin releasenotes
