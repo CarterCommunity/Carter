@@ -17,6 +17,7 @@ jobs:
     - run: |
         cat releasenotes/releasenotes.md 
         ls -al
+        whoami
         cat releasenotes/releasenotes.md >> temp_release_notes/*.md
         cp  temp_release_notes/*.md releasenotes/releasenotes.md
         git config user.name github-actions
