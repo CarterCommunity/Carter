@@ -15,6 +15,7 @@ jobs:
         USE_MILESTONE_TITLE: "true"
         OUTPUT_FOLDER: temp_release_notes
     - run: |
+        git fetch releasenotes
         git checkout releasenotes
         mkdir my_owned_releasenotes
         cp  temp_release_notes/*.md my_owned_releasenotes
