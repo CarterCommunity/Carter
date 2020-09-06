@@ -15,6 +15,7 @@ jobs:
         USE_MILESTONE_TITLE: "true"
         OUTPUT_FOLDER: temp_release_notes
     - run: |
+        cat temp_release_notes/*.md
         cat releasenotes/releasenotes.md >> temp_release_notes/*.md
         cp  temp_release_notes/*.md releasenotes/releasenotes.md
         git config user.name github-actions
