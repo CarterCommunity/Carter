@@ -14,7 +14,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         USE_MILESTONE_TITLE: "true"
         OUTPUT_FOLDER: temp_release_notes
-    - name: Commit Release Notes
     - run: |
         mkdir my_owned_releasenotes
         cp  temp_release_notes/*.md my_owned_releasenotes
