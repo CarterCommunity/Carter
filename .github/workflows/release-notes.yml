@@ -18,6 +18,6 @@ jobs:
         cp  temp_release_notes/*.md releasenotes
         git config user.name Jonathan Channon
         git config user.email jonathan.channon@gmail.com
-        git add releasenotes/
+        git add .
         git commit -m "Generated Release Notes"
         git push 
