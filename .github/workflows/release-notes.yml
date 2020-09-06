@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: releasenotes
     - name: Create Release Notes
       uses: docker://decathlon/release-notes-generator-action:2.0.1
       env:
@@ -15,8 +17,6 @@ jobs:
         USE_MILESTONE_TITLE: "true"
         OUTPUT_FOLDER: temp_release_notes
     - run: |
-        git fetch releasenotes
-        git checkout releasenotes
         mkdir my_owned_releasenotes
         cp  temp_release_notes/*.md my_owned_releasenotes
         cat releasenotes/releasenotes.md >> my_owned_releasenotes/*.md
@@ -25,4 +25,4 @@ jobs:
         git config user.email github-actions@github.com
         git add releasenotes/releasenotes.md
         git commit -m "Generated Release Notes"
-        git push origin releasenotes
+        git push 
