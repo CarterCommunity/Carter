@@ -1,6 +1,7 @@
 namespace Carter.Tests
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using Carter.Request;
     using Microsoft.AspNetCore.Http;
@@ -70,7 +71,7 @@ namespace Carter.Tests
             this.Get("/parameterized/{name:alpha}", ctx => ctx.Response.WriteAsync("echo " + ctx.GetRouteData().Values["name"]));
             this.Get("/parameterized/{id:int}", ctx => ctx.Response.WriteAsync("echo " + ctx.Request.RouteValues.As<int>("id")));
             this.Get("/parameterized/{id:guid}", ctx => ctx.Response.WriteAsync("echo " + ctx.Request.RouteValues.As<Guid>("id")));
-            this.Get("/parameterized/{id:datetime}", ctx => ctx.Response.WriteAsync("echo " + ctx.Request.RouteValues.As<DateTime>("id").ToString("dd/MM/yyyy hh:mm:ss")));
+            this.Get("/parameterized/{id:datetime}", ctx => ctx.Response.WriteAsync("echo " + ctx.Request.RouteValues.As<DateTime>("id").ToString("dd/MM/yyyy hh:mm:ss", CultureInfo.InvariantCulture)));
 
             this.Post("/", async ctx => { await ctx.Response.WriteAsync("Hello"); });
             this.Put("/", async ctx => { await ctx.Response.WriteAsync("Hello"); });
