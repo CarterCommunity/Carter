@@ -58,7 +58,7 @@ namespace Carter
         public bool Enabled { get; set; } = true;
         
         /// <summary>
-        /// Attribute used to ignore peoperties from the OpenAPI schema
+        /// Attribute used to ignore properties from the OpenAPI schema
         ///
         /// Note: Set this to null to disable.
         /// </summary>

@@ -351,8 +351,8 @@ namespace Carter.OpenApi
         /// </summary>
         /// <param name="navigation">The input SchemaElements that have been read from the input classes.</param>
         /// <param name="document">The OpenApiDocument that is to be filled with the schema information.</param>
-        /// <param name="context"></param>
-        /// <param name="optionsOpenApi"></param>
+        /// <param name="context">The HttpContext.</param>
+        /// <param name="options">The OpenApiOptions specified configuring Carter</param>
         private static void AddSchema(Dictionary<string, SchemaElement> navigation, OpenApiDocument document,
             HttpContext context, OpenApiOptions options)
         {
