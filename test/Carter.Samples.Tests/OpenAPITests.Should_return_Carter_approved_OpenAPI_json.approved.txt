@@ -273,8 +273,19 @@
             "minimum": 0,
             "exclusiveMinimum": true,
             "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ActorStatus"
           }
         }
+      },
+      "ActorStatus": {
+        "enum": [
+          "Active",
+          "Retired",
+          "Deceased"
+        ],
+        "type": "string"
       },
       "Bar": {
         "type": "object",

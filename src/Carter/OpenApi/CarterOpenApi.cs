@@ -361,6 +361,21 @@ namespace Carter.OpenApi
                     continue;
                 }
 
+                if (keyValuePair.Value.ElementType.IsEnum)
+                {
+                    var enumValues = Enum.GetNames(keyValuePair.Value.ElementType)
+                        .Select(v => (IOpenApiAny)new OpenApiString(v))
+                        .ToList();
+                    
+                    document.Components.Schemas.Add(keyValuePair.Value.ShortName, new OpenApiSchema
+                    {
+                        Enum = enumValues,
+                        Type = "string",
+                    });
+                    
+                    continue;
+                }
+
                 var schema = new OpenApiSchema
                 {
                     Type = "object"
