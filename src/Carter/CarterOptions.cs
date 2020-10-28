@@ -56,6 +56,13 @@ namespace Carter
         /// Determines if OpenAPI should be mapped and enabled. True by default.
         /// </summary>
         public bool Enabled { get; set; } = true;
+        
+        /// <summary>
+        /// Attribute used to ignore properties from the OpenAPI schema
+        ///
+        /// Note: Set this to null to disable.
+        /// </summary>
+        public Type SchemaIgnoreAttribute { get; set; } = typeof(System.Text.Json.Serialization.JsonIgnoreAttribute);
     }
 
     /// <summary>

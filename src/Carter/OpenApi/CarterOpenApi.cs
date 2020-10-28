@@ -31,7 +31,7 @@ namespace Carter.OpenApi
                     return Task.CompletedTask;
                 }
                 var document = CreateDocument(options);
-                AddSchema(schemaNavigation, document, context);
+                AddSchema(schemaNavigation, document, context, options.OpenApi);
                 AddSecurityInformation(options, document);
                 AddPaths(schemaNavigation, metaDatas, document, context);
                 
@@ -351,7 +351,10 @@ namespace Carter.OpenApi
         /// </summary>
         /// <param name="navigation">The input SchemaElements that have been read from the input classes.</param>
         /// <param name="document">The OpenApiDocument that is to be filled with the schema information.</param>
-        private static void AddSchema(Dictionary<string, SchemaElement> navigation, OpenApiDocument document, HttpContext context)
+        /// <param name="context">The HttpContext.</param>
+        /// <param name="options">The OpenApiOptions specified configuring Carter</param>
+        private static void AddSchema(Dictionary<string, SchemaElement> navigation, OpenApiDocument document,
+            HttpContext context, OpenApiOptions options)
         {
             foreach (var keyValuePair in navigation.OrderBy(o => o.Value.ShortName))
             {
@@ -368,9 +371,19 @@ namespace Carter.OpenApi
                 
                 foreach (var memberKeyValue in keyValuePair.Value.DataMembers)
                 {
-                    var propertySchema = SchemaFromElement(memberKeyValue.Value);
                     var propertyInfo = keyValuePair.Value.ElementType.GetProperties().Where(o => CamelCase(o.Name) == memberKeyValue.Key).SingleOrDefault();
                     object[] attribute = propertyInfo.GetCustomAttributes(typeof(ApiSchemaAttributes), true);
+
+                    if (options.SchemaIgnoreAttribute != null)
+                    {
+                        if (propertyInfo.GetCustomAttribute(options.SchemaIgnoreAttribute,true) != null)
+                        {
+                            continue;
+                        }                        
+                    }
+                    
+                    var propertySchema = SchemaFromElement(memberKeyValue.Value);
+
                     if (attribute.Length > 0)
                     {
                         var myAttribute = (ApiSchemaAttributes)attribute[0];
