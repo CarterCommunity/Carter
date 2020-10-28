@@ -56,7 +56,7 @@ namespace Carter.Tests.ModelBinding
                     {
                         new KeyValuePair<string, string>("myintproperty", "1"),
                         new KeyValuePair<string, string>("MyStringProperty", "hi there"),
-                        new KeyValuePair<string, string>("MyDoubleProperty", "2.3"),
+                        new KeyValuePair<string, string>("MyDoubleProperty", 2.3M.ToString()),
                         new KeyValuePair<string, string>("MyArrayProperty", "1"),
                         new KeyValuePair<string, string>("MyArrayProperty", "2"),
                         new KeyValuePair<string, string>("MyArrayProperty", "3"),
@@ -80,8 +80,8 @@ namespace Carter.Tests.ModelBinding
                         new KeyValuePair<string, string>("MyEmptyGuidProperty", ""),
                         new KeyValuePair<string, string>("MyEmptyNullableGuidProperty", ""),
                         new KeyValuePair<string, string>("MyEmptyNullableDateTimeProperty", ""),
-                        new KeyValuePair<string, string>("MyDecimalProperty", "1234.00"),
-                        new KeyValuePair<string, string>("MyFormattedDecimalProperty", "1,234.00")
+                        new KeyValuePair<string, string>("MyDecimalProperty", 1234M.ToString("0.##")),
+                        new KeyValuePair<string, string>("MyFormattedDecimalProperty", 1234.ToString("N2"))
                     }));
 
             //When
