@@ -10,5 +10,14 @@ namespace CarterSample.Features.Actors
         
         [JsonIgnore]
         public string ExternalReference { get; set; }
+        
+        public ActorStatus Status { get; set; }
+    }
+    
+    public enum ActorStatus
+    {
+        Active,
+        Retired,
+        Deceased
     }
 }

@@ -34,7 +34,6 @@ namespace Carter.OpenApi
         public bool IsSimple()
         {
             return (ElementType.IsPrimitive ||
-                ElementType.IsEnum ||
                 ElementType == typeof(string) ||
                 ElementType == typeof(decimal));
         }
