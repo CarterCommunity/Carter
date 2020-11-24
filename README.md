@@ -218,4 +218,4 @@ public class ActorsModule : CarterModule
 }
 ```
 
-[More samples](https://github.com/CarterCommunity/Carter/tree/master/samples)
+[More samples](https://github.com/CarterCommunity/Carter/tree/master/samples) 
