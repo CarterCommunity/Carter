@@ -219,3 +219,57 @@ public class ActorsModule : CarterModule
 ```
 
 [More samples](https://github.com/CarterCommunity/Carter/tree/master/samples)
+
+### Configuration
+
+#### Custom Model Binders
+
+By default, Carter uses the `System.Text.Json` library for model binding, though you can use your own model binder by implementing the provided `IModelBinder` interface. You would then wire up your custom implmentation (say, `CustomModelBinder`) by adding the following line to the initial Carter configuration, in this case as part of `Startup.cs`:
+
+```csharp
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddCarter(configurator: c =>
+        {
+            c.WithModelBinder<CustomModelBinder>();
+        });
+    }
+```
+
+Note that Carter already ships with an alternate model binder implementation that uses `Newtonsoft.Json`, so you can switch to the Newtonsoft implementation with the following line (plus the requisite using statement):
+
+```csharp
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddCarter(configurator: c =>
+        {
+            c.WithModelBinder<NewtonsoftJsonModelBinder>();
+        });
+    }
+```
+
+#### Custom response negotiators
+
+Similar to model binding, on the outbound side of things, Carter will use a response negotiator based on `System.Text.Json`, though it provides for custom implementations via the `IResponseNegotiator` interface. To use your own implementation of `IResponseNegotiator` (say, `CustomResponseNegotiator`), add the following line to the initial Carter configuration, in this case as part of `Startup.cs`:
+
+```csharp
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddCarter(configurator: c =>
+        {
+            c.WithResponseNegotiator<CustomResponseNegotiator>();
+        });
+    }
+```
+
+Here again, Carter already ships with a response negotiator using `Newtonsoft.Json`, so you can wire up the Newtonsoft implementation with the following line:
+
+```csharp
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddCarter(configurator: c =>
+        {
+            c.WithResponseNegotiator<NewtonsoftJsonResponseNegotiator>();
+        });
+    }
+```
