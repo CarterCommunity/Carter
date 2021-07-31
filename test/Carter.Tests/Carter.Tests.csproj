@@ -1,14 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="fakeiteasy" Version="6.0.0" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Carter\Carter.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.1.0" />
+	<PackageReference Include="fakeiteasy" Version="7.1.0" />
+	<PackageReference Include="Microsoft.AspNetCore.TestHost" Version="5.0.8" />
+	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+	<PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
+	<PackageReference Include="MartinCostello.Logging.XUnit" Version="0.1.2" />
   </ItemGroup>
 </Project>

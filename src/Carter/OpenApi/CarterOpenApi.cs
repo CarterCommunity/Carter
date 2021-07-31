@@ -716,72 +716,72 @@ namespace Carter.OpenApi
                             }
                         }
 
-                        if (propertyValidator is ILengthValidator lengthValidator)
-                        {
-                            if (lengthValidator.Max > 0)
-                                schema.Properties[key].MaxLength = lengthValidator.Max;
+                        //if (propertyValidator is ILengthValidator lengthValidator)
+                        //{
+                        //    if (lengthValidator.Max > 0)
+                        //        schema.Properties[key].MaxLength = lengthValidator.Max;
 
-                            schema.Properties[key].MinLength = lengthValidator.Min;
-                        }
+                        //    schema.Properties[key].MinLength = lengthValidator.Min;
+                        //}
 
-                        if (propertyValidator is IComparisonValidator comparisonValidator)
-                        {
-                            //var comparisonValidator = (IComparisonValidator)context.PropertyValidator;
-                            if (comparisonValidator.ValueToCompare.IsNumeric())
-                            {
-                                var valueToCompare = comparisonValidator.ValueToCompare.NumericToDecimal();
-                                var schemaProperty = schema.Properties[key];
+                        //if (propertyValidator is IComparisonValidator comparisonValidator)
+                        //{
+                        //    //var comparisonValidator = (IComparisonValidator)context.PropertyValidator;
+                        //    if (comparisonValidator.ValueToCompare.IsNumeric())
+                        //    {
+                        //        var valueToCompare = comparisonValidator.ValueToCompare.NumericToDecimal();
+                        //        var schemaProperty = schema.Properties[key];
 
-                                if (comparisonValidator.Comparison == Comparison.GreaterThanOrEqual)
-                                {
-                                    schemaProperty.Minimum = valueToCompare;
-                                }
-                                else if (comparisonValidator.Comparison == Comparison.GreaterThan)
-                                {
-                                    schemaProperty.Minimum = valueToCompare;
-                                    schemaProperty.ExclusiveMinimum = true;
-                                }
-                                else if (comparisonValidator.Comparison == Comparison.LessThanOrEqual)
-                                {
-                                    schemaProperty.Maximum = valueToCompare;
-                                }
-                                else if (comparisonValidator.Comparison == Comparison.LessThan)
-                                {
-                                    schemaProperty.Maximum = valueToCompare;
-                                    schemaProperty.ExclusiveMaximum = true;
-                                }
-                            }
-                        }
+                        //        if (comparisonValidator.Comparison == Comparison.GreaterThanOrEqual)
+                        //        {
+                        //            schemaProperty.Minimum = valueToCompare;
+                        //        }
+                        //        else if (comparisonValidator.Comparison == Comparison.GreaterThan)
+                        //        {
+                        //            schemaProperty.Minimum = valueToCompare;
+                        //            schemaProperty.ExclusiveMinimum = true;
+                        //        }
+                        //        else if (comparisonValidator.Comparison == Comparison.LessThanOrEqual)
+                        //        {
+                        //            schemaProperty.Maximum = valueToCompare;
+                        //        }
+                        //        else if (comparisonValidator.Comparison == Comparison.LessThan)
+                        //        {
+                        //            schemaProperty.Maximum = valueToCompare;
+                        //            schemaProperty.ExclusiveMaximum = true;
+                        //        }
+                        //    }
+                        //}
 
-                        if (propertyValidator is RegularExpressionValidator expressionValidator)
-                        {
-                            schema.Properties[key].Pattern = expressionValidator.Expression;
-                        }
+                        //if (propertyValidator is RegularExpressionValidator expressionValidator)
+                        //{
+                        //    schema.Properties[key].Pattern = expressionValidator.Expression;
+                        //}
 
-                        if (propertyValidator is IBetweenValidator betweenValidator)
-                        {
-                            var schemaProperty = schema.Properties[key];
+                        //if (propertyValidator is IBetweenValidator betweenValidator)
+                        //{
+                        //    var schemaProperty = schema.Properties[key];
 
-                            if (betweenValidator.From.IsNumeric())
-                            {
-                                schemaProperty.Minimum = betweenValidator.From.NumericToDecimal();
+                        //    if (betweenValidator.From.IsNumeric())
+                        //    {
+                        //        schemaProperty.Minimum = betweenValidator.From.NumericToDecimal();
 
-                                if (betweenValidator is ExclusiveBetweenValidator)
-                                {
-                                    schemaProperty.ExclusiveMinimum = true;
-                                }
-                            }
+                        //        if (betweenValidator is ExclusiveBetweenValidator)
+                        //        {
+                        //            schemaProperty.ExclusiveMinimum = true;
+                        //        }
+                        //    }
 
-                            if (betweenValidator.To.IsNumeric())
-                            {
-                                schemaProperty.Maximum = betweenValidator.To.NumericToDecimal();
+                        //    if (betweenValidator.To.IsNumeric())
+                        //    {
+                        //        schemaProperty.Maximum = betweenValidator.To.NumericToDecimal();
 
-                                if (betweenValidator is ExclusiveBetweenValidator)
-                                {
-                                    schemaProperty.ExclusiveMaximum = true;
-                                }
-                            }
-                        }
+                        //        if (betweenValidator is ExclusiveBetweenValidator)
+                        //        {
+                        //            schemaProperty.ExclusiveMaximum = true;
+                        //        }
+                        //    }
+                        //}
                     }
                 }
             }

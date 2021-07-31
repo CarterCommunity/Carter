@@ -20,13 +20,13 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="9.0.1" />
-        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.1.0" />
-        <PackageReference Include="Microsoft.OpenApi" Version="1.1.4" />
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19554-01" PrivateAssets="all" />
-        <PackageReference Include="MinVer" Version="2.0.0">
+        <PackageReference Include="FluentValidation" Version="10.3.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="5.0.0" />
+        <PackageReference Include="Microsoft.OpenApi" Version="1.2.3" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="all" />
+        <PackageReference Include="MinVer" Version="2.5.0">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     </ItemGroup>
 </Project>
