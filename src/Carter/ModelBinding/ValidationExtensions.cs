@@ -32,9 +32,16 @@ namespace Carter.ModelBinding
         /// </summary>
         /// <param name="result"><see cref="ValidationResult"/></param>
         /// <returns><see cref="IEnumerable{dynamic}"/> of property names and associated error messages</returns>
-        public static IEnumerable<dynamic> GetFormattedErrors(this ValidationResult result)
+        public static IEnumerable<ModelError> GetFormattedErrors(this ValidationResult result)
         {
-            return result.Errors.Select(x => new { x.PropertyName, x.ErrorMessage });
+            return result.Errors.Select(x => new ModelError { PropertyName = x.PropertyName, ErrorMessage = x.ErrorMessage });
         }
+    }
+
+    public class ModelError
+    {
+        public string PropertyName { get; set; }
+
+        public string ErrorMessage { get; set; }
     }
 }

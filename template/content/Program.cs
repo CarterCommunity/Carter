@@ -1,17 +1,12 @@
-namespace CarterTemplate
-{
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Hosting;
+using Carter;
+using Microsoft.AspNetCore.Builder;
 
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var host = Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>())
-                .Build();
+var builder = WebApplication.CreateBuilder(args);
 
-            host.Run();
-        }
-    }
-}
+builder.Services.AddCarter();
+
+var app = builder.Build();
+
+app.MapCarter();
+
+app.Run();

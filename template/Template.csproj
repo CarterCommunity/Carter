@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <PackageType>Template</PackageType>
-        <PackageVersion>5.2.0</PackageVersion>
+        <PackageVersion>6.0.0</PackageVersion>
         <PackageId>CarterTemplate</PackageId>
         <Description>A dotnet-new template for Carter applications.</Description>
         <Authors>Jonathan Channon</Authors>
@@ -25,6 +25,6 @@
         <None Include="..\media\carterlogo.png" Pack="true" PackagePath="\"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Carter" Version="5.2.0"/>
+        <PackageReference Include="Carter" Version="6.0.0"/>
     </ItemGroup>
 </Project>

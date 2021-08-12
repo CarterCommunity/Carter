@@ -6,32 +6,31 @@
     using Carter;
     using Carter.ModelBinding;
     using Carter.Response;
-    using CarterSample.Features.CastMembers.OpenApi;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
     using ValidatorOnlyProject;
 
-    public class CastMemberModule : CarterModule
+    public class CastMemberModule : ICarterModule
     {
-        public CastMemberModule()
+        public void AddRoutes(IEndpointRouteBuilder app)
         {
-            this.Post("/castmembers", async (req, res) =>
+            app.MapPost("/castmembers", (HttpRequest req, CastMember castMember) =>
             {
-                var result = await req.BindAndValidate<CastMember>();
+                var result = req.Validate<CastMember>(castMember);
 
-                if (!result.ValidationResult.IsValid)
+                if (!result.IsValid)
                 {
-                    await res.AsJson(result.ValidationResult.GetFormattedErrors());
-                    return;
+                    return Results.UnprocessableEntity(result.GetFormattedErrors());
                 }
 
-                await res.WriteAsync("OK");
+                return Results.Ok("OK");
             });
 
-            this.Get<GetCastMembers>("/castmembers", async(request, response) =>
+            app.MapGet("/castmembers", () =>
             {
                 var castMembers = new[] { new CastMember { Name = "Samuel L Jackson" }, new CastMember { Name = "John Travolta" } };
 
-                await response.AsJson(castMembers);
+                return castMembers;
             });
         }
     }
