@@ -78,7 +78,7 @@ namespace Carter
             foreach (var newModule in newModules)
             {
                 //services.AddScoped(newModule);
-                services.AddScoped(typeof(ICarterModule), newModule);
+                services.AddSingleton(typeof(ICarterModule), newModule);
             }
 
             foreach (var negotiator in responseNegotiators)
