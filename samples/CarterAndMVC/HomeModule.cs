@@ -1,13 +1,11 @@
 ﻿namespace CarterAndMVC
 {
     using Carter;
-    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Routing;
 
-    public class HomeModule : CarterModule
+    public class HomeModule : ICarterModule
     {
-        public HomeModule()
-        {
-            Get("/", async (req, res) => await res.WriteAsync("Hello from Carter!"));
-        }
+        public void AddRoutes(IEndpointRouteBuilder app) => app.MapGet("/", () => "Hello from Carter!");
     }
 }

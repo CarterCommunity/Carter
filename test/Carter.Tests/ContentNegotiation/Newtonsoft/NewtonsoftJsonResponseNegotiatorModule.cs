@@ -1,12 +1,15 @@
 namespace Carter.Tests.ContentNegotiation.Newtonsoft
 {
     using Carter.Response;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
 
-    public class NewtonsoftJsonResponseNegotiatorModule : CarterModule
+    public class NewtonsoftJsonResponseNegotiatorModule : ICarterModule
     {
-        public NewtonsoftJsonResponseNegotiatorModule()
+        public void AddRoutes(IEndpointRouteBuilder app)
         {
-            this.Get("/negotiate", (req, res) => res.Negotiate(new { FirstName = "Jim" }));
+            app.MapGet("/negotiate", (HttpResponse res) => res.Negotiate(new { FirstName = "Jim" }));
         }
     }
 }

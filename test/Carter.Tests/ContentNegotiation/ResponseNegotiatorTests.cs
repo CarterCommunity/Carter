@@ -9,6 +9,7 @@ namespace Carter.Tests.ContentNegotiation
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
+    using Microsoft.Extensions.DependencyInjection;
     using Xunit;
     using MediaTypeHeaderValue = Microsoft.Net.Http.Headers.MediaTypeHeaderValue;
 
@@ -20,6 +21,7 @@ namespace Carter.Tests.ContentNegotiation
                 new WebHostBuilder()
                     .ConfigureServices(x =>
                     {
+                        x.AddRouting();
                         x.AddCarter(configurator: c =>
                             c.WithModule<NegotiatorModule>()
                                 .WithResponseNegotiator<TestResponseNegotiator>()

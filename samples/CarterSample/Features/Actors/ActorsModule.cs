@@ -6,32 +6,34 @@ namespace CarterSample.Features.Actors
     using Carter.ModelBinding;
     using Carter.Request;
     using Carter.Response;
-    using CarterSample.Features.Actors.OpenApi;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
 
-    public class ActorsModule : CarterModule
+    public class ActorsModule : ICarterModule
     {
-        public ActorsModule(IActorProvider actorProvider)
+        public void AddRoutes(IEndpointRouteBuilder app)
         {
-            this.Get<GetActors>("/actors", (req, res) =>
+            app.MapGet("/actors", (IActorProvider actorProvider, HttpResponse res) =>
             {
                 var people = actorProvider.Get();
-                return res.AsJson(people);
+                return people;
             });
 
-            this.Get<GetActorById>("/actors/{id:int}", (req, res) =>
+             app.MapGet("/actors/{id:int}", (int id, IActorProvider actorProvider, HttpResponse res) =>
             {
-                var person = actorProvider.Get(req.RouteValues.As<int>("id"));
+                var person = actorProvider.Get(id);
                 return res.Negotiate(person);
             });
 
-            this.Put<UpdateActor>("/actors/{id:int}", async (req, res) =>
+            app.MapPut("/actors/{id:int}", async (HttpRequest req, Actor actor, HttpResponse res) =>
             {
-                var result = await req.BindAndValidate<Actor>();
+                var result = req.Validate<Actor>(actor);
 
-                if (!result.ValidationResult.IsValid)
+                if (!result.IsValid)
                 {
                     res.StatusCode = 422;
-                    await res.Negotiate(result.ValidationResult.GetFormattedErrors());
+                    await res.Negotiate(result.GetFormattedErrors());
                     return;
                 }
 
@@ -40,31 +42,30 @@ namespace CarterSample.Features.Actors
                 res.StatusCode = 204;
             });
 
-            this.Post<AddActor>("/actors", async (req, res) =>
+            app.MapPost("/actors", async (HttpContext ctx, Actor actor) =>
             {
-                var result = await req.BindAndValidate<Actor>();
+                var result = ctx.Request.Validate<Actor>(actor);
 
-                if (!result.ValidationResult.IsValid)
+                if (!result.IsValid)
                 {
-                    res.StatusCode = 422;
-                    await res.Negotiate(result.ValidationResult.GetFormattedErrors());
+                    ctx.Response.StatusCode = 422;
+                    await ctx.Response.Negotiate(result.GetFormattedErrors());
                     return;
                 }
 
                 //Save the user in your database
 
-                res.StatusCode = 201;
-                await res.Negotiate(result.Data);
+                ctx.Response.StatusCode = 201;
+                await ctx.Response.Negotiate(actor);
             });
 
-            this.Delete<DeleteActor>("/actors/{id:int}", (req, res) =>
+            app.MapDelete("/actors/{id:int}", (int id, IActorProvider actorProvider, HttpResponse res) =>
             {
-                actorProvider.Delete(req.RouteValues.As<int>("id"));
-                res.StatusCode = 204;
-                return Task.CompletedTask;
+                actorProvider.Delete(id);
+                return Results.StatusCode(204);
             });
 
-            this.Get("/actors/download", async (request, response) =>
+            app.MapGet("/actors/download", async (HttpResponse response) =>
             {
                 using (var video = new FileStream("earth.mp4", FileMode.Open)) //24406813
                 {
@@ -72,13 +73,13 @@ namespace CarterSample.Features.Actors
                 }
             });
 
-            this.Get<EmptyOpenApiMetaData>("/empty", (request, response) => Task.CompletedTask);
+            app.MapGet("/empty", () => Task.CompletedTask);
 
-            this.Get<SampleMetaData>("/actors/sample", (request, response) => Task.CompletedTask);
+            app.MapGet("/actors/sample", () => Task.CompletedTask);
 
-            this.Post<NoValidatorMetaData>("/actors/sample", (request, response) => Task.CompletedTask);
+            app.MapPost("/actors/sample", () => Task.CompletedTask);
 
-            this.Get<GetSimpleNullables>("/nullable", (request, response) => Task.CompletedTask);
+            app.MapGet("/nullable", () => Task.CompletedTask); 
         }
     }
 }

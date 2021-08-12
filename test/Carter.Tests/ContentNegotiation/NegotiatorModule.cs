@@ -1,12 +1,15 @@
 namespace Carter.Tests.ContentNegotiation
 {
     using Carter.Response;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
 
-    public class NegotiatorModule : CarterModule
+    public class NegotiatorModule : ICarterModule
     {
-        public NegotiatorModule()
+        public void AddRoutes(IEndpointRouteBuilder app)
         {
-            this.Get("/negotiate", (req, res) => res.Negotiate(new { FirstName = "Jim" }));
+            app.MapGet("/negotiate", (HttpResponse res) => res.Negotiate(new { FirstName = "Jim" }));
         }
     }
 }

@@ -1,25 +1,18 @@
 namespace CarterSample.Features.Home
 {
-    using System;
-    using System.Threading.Tasks;
     using Carter;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
 
-    public class HomeModule : CarterModule
+    public class HomeModule : ICarterModule
     {
-        public HomeModule()
+        public void AddRoutes(IEndpointRouteBuilder app)
         {
-            this.Get("/", (req, res) =>
+            app.MapGet("/", (HttpResponse res) =>
             {
                 res.StatusCode = 409;
-                return res.WriteAsync("There's no place like 127.0.0.1");
+                return Results.Text("There's no place like 127.0.0.1");
             });
-
-            this.After = (ctx) =>
-            {
-                Console.WriteLine("Catch you later!");
-                return Task.CompletedTask;
-            };
         }
     }
 }

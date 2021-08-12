@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
@@ -11,6 +11,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Shouldly" Version="4.0.0-beta0002" />
+    <PackageReference Include="Shouldly" Version="4.0.3" />
   </ItemGroup>
 </Project>

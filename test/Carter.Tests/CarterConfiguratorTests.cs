@@ -2,7 +2,7 @@ namespace Carter.Tests
 {
     using Carter.Tests.ContentNegotiation;
     using Carter.Tests.ModelBinding;
-    using Carter.Tests.StatusCodeHandlers;
+    using Carter.Tests.StreamTests;
     using Xunit;
 
     public class CarterConfiguratorTests
@@ -40,7 +40,7 @@ namespace Carter.Tests
             var configurator = new CarterConfigurator();
 
             //When 
-            configurator.WithModules(typeof(TestModule), typeof(BindModule));
+            configurator.WithModules(typeof(TestModule), typeof(StreamModule));
 
             //Then
             Assert.Equal(2, configurator.ModuleTypes.Count);
@@ -53,7 +53,7 @@ namespace Carter.Tests
             var configurator = new CarterConfigurator();
 
             //When
-            var sameconfigurator = configurator.WithModules(typeof(TestModule), typeof(BindModule));
+            var sameconfigurator = configurator.WithModules(typeof(TestModule), typeof(StreamModule));
 
             //Then
             Assert.Same(configurator, sameconfigurator);
@@ -106,58 +106,6 @@ namespace Carter.Tests
 
             //When
             var sameconfigurator = configurator.WithValidators(typeof(TestModelValidator), typeof(DuplicateTestModelOne));
-
-            //Then
-            Assert.Same(configurator, sameconfigurator);
-        }
-
-        [Fact]
-        public void Should_add_single_statuscodehandler()
-        {
-            //Given
-            var configurator = new CarterConfigurator();
-
-            //When
-            configurator.WithStatusCodeHandler<TeapotStatusCodeHandler>();
-
-            //Then
-            Assert.Single(configurator.StatusCodeHandlerTypes);
-        }
-
-        [Fact]
-        public void Should_return_same_instance_when_adding_statuscodehandler()
-        {
-            //Given
-            var configurator = new CarterConfigurator();
-
-            //When
-            var sameconfigurator = configurator.WithStatusCodeHandler<TeapotStatusCodeHandler>();
-
-            //Then
-            Assert.Same(configurator, sameconfigurator);
-        }
-
-        [Fact]
-        public void Should_add_multiple_statuscodehandlers()
-        {
-            //Given
-            var configurator = new CarterConfigurator();
-
-            //When 
-            configurator.WithStatusCodeHandlers(typeof(TeapotStatusCodeHandler), typeof(NoOpStatusCodeHandler));
-
-            //Then
-            Assert.Equal(2, configurator.StatusCodeHandlerTypes.Count);
-        }
-
-        [Fact]
-        public void Should_return_same_instance_when_adding_multiple_statuscodehandlers()
-        {
-            //Given
-            var configurator = new CarterConfigurator();
-
-            //When
-            var sameconfigurator = configurator.WithStatusCodeHandlers(typeof(TeapotStatusCodeHandler), typeof(NoOpStatusCodeHandler));
 
             //Then
             Assert.Same(configurator, sameconfigurator);

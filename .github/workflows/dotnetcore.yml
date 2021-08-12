@@ -12,11 +12,13 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.401
+        dotnet-version: 6.0.100-rc.1.21411.1
     - name: Build Reason
       run: echo ${{github.ref}} and ${{github.event_name}}
     - name: Build with dotnet
-      run: dotnet build --configuration Release --nologo
+      run: find . -path ./template -prune -false -o -name '*.csproj' -execdir dotnet build --configuration Release --nologo {} \;
+#    - name: Build with dotnet
+#      run: dotnet build --configuration Release --nologo
     - name: Run tests
       run: dotnet test --configuration Release --no-build --nologo
     - if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || contains(github.ref, 'tags'))
