@@ -8,6 +8,7 @@
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
+    using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
     public class ResponseFromStreamTests
@@ -16,7 +17,11 @@
         {
             this.server = new TestServer(
                 new WebHostBuilder()
-                    .ConfigureServices(x => { x.AddCarter(configurator: c => c.WithModule<StreamModule>()); })
+                    .ConfigureServices(x =>
+                    {
+                        x.AddRouting();
+                        x.AddCarter(configurator: c => c.WithModule<StreamModule>());
+                    })
                     .Configure(x =>
                     {
                         x.UseRouting();

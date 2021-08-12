@@ -2,7 +2,6 @@ namespace Carter
 {
     using System;
     using System.Collections.Generic;
-    using Carter.ModelBinding;
     using FluentValidation;
     using Microsoft.Extensions.Logging;
 
@@ -15,15 +14,18 @@ namespace Carter
         {
             this.ModuleTypes = new List<Type>();
             this.ValidatorTypes = new List<Type>();
-            this.StatusCodeHandlerTypes = new List<Type>();
             this.ResponseNegotiatorTypes = new List<Type>();
         }
+
+        internal bool ExcludeValidators;
+
+        internal bool ExcludeModules;
+        
+        internal bool ExcludeResponseNegotiators;
 
         internal List<Type> ModuleTypes { get; }
 
         internal List<Type> ValidatorTypes { get; }
-
-        internal List<Type> StatusCodeHandlerTypes { get; }
 
         internal List<Type> ResponseNegotiatorTypes { get; }
 
@@ -41,11 +43,6 @@ namespace Carter
                 logger.LogDebug("Found module {ModuleName}", module.FullName);
             }
 
-            foreach (var sch in this.StatusCodeHandlerTypes)
-            {
-                logger.LogDebug("Found status code handler {StatusCodeHandlerName}", sch.FullName);
-            }
-
             foreach (var negotiator in this.ResponseNegotiatorTypes)
             {
                 logger.LogDebug("Found response negotiator {ResponseNegotiatorName}", negotiator.FullName);
@@ -53,11 +50,11 @@ namespace Carter
         }
 
         /// <summary>
-        /// Register a specific <see cref="CarterModule"/>
+        /// Register a specific <see cref="ICarterModule"/>
         /// </summary>
-        /// <typeparam name="TModule">The <see cref="CarterModule"/> to register</typeparam>
+        /// <typeparam name="TModule">The <see cref="ICarterModule"/> to register</typeparam>
         /// <returns><see cref="CarterConfigurator"/></returns>
-        public CarterConfigurator WithModule<TModule>() where TModule : CarterModule
+        public CarterConfigurator WithModule<TModule>() where TModule : ICarterModule
         {
             this.ModuleTypes.Add(typeof(TModule));
             return this;
@@ -70,7 +67,7 @@ namespace Carter
         /// <returns><see cref="CarterConfigurator"/></returns>
         public CarterConfigurator WithModules(params Type[] modules)
         {
-            modules.MustDeriveFrom<CarterModule>();
+            modules.MustDeriveFrom<ICarterModule>();
             this.ModuleTypes.AddRange(modules);
             return this;
         }
@@ -99,29 +96,6 @@ namespace Carter
         }
 
         /// <summary>
-        /// Register a specific <see cref="IStatusCodeHandler"/>
-        /// </summary>
-        /// <typeparam name="T">The <see cref="IStatusCodeHandler"/> to register</typeparam>
-        /// <returns><see cref="CarterConfigurator"/></returns>
-        public CarterConfigurator WithStatusCodeHandler<T>() where T : IStatusCodeHandler
-        {
-            this.StatusCodeHandlerTypes.Add(typeof(T));
-            return this;
-        }
-
-        /// <summary>
-        /// Register specific <see cref="IStatusCodeHandler"/>s
-        /// </summary>
-        /// <param name="statusCodeHandlers">An array of <see cref="IStatusCodeHandler"/>s</param>
-        /// <returns><see cref="CarterConfigurator"/></returns>
-        public CarterConfigurator WithStatusCodeHandlers(params Type[] statusCodeHandlers)
-        {
-            statusCodeHandlers.MustDeriveFrom<IStatusCodeHandler>();
-            this.StatusCodeHandlerTypes.AddRange(statusCodeHandlers);
-            return this;
-        }
-
-        /// <summary>
         /// Register a specific <see cref="IResponseNegotiator"/>
         /// </summary>
         /// <typeparam name="T">The <see cref="IResponseNegotiator"/> to register</typeparam>
@@ -133,7 +107,7 @@ namespace Carter
         }
 
         /// <summary>
-        /// Register specific <see cref="IStatusCodeHandler"/>s
+        /// Register specific <see cref="IResponseNegotiator"/>s
         /// </summary>
         /// <param name="responseNegotiators">An array of <see cref="IResponseNegotiator"/>s</param>
         /// <returns><see cref="CarterConfigurator"/></returns>
@@ -143,15 +117,34 @@ namespace Carter
             this.ResponseNegotiatorTypes.AddRange(responseNegotiators);
             return this;
         }
+
+        /// <summary>
+        /// Do not register any validators
+        /// </summary>
+        /// <returns></returns>
+        public CarterConfigurator WithEmptyValidators()
+        {
+            this.ExcludeValidators = true;
+            return this;
+        }
         
         /// <summary>
-        /// Register a specific <see cref="IModelBinder"/>
+        /// Do not register any modules
         /// </summary>
-        /// <typeparam name="T">The <see cref="IModelBinder"/> to register</typeparam>
-        /// <returns><see cref="CarterConfigurator"/></returns>
-        public CarterConfigurator WithModelBinder<T>() where T : IModelBinder
+        /// <returns></returns>
+        public CarterConfigurator WithEmptyModules()
         {
-            this.ModelBinder = typeof(T);
+            this.ExcludeModules = true;
+            return this;
+        }
+        
+        /// <summary>
+        /// Do not register any response negotiators
+        /// </summary>
+        /// <returns></returns>
+        public CarterConfigurator WithEmptyResponseNegotiators()
+        {
+            this.ExcludeResponseNegotiators = true;
             return this;
         }
     }

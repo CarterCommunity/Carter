@@ -1,18 +1,14 @@
-﻿namespace CarterSample
-{
-    using Microsoft.AspNetCore;
-    using Microsoft.AspNetCore.Hosting;
+﻿using Carter;
+using CarterSample.Features.Actors;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .Build()
-                .Run();
-            
-            
-        }
-    }
-}
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton<IActorProvider, ActorProvider>();
+builder.Services.AddCarter();
+
+var app = builder.Build();
+
+app.MapCarter();
+app.Run();

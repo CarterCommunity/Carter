@@ -2,6 +2,7 @@
 {
     using System;
     using System.Text.Json;
+    using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
@@ -13,7 +14,7 @@
 
         public DefaultJsonResponseNegotiator()
         {
-            this.jsonSettings = new JsonSerializerOptions { IgnoreNullValues = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            this.jsonSettings = new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
         }
 
         public bool CanHandle(MediaTypeHeaderValue accept)

@@ -6,12 +6,15 @@
     using Carter.ModelBinding;
     using Carter.Request;
     using Carter.Response;
+    using Microsoft.AspNetCore.Routing;
 
-    public class FunctionalProgrammingModule : CarterModule
+    public class FunctionalProgrammingModule : ICarterModule
     {
-        public FunctionalProgrammingModule() : base("/functional")
+        public void AddRoutes(IEndpointRouteBuilder app)
         {
-            this.Get("/directors", (req, res) =>
+            var basePath = "/functional";
+
+            app.MapGet($"{basePath}/directors", (HttpResponse res) =>
             {
                 var handler = RouteHandlers.ListDirectorsHandler;
 
@@ -26,48 +29,47 @@
                 return res.AsJson(directors);
             });
 
-            this.Get("/directors/{id:int}", (req, res) =>
+            app.MapGet($"{basePath}/directors/{{id:int}}", (int id) =>
             {
                 var handler = RouteHandlers.GetDirectorByIdHandler;
 
-                var director = handler(req.RouteValues.As<int>("id"));
+                var director = handler(id);
 
                 if (director == null)
                 {
-                    res.StatusCode = 404;
-                    return Task.CompletedTask;
+                    return Results.StatusCode(404);
                 }
 
-                return res.AsJson(director);
+                return Results.Ok(director);
             });
 
-            this.Post("/directors", async (req, res) =>
+            app.MapPost($"{basePath}/directors", async (HttpRequest req, Director director, HttpResponse res) =>
             {
-                var result = await req.BindAndValidate<Director>();
+                var result = req.Validate<Director>(director);
 
-                if (!result.ValidationResult.IsValid)
+                if (!result.IsValid)
                 {
                     res.StatusCode = 422;
-                    await res.Negotiate(result.ValidationResult.GetFormattedErrors());
+                    await res.Negotiate(result.GetFormattedErrors());
                     return;
                 }
 
                 var handler = RouteHandlers.CreateDirectorHandler;
 
-                var id = handler(result.Data);
+                var id = handler(director);
 
                 res.StatusCode = 201;
                 res.Headers["Location"] = "/" + id;
             });
 
-            this.Put("/directors/{id:int}", async (req, res) =>
+            app.MapPut($"{basePath}/directors/{{id:int}}", async (int id, Director director, HttpContext ctx) =>
             {
-                var result = await req.BindAndValidate<Director>();
+                var result = ctx.Request.Validate<Director>(director);
 
-                if (!result.ValidationResult.IsValid)
+                if (!result.IsValid)
                 {
-                    res.StatusCode = 422;
-                    await res.Negotiate(result.ValidationResult.GetFormattedErrors());
+                    ctx.Response.StatusCode = 422;
+                    await ctx.Response.Negotiate(result.GetFormattedErrors());
                     return;
                 }
 
@@ -75,37 +77,35 @@
 
                 try
                 {
-                    var success = handler(result.Data);
+                    var success = handler(director);
 
                     if (!success)
                     {
-                        res.StatusCode = 400;
+                        ctx.Response.StatusCode = 400;
                         return;
                     }
 
-                    res.StatusCode = 204;
+                    ctx.Response.StatusCode = 204;
                 }
                 catch
                 {
-                    res.StatusCode = 403;
+                    ctx.Response.StatusCode = 403;
                 }
             });
 
-            this.Delete("/directors/{id:int}", (req, res) =>
+            app.MapDelete($"{basePath}/directors/{{id:int}}", (int id) =>
             {
                 var handler = RouteHandlers.DeleteDirectorHandler;
 
                 try
                 {
-                    handler(req.RouteValues.As<int>("id"));
+                    handler(id);
 
-                    res.StatusCode = 204;
-                    return Task.CompletedTask;
+                    return Results.StatusCode(204);
                 }
                 catch (InvalidOperationException)
                 {
-                    res.StatusCode = 403;
-                    return Task.CompletedTask;
+                    return Results.StatusCode(403);
                 }
             });
         }

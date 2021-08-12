@@ -4,12 +4,15 @@
     using System.Net.Mime;
     using System.Text;
     using Carter.Response;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Routing;
 
-    public class StreamModule : CarterModule
+    public class StreamModule : ICarterModule
     {
-        public StreamModule()
+        public void AddRoutes(IEndpointRouteBuilder app)
         {
-            this.Get("/downloadwithcd", async (request, response) =>
+            app.MapGet("/downloadwithcd", async (HttpResponse response) =>
             {
                 using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("hi")))
                 {
@@ -18,7 +21,7 @@
                 }
             });
 
-            this.Get("/download", async (request, response) =>
+            app.MapGet("/download", async (HttpResponse response) =>
             {
                 using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("hi")))
                 {
@@ -26,7 +29,7 @@
                 }
             });
 
-            this.Get("/downloadrange", async (request, response) =>
+            app.MapGet("/downloadrange", async (HttpResponse response) =>
             {
                 using (var mystream = new MemoryStream(Encoding.ASCII.GetBytes("0123456789")))
                 {

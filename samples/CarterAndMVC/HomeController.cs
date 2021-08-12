@@ -10,6 +10,4 @@
             return "Hello from MVC";
         }
     }
-    
-    
 }
