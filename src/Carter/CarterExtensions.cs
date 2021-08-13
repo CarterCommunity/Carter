@@ -73,11 +73,8 @@ namespace Carter
 
             services.AddSingleton<IValidatorLocator, DefaultValidatorLocator>();
 
-            //services.AddRouting();
-
             foreach (var newModule in newModules)
             {
-                //services.AddScoped(newModule);
                 services.AddSingleton(typeof(ICarterModule), newModule);
             }
 
