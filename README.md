@@ -63,7 +63,6 @@ You can get started using either the template or by adding the package manually 
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddSingleton<IActorProvider, ActorProvider>();
 builder.Services.AddCarter();
 
 var app = builder.Build();
