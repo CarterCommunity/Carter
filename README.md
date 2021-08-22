@@ -21,7 +21,7 @@ Other extensions include:
 Carter uses `IEndpointRouteBuilder` routing and all the extensions `IEndpointConventionBuilder` offers also known as Minimal APIs. For example you can define a route with authorization required like so:
 
 ```csharp
-this.Get("/", () => "There's no place like 127.0.0.1").RequireAuthorization();
+app.Get("/", () => "There's no place like 127.0.0.1").RequireAuthorization();
 ```
 
 
