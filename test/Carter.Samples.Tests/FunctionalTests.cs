@@ -5,6 +5,7 @@ namespace Carter.Samples.Tests
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
+    using CarterSample.Features.Actors;
     using CarterSample;
     using CarterSample.Features.FunctionalProgramming;
     using CarterSample.Features.FunctionalProgramming.CreateDirector;
@@ -34,6 +35,7 @@ namespace Carter.Samples.Tests
             var server = new TestServer(WebHost.CreateDefaultBuilder()
                     .ConfigureServices(x =>
                     {
+                        x.AddSingleton<IActorProvider, ActorProvider>();
                         x.AddRouting();
                         x.AddCarter();
                     })
