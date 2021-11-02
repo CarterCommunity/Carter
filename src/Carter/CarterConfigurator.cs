@@ -17,6 +17,12 @@ namespace Carter
             this.ResponseNegotiatorTypes = new List<Type>();
         }
 
+        internal bool ExcludeValidators;
+
+        internal bool ExcludeModules;
+        
+        internal bool ExcludeResponseNegotiators;
+
         internal List<Type> ModuleTypes { get; }
 
         internal List<Type> ValidatorTypes { get; }
@@ -101,7 +107,7 @@ namespace Carter
         }
 
         /// <summary>
-        /// Register specific <see cref="IStatusCodeHandler"/>s
+        /// Register specific <see cref="IResponseNegotiator"/>s
         /// </summary>
         /// <param name="responseNegotiators">An array of <see cref="IResponseNegotiator"/>s</param>
         /// <returns><see cref="CarterConfigurator"/></returns>
@@ -109,6 +115,36 @@ namespace Carter
         {
             responseNegotiators.MustDeriveFrom<IResponseNegotiator>();
             this.ResponseNegotiatorTypes.AddRange(responseNegotiators);
+            return this;
+        }
+
+        /// <summary>
+        /// Do not register any validators
+        /// </summary>
+        /// <returns></returns>
+        public CarterConfigurator WithEmptyValidators()
+        {
+            this.ExcludeValidators = true;
+            return this;
+        }
+        
+        /// <summary>
+        /// Do not register any modules
+        /// </summary>
+        /// <returns></returns>
+        public CarterConfigurator WithEmptyModules()
+        {
+            this.ExcludeModules = true;
+            return this;
+        }
+        
+        /// <summary>
+        /// Do not register any response negotiators
+        /// </summary>
+        /// <returns></returns>
+        public CarterConfigurator WithEmptyResponseNegotiators()
+        {
+            this.ExcludeResponseNegotiators = true;
             return this;
         }
     }

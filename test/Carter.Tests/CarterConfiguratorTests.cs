@@ -105,7 +105,8 @@ namespace Carter.Tests
             var configurator = new CarterConfigurator();
 
             //When
-            var sameconfigurator = configurator.WithValidators(typeof(TestModelValidator), typeof(DuplicateTestModelOne));
+            var sameconfigurator =
+                configurator.WithValidators(typeof(TestModelValidator), typeof(DuplicateTestModelOne));
 
             //Then
             Assert.Same(configurator, sameconfigurator);
@@ -157,10 +158,50 @@ namespace Carter.Tests
             var configurator = new CarterConfigurator();
 
             //When
-            var sameconfigurator = configurator.WithResponseNegotiators(typeof(TestResponseNegotiator), typeof(TestXmlResponseNegotiator));
+            var sameconfigurator =
+                configurator.WithResponseNegotiators(typeof(TestResponseNegotiator), typeof(TestXmlResponseNegotiator));
 
             //Then
             Assert.Same(configurator, sameconfigurator);
+        }
+
+        [Fact]
+        public void Should_exclude_modules()
+        {
+            //Given
+            var configurator = new CarterConfigurator();
+
+            //When
+            var sameconfigurator = configurator.WithEmptyModules();
+            
+            //Then
+            Assert.Equal(0, sameconfigurator.ModuleTypes.Count);
+        }
+        
+        [Fact]
+        public void Should_exclude_negotiators()
+        {
+            //Given
+            var configurator = new CarterConfigurator();
+
+            //When
+            var sameconfigurator = configurator.WithResponseNegotiators();
+            
+            //Then
+            Assert.Equal(0, sameconfigurator.ResponseNegotiatorTypes.Count);
+        }
+        
+        [Fact]
+        public void Should_exclude_validators()
+        {
+            //Given
+            var configurator = new CarterConfigurator();
+
+            //When
+            var sameconfigurator = configurator.WithEmptyValidators();
+            
+            //Then
+            Assert.Equal(0, sameconfigurator.ValidatorTypes.Count);
         }
     }
 }

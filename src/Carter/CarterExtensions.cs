@@ -22,7 +22,7 @@ namespace Carter
         {
             var loggerFactory = builder.ServiceProvider.GetRequiredService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger(typeof(CarterConfigurator));
-            
+
             var carterConfigurator = builder.ServiceProvider.GetRequiredService<CarterConfigurator>();
             carterConfigurator.LogDiscoveredCarterTypes(logger);
 
@@ -90,7 +90,11 @@ namespace Carter
             IReadOnlyCollection<Assembly> assemblies)
         {
             IEnumerable<Type> responseNegotiators;
-            if (!carterConfigurator.ResponseNegotiatorTypes.Any())
+            if (carterConfigurator.ExcludeResponseNegotiators || carterConfigurator.ResponseNegotiatorTypes.Any())
+            {
+                responseNegotiators = carterConfigurator.ResponseNegotiatorTypes;
+            }
+            else
             {
                 responseNegotiators = assemblies.SelectMany(x => x.GetTypes()
                     .Where(t =>
@@ -103,18 +107,19 @@ namespace Carter
 
                 carterConfigurator.ResponseNegotiatorTypes.AddRange(responseNegotiators);
             }
-            else
-            {
-                responseNegotiators = carterConfigurator.ResponseNegotiatorTypes;
-            }
 
             return responseNegotiators;
         }
-        
-        private static IEnumerable<Type> GetNewModules(CarterConfigurator carterConfigurator, IReadOnlyCollection<Assembly> assemblies)
+
+        private static IEnumerable<Type> GetNewModules(CarterConfigurator carterConfigurator,
+            IReadOnlyCollection<Assembly> assemblies)
         {
             IEnumerable<Type> modules;
-            if (!carterConfigurator.ModuleTypes.Any())
+            if (carterConfigurator.ExcludeModules || carterConfigurator.ModuleTypes.Any())
+            {
+                modules = carterConfigurator.ModuleTypes;
+            }
+            else
             {
                 modules = assemblies.SelectMany(x => x.GetTypes()
                     .Where(t =>
@@ -126,10 +131,6 @@ namespace Carter
 
                 carterConfigurator.ModuleTypes.AddRange(modules);
             }
-            else
-            {
-                modules = carterConfigurator.ModuleTypes;
-            }
 
             return modules;
         }
@@ -138,17 +139,18 @@ namespace Carter
             IReadOnlyCollection<Assembly> assemblies)
         {
             IEnumerable<Type> validators;
-            if (!carterConfigurator.ValidatorTypes.Any())
+
+            if (carterConfigurator.ExcludeValidators || carterConfigurator.ValidatorTypes.Any())
+            {
+                validators = carterConfigurator.ValidatorTypes;
+            }
+            else
             {
                 validators = assemblies.SelectMany(ass => ass.GetTypes())
                     .Where(typeof(IValidator).IsAssignableFrom)
                     .Where(t => !t.GetTypeInfo().IsAbstract);
 
                 carterConfigurator.ValidatorTypes.AddRange(validators);
-            }
-            else
-            {
-                validators = carterConfigurator.ValidatorTypes;
             }
 
             return validators;
