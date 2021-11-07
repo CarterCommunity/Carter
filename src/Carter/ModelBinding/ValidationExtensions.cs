@@ -1,12 +1,12 @@
 namespace Carter.ModelBinding
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using FluentValidation;
     using FluentValidation.Results;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     public static class ValidationExtensions
     {
@@ -36,6 +36,19 @@ namespace Carter.ModelBinding
         {
             return result.Errors.Select(x => new ModelError { PropertyName = x.PropertyName, ErrorMessage = x.ErrorMessage });
         }
+
+        /// <summary>
+        /// Retrieve formatted validation errors for validation problem result
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string[]> GetValidationProblems(this ValidationResult result)
+        {
+            return result.Errors
+                .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
+                .ToDictionary(failureGroup => failureGroup.Key, failureGroup => failureGroup.ToArray());
+        }
+
     }
 
     public class ModelError
