@@ -2,8 +2,11 @@ namespace Carter.Tests
 {
     using System;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
+    using Carter.ModelBinding;
     using Carter.Request;
+    using Carter.Response;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
@@ -38,6 +41,12 @@ namespace Carter.Tests
                 var id = ctx.Request.Query.AsMultiple<int>("id");
                 await ctx.Response.WriteAsync($"Managed to parse multiple ints {id.Count()}");
             });
+            
+            app.MapGet("/multimulti", async (HttpContext ctx) =>
+            {
+                var id = ctx.Request.Query.AsMultiple<int[]>("id");
+                await ctx.Response.WriteAsync($"Managed to parse multiple ints {id.Count()}");
+            });
 
             app.MapGet("/nullablemultiquerystring", async (HttpContext ctx) =>
             {
@@ -55,6 +64,24 @@ namespace Carter.Tests
             {
                 var content = await ctx.Request.Body.AsStringAsync();
                 await ctx.Response.WriteAsync(content);
+            });
+            
+            app.MapPost("/bindandsave", async (HttpRequest req, HttpResponse res) =>
+            {
+                var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
+                await req.BindAndSaveFile(filePath);
+
+                await res.Negotiate(new ExtensionTests.PathTestModel { Path = filePath });
+            });
+
+            app.MapPost("/bindandsavecustomname", async (HttpRequest req, HttpResponse res) =>
+            {
+                var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+
+                await req.BindAndSaveFile(filePath, "mycustom.txt");
+
+                await res.Negotiate(new ExtensionTests.PathTestModel { Path = filePath });
             });
 
             app.MapGet("405test", context => context.Response.WriteAsync("hi"));
