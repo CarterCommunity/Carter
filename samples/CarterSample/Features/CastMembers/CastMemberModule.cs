@@ -1,37 +1,26 @@
-﻿namespace CarterSample.Features.CastMembers
+﻿namespace CarterSample.Features.CastMembers;
+
+public class CastMemberModule : ICarterModule
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Carter;
-    using Carter.ModelBinding;
-    using Carter.Response;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Routing;
-    using ValidatorOnlyProject;
-
-    public class CastMemberModule : ICarterModule
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
-        public void AddRoutes(IEndpointRouteBuilder app)
+        app.MapPost("/castmembers", (HttpRequest req, CastMember castMember) =>
         {
-            app.MapPost("/castmembers", (HttpRequest req, CastMember castMember) =>
+            var result = req.Validate<CastMember>(castMember);
+
+            if (!result.IsValid)
             {
-                var result = req.Validate<CastMember>(castMember);
+                return Results.ValidationProblem(result.GetValidationProblems(), statusCode: 422);
+            }
 
-                if (!result.IsValid)
-                {
-                    return Results.UnprocessableEntity(result.GetFormattedErrors());
-                }
+            return Results.Ok("OK");
+        });
 
-                return Results.Ok("OK");
-            });
+        app.MapGet("/castmembers", () =>
+        {
+            var castMembers = new[] { new CastMember { Name = "Samuel L Jackson" }, new CastMember { Name = "John Travolta" } };
 
-            app.MapGet("/castmembers", () =>
-            {
-                var castMembers = new[] { new CastMember { Name = "Samuel L Jackson" }, new CastMember { Name = "John Travolta" } };
-
-                return castMembers;
-            });
-        }
+            return castMembers;
+        });
     }
 }

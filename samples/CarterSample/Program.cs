@@ -1,11 +1,9 @@
-﻿using Carter;
-using CarterSample.Features.Actors;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
+﻿var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton<IGetActorsQuery, GetActorsQuery>();
+builder.Services.AddSingleton<IGetActorByIdQuery, GetActorByIdQuery>();
+builder.Services.AddSingleton<IDeleteActorCommand, DeleteActorCommand>();
 
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddSingleton<IActorProvider, ActorProvider>();
 builder.Services.AddCarter();
 
 var app = builder.Build();

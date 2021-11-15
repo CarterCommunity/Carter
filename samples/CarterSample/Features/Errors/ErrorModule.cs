@@ -1,34 +1,26 @@
-namespace CarterSample.Features.Errors
+namespace CarterSample.Features.Errors;
+
+public class ErrorModule : ICarterModule
 {
-    using System;
-    using Carter;
-    using Microsoft.AspNetCore.Diagnostics;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Routing;
-
-    public class ErrorModule : ICarterModule
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
-        public void AddRoutes(IEndpointRouteBuilder app)
-        {
-            app.MapGet("/error", () =>
-            {
-                throw new Exception("oops");
-            });
+        app.MapGet("/error", () => { throw new Exception("oops"); });
 
-            app.MapGet("/errorhandler", (HttpContext ctx) =>
+        app.MapGet("/errorhandler", (HttpContext ctx) =>
+        {
+            var error = string.Empty;
+            var feature = ctx.Features.Get<IExceptionHandlerFeature>();
+            if (feature != null)
             {
-                string error = string.Empty;
-                var feature = ctx.Features.Get<IExceptionHandlerFeature>();
-                if (feature != null)
+                if (feature.Error is ArgumentNullException)
                 {
-                    if (feature.Error is ArgumentNullException)
-                    {
-                        ctx.Response.StatusCode = 402;
-                    }
-                    error = feature.Error.ToString();
+                    ctx.Response.StatusCode = 402;
                 }
-                return $"There has been an error{Environment.NewLine}{error}";
-            });
-        }
+
+                error = feature.Error.ToString();
+            }
+
+            return $"There has been an error{Environment.NewLine}{error}";
+        });
     }
 }

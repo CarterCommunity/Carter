@@ -1,7 +1,6 @@
-﻿namespace CarterSample.Features.FunctionalProgramming
+﻿namespace CarterSample.Features.FunctionalProgramming;
+
+public class Director
 {
-    public class Director
-    {
-        public string Name { get; set; }
-    }
+    public string Name { get; set; }
 }

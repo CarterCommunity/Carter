@@ -1,9 +1,6 @@
-namespace CarterSample.Features.Actors
-{
-    using System.Collections.Generic;
+namespace CarterSample.Features.Actors;
 
-    public class PagedItems<T>
-    {
-        public IEnumerable<T> Data { get; }
-    }
+public class PagedItems<T>
+{
+    public IEnumerable<T> Data { get; }
 }

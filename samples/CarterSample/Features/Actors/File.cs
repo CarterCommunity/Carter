@@ -1,8 +1,7 @@
-﻿namespace CarterSample.Features.Actors
+﻿namespace CarterSample.Features.Actors;
+
+public class File
 {
-    public class File
-    {
-        public string Name { get; set;  }
-        public ulong FileTypeId { get; set; }
-    }
+    public string Name { get; set;  }
+    public ulong FileTypeId { get; set; }
 }
