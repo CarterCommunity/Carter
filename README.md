@@ -149,7 +149,7 @@ public class Database : IDatabase
 
 As mentioned earlier Carter will scan for implementations in your app and register them for DI. However, if you want a more controlled app, Carter comes with a `CarterConfigurator` that allows you to register modules, validators and response negotiators manually.
 
-Carter will use a response negotiator based on `System.Text.Json`, though it provides for custom implementations via the `IResponseNegotiator` interface. To use your own implementation of `IResponseNegotiator` (say, `CustomResponseNegotiator`), add the following line to the initial Carter configuration, in this case as part of `Startup.cs`:
+Carter will use a response negotiator based on `System.Text.Json`, though it provides for custom implementations via the `IResponseNegotiator` interface. To use your own implementation of `IResponseNegotiator` (say, `CustomResponseNegotiator`), add the following line to the initial Carter configuration, in this case as part of `Program.cs`:
 
 ```csharp
 
@@ -165,11 +165,8 @@ Carter will use a response negotiator based on `System.Text.Json`, though it pro
 Here again, Carter already ships with a response negotiator using `Newtonsoft.Json`, so you can wire up the Newtonsoft implementation with the following line:
 
 ```csharp
-    public void ConfigureServices(IServiceCollection services)
+    builder.Services.AddCarter(configurator: c =>
     {
-        services.AddCarter(configurator: c =>
-        {
-            c.WithResponseNegotiator<NewtonsoftJsonResponseNegotiator>();
-        });
-    }
+        c.WithResponseNegotiator<NewtonsoftJsonResponseNegotiator>();
+    });
 ```
