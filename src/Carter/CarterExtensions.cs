@@ -1,176 +1,175 @@
-namespace Carter
+namespace Carter;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Carter.Response;
+using FluentValidation;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+public static class CarterExtensions
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using Carter.Response;
-    using FluentValidation;
-    using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Routing;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
-
-    public static class CarterExtensions
+    /// <summary>
+    /// Adds Carter to the specified <see cref="IApplicationBuilder"/>.
+    /// </summary>
+    /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
+    /// <returns>A reference to this instance after the operation has completed.</returns>
+    public static void MapCarter(this IEndpointRouteBuilder builder)
     {
-        /// <summary>
-        /// Adds Carter to the specified <see cref="IApplicationBuilder"/>.
-        /// </summary>
-        /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
-        /// <returns>A reference to this instance after the operation has completed.</returns>
-        public static void MapCarter(this IEndpointRouteBuilder builder)
+        var loggerFactory = builder.ServiceProvider.GetRequiredService<ILoggerFactory>();
+        var logger = loggerFactory.CreateLogger(typeof(CarterConfigurator));
+
+        var carterConfigurator = builder.ServiceProvider.GetRequiredService<CarterConfigurator>();
+        carterConfigurator.LogDiscoveredCarterTypes(logger);
+
+        foreach (var newCarterModule in builder.ServiceProvider.GetServices<ICarterModule>())
         {
-            var loggerFactory = builder.ServiceProvider.GetRequiredService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger(typeof(CarterConfigurator));
+            newCarterModule.AddRoutes(builder);
+        }
+    }
 
-            var carterConfigurator = builder.ServiceProvider.GetRequiredService<CarterConfigurator>();
-            carterConfigurator.LogDiscoveredCarterTypes(logger);
+    /// <summary>
+    /// Adds Carter to the specified <see cref="IServiceCollection"/>.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
+    /// <param name="assemblyCatalog">Optional <see cref="DependencyContextAssemblyCatalog"/> containing assemblies to add to the services collection. If not provided, the default catalog of assemblies is added, which includes Assembly.GetEntryAssembly.</param>
+    /// <param name="configurator">Optional <see cref="CarterConfigurator"/> to enable registration of specific types within Carter</param>
+    public static IServiceCollection AddCarter(this IServiceCollection services,
+        DependencyContextAssemblyCatalog assemblyCatalog = null,
+        Action<CarterConfigurator> configurator = null)
+    {
+        assemblyCatalog ??= new DependencyContextAssemblyCatalog();
 
-            foreach (var newCarterModule in builder.ServiceProvider.GetServices<ICarterModule>())
-            {
-                newCarterModule.AddRoutes(builder);
-            }
+        var config = new CarterConfigurator();
+        configurator?.Invoke(config);
+
+        WireupCarter(services, assemblyCatalog, config);
+
+        return services;
+    }
+
+    private static void WireupCarter(this IServiceCollection services,
+        DependencyContextAssemblyCatalog assemblyCatalog, CarterConfigurator carterConfigurator)
+    {
+        var assemblies = assemblyCatalog.GetAssemblies();
+
+        var validators = GetValidators(carterConfigurator, assemblies);
+
+        var newModules = GetNewModules(carterConfigurator, assemblies);
+
+        var responseNegotiators = GetResponseNegotiators(carterConfigurator, assemblies);
+
+        services.AddSingleton(carterConfigurator);
+
+        foreach (var validator in validators)
+        {
+            services.AddSingleton(typeof(IValidator), validator);
+            services.AddSingleton(validator);
         }
 
-        /// <summary>
-        /// Adds Carter to the specified <see cref="IServiceCollection"/>.
-        /// </summary>
-        /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
-        /// <param name="assemblyCatalog">Optional <see cref="DependencyContextAssemblyCatalog"/> containing assemblies to add to the services collection. If not provided, the default catalog of assemblies is added, which includes Assembly.GetEntryAssembly.</param>
-        /// <param name="configurator">Optional <see cref="CarterConfigurator"/> to enable registration of specific types within Carter</param>
-        public static IServiceCollection AddCarter(this IServiceCollection services,
-            DependencyContextAssemblyCatalog assemblyCatalog = null,
-            Action<CarterConfigurator> configurator = null)
+        services.AddSingleton<IValidatorLocator, DefaultValidatorLocator>();
+
+        foreach (var newModule in newModules)
         {
-            assemblyCatalog ??= new DependencyContextAssemblyCatalog();
-
-            var config = new CarterConfigurator();
-            configurator?.Invoke(config);
-
-            WireupCarter(services, assemblyCatalog, config);
-
-            return services;
+            services.AddSingleton(typeof(ICarterModule), newModule);
         }
 
-        private static void WireupCarter(this IServiceCollection services,
-            DependencyContextAssemblyCatalog assemblyCatalog, CarterConfigurator carterConfigurator)
+        foreach (var negotiator in responseNegotiators)
         {
-            var assemblies = assemblyCatalog.GetAssemblies();
-
-            var validators = GetValidators(carterConfigurator, assemblies);
-
-            var newModules = GetNewModules(carterConfigurator, assemblies);
-
-            var responseNegotiators = GetResponseNegotiators(carterConfigurator, assemblies);
-
-            services.AddSingleton(carterConfigurator);
-
-            foreach (var validator in validators)
-            {
-                services.AddSingleton(typeof(IValidator), validator);
-                services.AddSingleton(validator);
-            }
-
-            services.AddSingleton<IValidatorLocator, DefaultValidatorLocator>();
-
-            foreach (var newModule in newModules)
-            {
-                services.AddSingleton(typeof(ICarterModule), newModule);
-            }
-
-            foreach (var negotiator in responseNegotiators)
-            {
-                services.AddSingleton(typeof(IResponseNegotiator), negotiator);
-            }
-
-            services.AddSingleton<IResponseNegotiator, DefaultJsonResponseNegotiator>();
+            services.AddSingleton(typeof(IResponseNegotiator), negotiator);
         }
 
-        private static IEnumerable<Type> GetResponseNegotiators(CarterConfigurator carterConfigurator,
-            IReadOnlyCollection<Assembly> assemblies)
+        services.AddSingleton<IResponseNegotiator, DefaultJsonResponseNegotiator>();
+    }
+
+    private static IEnumerable<Type> GetResponseNegotiators(CarterConfigurator carterConfigurator,
+        IReadOnlyCollection<Assembly> assemblies)
+    {
+        IEnumerable<Type> responseNegotiators;
+        if (carterConfigurator.ExcludeResponseNegotiators || carterConfigurator.ResponseNegotiatorTypes.Any())
         {
-            IEnumerable<Type> responseNegotiators;
-            if (carterConfigurator.ExcludeResponseNegotiators || carterConfigurator.ResponseNegotiatorTypes.Any())
-            {
-                responseNegotiators = carterConfigurator.ResponseNegotiatorTypes;
-            }
-            else
-            {
-                responseNegotiators = assemblies.SelectMany(x => x.GetTypes()
-                    .Where(t =>
-                        !t.IsAbstract &&
-                        typeof(IResponseNegotiator).IsAssignableFrom(t) &&
-                        t != typeof(IResponseNegotiator) &&
-                        t != typeof(DefaultJsonResponseNegotiator) &&
-                        t != typeof(NewtonsoftJsonResponseNegotiator)
-                    ));
+            responseNegotiators = carterConfigurator.ResponseNegotiatorTypes;
+        }
+        else
+        {
+            responseNegotiators = assemblies.SelectMany(x => x.GetTypes()
+                .Where(t =>
+                    !t.IsAbstract &&
+                    typeof(IResponseNegotiator).IsAssignableFrom(t) &&
+                    t != typeof(IResponseNegotiator) &&
+                    t != typeof(DefaultJsonResponseNegotiator) &&
+                    t != typeof(NewtonsoftJsonResponseNegotiator)
+                ));
 
-                carterConfigurator.ResponseNegotiatorTypes.AddRange(responseNegotiators);
-            }
-
-            return responseNegotiators;
+            carterConfigurator.ResponseNegotiatorTypes.AddRange(responseNegotiators);
         }
 
-        private static IEnumerable<Type> GetNewModules(CarterConfigurator carterConfigurator,
-            IReadOnlyCollection<Assembly> assemblies)
+        return responseNegotiators;
+    }
+
+    private static IEnumerable<Type> GetNewModules(CarterConfigurator carterConfigurator,
+        IReadOnlyCollection<Assembly> assemblies)
+    {
+        IEnumerable<Type> modules;
+        if (carterConfigurator.ExcludeModules || carterConfigurator.ModuleTypes.Any())
         {
-            IEnumerable<Type> modules;
-            if (carterConfigurator.ExcludeModules || carterConfigurator.ModuleTypes.Any())
-            {
-                modules = carterConfigurator.ModuleTypes;
-            }
-            else
-            {
-                modules = assemblies.SelectMany(x => x.GetTypes()
-                    .Where(t =>
-                        !t.IsAbstract &&
-                        typeof(ICarterModule).IsAssignableFrom(t) &&
-                        t != typeof(ICarterModule) &&
-                        t.IsPublic
-                    ));
+            modules = carterConfigurator.ModuleTypes;
+        }
+        else
+        {
+            modules = assemblies.SelectMany(x => x.GetTypes()
+                .Where(t =>
+                    !t.IsAbstract &&
+                    typeof(ICarterModule).IsAssignableFrom(t) &&
+                    t != typeof(ICarterModule) &&
+                    t.IsPublic
+                ));
 
-                carterConfigurator.ModuleTypes.AddRange(modules);
-            }
-
-            return modules;
+            carterConfigurator.ModuleTypes.AddRange(modules);
         }
 
-        private static IEnumerable<Type> GetValidators(CarterConfigurator carterConfigurator,
-            IReadOnlyCollection<Assembly> assemblies)
+        return modules;
+    }
+
+    private static IEnumerable<Type> GetValidators(CarterConfigurator carterConfigurator,
+        IReadOnlyCollection<Assembly> assemblies)
+    {
+        IEnumerable<Type> validators;
+
+        if (carterConfigurator.ExcludeValidators || carterConfigurator.ValidatorTypes.Any())
         {
-            IEnumerable<Type> validators;
+            validators = carterConfigurator.ValidatorTypes;
+        }
+        else
+        {
+            validators = assemblies.SelectMany(ass => ass.GetTypes())
+                .Where(typeof(IValidator).IsAssignableFrom)
+                .Where(t => !t.GetTypeInfo().IsAbstract);
 
-            if (carterConfigurator.ExcludeValidators || carterConfigurator.ValidatorTypes.Any())
-            {
-                validators = carterConfigurator.ValidatorTypes;
-            }
-            else
-            {
-                validators = assemblies.SelectMany(ass => ass.GetTypes())
-                    .Where(typeof(IValidator).IsAssignableFrom)
-                    .Where(t => !t.GetTypeInfo().IsAbstract);
-
-                carterConfigurator.ValidatorTypes.AddRange(validators);
-            }
-
-            return validators;
+            carterConfigurator.ValidatorTypes.AddRange(validators);
         }
 
-        private class CompositeConventionBuilder : IEndpointConventionBuilder
+        return validators;
+    }
+
+    private class CompositeConventionBuilder : IEndpointConventionBuilder
+    {
+        private readonly List<IEndpointConventionBuilder> _builders;
+
+        public CompositeConventionBuilder(List<IEndpointConventionBuilder> builders)
         {
-            private readonly List<IEndpointConventionBuilder> _builders;
+            _builders = builders;
+        }
 
-            public CompositeConventionBuilder(List<IEndpointConventionBuilder> builders)
+        public void Add(Action<EndpointBuilder> convention)
+        {
+            foreach (var builder in _builders)
             {
-                _builders = builders;
-            }
-
-            public void Add(Action<EndpointBuilder> convention)
-            {
-                foreach (var builder in _builders)
-                {
-                    builder.Add(convention);
-                }
+                builder.Add(convention);
             }
         }
     }

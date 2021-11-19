@@ -1,50 +1,49 @@
-namespace Carter
+namespace Carter;
+
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using FluentValidation;
+
+public class DefaultValidatorLocator : IValidatorLocator
 {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using FluentValidation;
+    private readonly IEnumerable<IValidator> validators;
 
-    public class DefaultValidatorLocator : IValidatorLocator
+    private readonly ConcurrentDictionary<Type, IValidator> foundValidators = new ConcurrentDictionary<Type, IValidator>();
+
+    public DefaultValidatorLocator(IEnumerable<IValidator> validators) => this.validators = validators;
+
+    public IValidator GetValidator<T>() => this.GetValidator(typeof(T));
+
+    public IValidator GetValidator(Type type) => this.foundValidators.GetOrAdd(type, this.FindValidator);
+
+    private IValidator FindValidator(Type type)
     {
-        private readonly IEnumerable<IValidator> validators;
+        var fullType = CreateValidatorType(type);
 
-        private readonly ConcurrentDictionary<Type, IValidator> foundValidators = new ConcurrentDictionary<Type, IValidator>();
+        var available = this.validators
+            .Where(validator => fullType.GetTypeInfo().IsInstanceOfType(validator))
+            .ToArray();
 
-        public DefaultValidatorLocator(IEnumerable<IValidator> validators) => this.validators = validators;
-
-        public IValidator GetValidator<T>() => this.GetValidator(typeof(T));
-
-        public IValidator GetValidator(Type type) => this.foundValidators.GetOrAdd(type, this.FindValidator);
-
-        private IValidator FindValidator(Type type)
+        if (available.Length > 1)
         {
-            var fullType = CreateValidatorType(type);
+            var names = string.Join(", ", available.Select(v => v.GetType().Name));
+            var message = string.Concat(
+                "Ambiguous choice between multiple validators for type ",
+                type.Name,
+                ". The validators available are: ",
+                names);
 
-            var available = this.validators
-                .Where(validator => fullType.GetTypeInfo().IsInstanceOfType(validator))
-                .ToArray();
-
-            if (available.Length > 1)
-            {
-                var names = string.Join(", ", available.Select(v => v.GetType().Name));
-                var message = string.Concat(
-                    "Ambiguous choice between multiple validators for type ",
-                    type.Name,
-                    ". The validators available are: ",
-                    names);
-
-                throw new InvalidOperationException(message);
-            }
-
-            return available.FirstOrDefault();
+            throw new InvalidOperationException(message);
         }
 
-        private static Type CreateValidatorType(Type type)
-        {
-            return typeof(AbstractValidator<>).MakeGenericType(type);
-        }
+        return available.FirstOrDefault();
+    }
+
+    private static Type CreateValidatorType(Type type)
+    {
+        return typeof(AbstractValidator<>).MakeGenericType(type);
     }
 }
