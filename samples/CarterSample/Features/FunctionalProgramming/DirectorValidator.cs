@@ -1,12 +1,11 @@
-﻿namespace CarterSample.Features.FunctionalProgramming
-{
-    using FluentValidation;
+﻿namespace CarterSample.Features.FunctionalProgramming;
 
-    public class DirectorValidator : AbstractValidator<Director>
+using FluentValidation;
+
+public class DirectorValidator : AbstractValidator<Director>
+{
+    public DirectorValidator()
     {
-        public DirectorValidator()
-        {
-            this.RuleFor(x => x.Name).NotEmpty();
-        }
+        this.RuleFor(x => x.Name).NotEmpty();
     }
 }

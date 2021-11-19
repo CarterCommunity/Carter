@@ -35,7 +35,9 @@ namespace Carter.Samples.Tests
             var server = new TestServer(WebHost.CreateDefaultBuilder()
                     .ConfigureServices(x =>
                     {
-                        x.AddSingleton<IActorProvider, ActorProvider>();
+                        x.AddSingleton<IGetActorsQuery, GetActorsQuery>();
+                        x.AddSingleton<IGetActorByIdQuery, GetActorByIdQuery>();
+                        x.AddSingleton<IDeleteActorCommand, DeleteActorCommand>();
                         x.AddRouting();
                         x.AddCarter();
                     })

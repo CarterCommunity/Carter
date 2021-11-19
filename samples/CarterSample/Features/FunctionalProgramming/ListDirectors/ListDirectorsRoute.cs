@@ -1,27 +1,26 @@
-﻿namespace CarterSample.Features.FunctionalProgramming.ListDirectors
+﻿namespace CarterSample.Features.FunctionalProgramming.ListDirectors;
+
+using System.Collections.Generic;
+using System.Linq;
+
+public static class ListDirectorsRoute
 {
-    using System.Collections.Generic;
-    using System.Linq;
+    public delegate IEnumerable<Director> ListDirectorsHandler();
+    public delegate IEnumerable<Director> ListDirectors();
+    public delegate bool UserAllowed();
 
-    public static class ListDirectorsRoute
+    public static IEnumerable<Director> Handle(ListDirectors listDirectors, UserAllowed userAllowed, SharedDelegateExample sharedDelegateExample)
     {
-        public delegate IEnumerable<Director> ListDirectorsHandler();
-        public delegate IEnumerable<Director> ListDirectors();
-        public delegate bool UserAllowed();
+        var truthy = sharedDelegateExample();
 
-        public static IEnumerable<Director> Handle(ListDirectors listDirectors, UserAllowed userAllowed, SharedDelegateExample sharedDelegateExample)
+        var currentUserAllowed = userAllowed();
+        if (!currentUserAllowed)
         {
-            var truthy = sharedDelegateExample();
-
-            var currentUserAllowed = userAllowed();
-            if (!currentUserAllowed)
-            {
-                return null;
-            }
-
-            var directors = listDirectors();
-
-            return directors ?? Enumerable.Empty<Director>();
+            return null;
         }
+
+        var directors = listDirectors();
+
+        return directors ?? Enumerable.Empty<Director>();
     }
 }

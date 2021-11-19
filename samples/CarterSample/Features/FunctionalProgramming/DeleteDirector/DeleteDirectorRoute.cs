@@ -1,21 +1,20 @@
-﻿namespace CarterSample.Features.FunctionalProgramming.DeleteDirector
+﻿namespace CarterSample.Features.FunctionalProgramming.DeleteDirector;
+
+using System;
+
+public class DeleteDirectorRoute
 {
-    using System;
+    public delegate int DeleteDirectorById(int id);
 
-    public class DeleteDirectorRoute
-    {
-        public delegate int DeleteDirectorById(int id);
-
-        public delegate void DeleteDirectorHandler(int id);
+    public delegate void DeleteDirectorHandler(int id);
         
-        public static void Handle(int dirId, DeleteDirectorById deleteDirectorById, Func<bool> userAllowed)
+    public static void Handle(int dirId, DeleteDirectorById deleteDirectorById, Func<bool> userAllowed)
+    {
+        if (!userAllowed())
         {
-            if (!userAllowed())
-            {
-                throw new InvalidOperationException();
-            }
-
-            deleteDirectorById(dirId);
+            throw new InvalidOperationException();
         }
+
+        deleteDirectorById(dirId);
     }
 }

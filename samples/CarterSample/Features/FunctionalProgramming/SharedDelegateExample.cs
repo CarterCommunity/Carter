@@ -1,12 +1,11 @@
-namespace CarterSample.Features.FunctionalProgramming
-{
-    public delegate bool SharedDelegateExample();
+namespace CarterSample.Features.FunctionalProgramming;
 
-    public class SharedImplementations
+public delegate bool SharedDelegateExample();
+
+public class SharedImplementations
+{
+    public static bool SharedImplementation()
     {
-        public static bool SharedImplementation()
-        {
-            return false;
-        }
+        return false;
     }
 }
