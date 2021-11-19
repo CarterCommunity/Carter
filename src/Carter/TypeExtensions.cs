@@ -1,17 +1,16 @@
-namespace Carter
-{
-    using System;
-    using System.Linq;
+namespace Carter;
 
-    internal static class TypeExtensions
+using System;
+using System.Linq;
+
+internal static class TypeExtensions
+{
+    internal static void MustDeriveFrom<T>(this Type[] types)
     {
-        internal static void MustDeriveFrom<T>(this Type[] types)
+        var invalidTypes = types.Where(m => !typeof(T).IsAssignableFrom(m)).ToList();
+        if (invalidTypes.Any())
         {
-            var invalidTypes = types.Where(m => !typeof(T).IsAssignableFrom(m)).ToList();
-            if (invalidTypes.Any())
-            {
-                throw new ArgumentException($"Types must derive from {typeof(T).Name}, failing types: {string.Join(",", invalidTypes)}");
-            }
+            throw new ArgumentException($"Types must derive from {typeof(T).Name}, failing types: {string.Join(",", invalidTypes)}");
         }
     }
 }
