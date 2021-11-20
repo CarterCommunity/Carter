@@ -40,3 +40,6 @@ app.UseSwaggerUI();
 app.MapCarter();
 
 app.Run();
+
+//Needed for testing unless you use InternalsVisibleTo in csproj
+public partial class Program { }

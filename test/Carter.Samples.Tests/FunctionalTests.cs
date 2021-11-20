@@ -5,21 +5,13 @@ namespace Carter.Samples.Tests
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
-    using CarterSample.Features.Actors;
-    using CarterSample;
     using CarterSample.Features.FunctionalProgramming;
     using CarterSample.Features.FunctionalProgramming.CreateDirector;
     using CarterSample.Features.FunctionalProgramming.DeleteDirector;
     using CarterSample.Features.FunctionalProgramming.GetDirectorById;
     using CarterSample.Features.FunctionalProgramming.ListDirectors;
     using CarterSample.Features.FunctionalProgramming.UpdateDirector;
-    using Microsoft.AspNetCore;
-    using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Hosting.Server.Features;
-    using Microsoft.AspNetCore.Http.Features;
-    using Microsoft.AspNetCore.TestHost;
-    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.AspNetCore.Mvc.Testing;
     using Newtonsoft.Json;
     using Xunit;
 
@@ -28,25 +20,15 @@ namespace Carter.Samples.Tests
         private readonly HttpClient client;
 
         public FunctionalTests()
-        {
-            var featureCollection = new FeatureCollection();
-            featureCollection.Set<IServerAddressesFeature>(new ServerAddressesFeature());
-
-            var server = new TestServer(WebHost.CreateDefaultBuilder()
-                    .ConfigureServices(x =>
+        {            
+            var server = new WebApplicationFactory<Program>()
+                .WithWebHostBuilder(builder =>
+                {
+                    builder.ConfigureServices(services =>
                     {
-                        x.AddSingleton<IGetActorsQuery, GetActorsQuery>();
-                        x.AddSingleton<IGetActorByIdQuery, GetActorByIdQuery>();
-                        x.AddSingleton<IDeleteActorCommand, DeleteActorCommand>();
-                        x.AddRouting();
-                        x.AddCarter();
-                    })
-                    .Configure(x =>
-                    {
-                        x.UseRouting();
-                        x.UseEndpoints(e => e.MapCarter());
-                    }), featureCollection
-            );
+                        //services.AddSingleton<IHelloService, MockHelloService>();
+                    });
+                });
 
             this.client = server.CreateClient();
         }
