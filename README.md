@@ -1,12 +1,5 @@
 # Carter
 
-* Latest NuGet Release [![NuGet Version](http://img.shields.io/nuget/v/Carter.svg?style=flat)](https://www.nuget.org/packages/carter) 
-* Latest NuGet Pre-Release [![NuGet Version](http://img.shields.io/nuget/vpre/Carter.svg?style=flat)](https://www.nuget.org/packages/carter) 
-* Lateset CI Release [![feedz.io](https://img.shields.io/badge/endpoint.svg?url=https%3A%2F%2Ff.feedz.io%2Fcarter%2Fcarter%2Fshield%2FCarter%2Flatest)](https://f.feedz.io/carter/carter/packages/Carter/latest/download) 
-* Build Status [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FCarterCommunity%2FCarter%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/CarterCommunity/Carter/goto?ref=main)
-
-<a href="https://join.slack.com/t/cartercommunity/shared_invite/enQtMzY2Nzc0NjU2MTgyLWY3M2Y2Yjk3NzViN2Y3YTQ4ZDA5NWFlMTYxMTIwNDFkMTc5YWEwMDFiOWUyM2Q4ZmY5YmRkODYyYTllZDViMmE"><img src="./slack.svg" width="140px"/></a>
-
 Carter is a framework that is a thin layer of extension methods and functionality over ASP.NET Core allowing the code to be more explicit and most importantly more enjoyable.
 
 For a better understanding, take a good look at the [samples](https://github.com/CarterCommunity/Carter/tree/master/samples) inside this repo. The samples demonstrate usages of elegant extensions around common ASP.NET Core types as shown below.  
@@ -18,6 +11,17 @@ Other extensions include:
 * Routes to use in common ASP.NET Core middleware e.g., `app.UseExceptionHandler("/errorhandler");`.
 * `IResponseNegotiator`s allow you to define how the response should look on a certain Accept header(content negotiation). Handling JSON is built in the default response but implementing an interface allows the user to choose how they want to represent resources.
 * All interface implementations for Carter components are registered into ASP.NET Core DI automatically. Implement the interface and off you go.
+
+### Releases
+
+* Latest NuGet Release [![NuGet Version](http://img.shields.io/nuget/v/Carter.svg?style=flat)](https://www.nuget.org/packages/carter) 
+* Latest NuGet Pre-Release [![NuGet Version](http://img.shields.io/nuget/vpre/Carter.svg?style=flat)](https://www.nuget.org/packages/carter) 
+* Lateset CI Release [![feedz.io](https://img.shields.io/badge/endpoint.svg?url=https%3A%2F%2Ff.feedz.io%2Fcarter%2Fcarter%2Fshield%2FCarter%2Flatest)](https://f.feedz.io/carter/carter/packages/Carter/latest/download) 
+* Build Status [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FCarterCommunity%2FCarter%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/CarterCommunity/Carter/goto?ref=main)
+
+### Join our Slack Channel
+
+<a href="https://join.slack.com/t/cartercommunity/shared_invite/enQtMzY2Nzc0NjU2MTgyLWY3M2Y2Yjk3NzViN2Y3YTQ4ZDA5NWFlMTYxMTIwNDFkMTc5YWEwMDFiOWUyM2Q4ZmY5YmRkODYyYTllZDViMmE"><img src="./slack.svg" width="140px"/></a>
 
 #### Routing
 
