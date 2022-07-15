@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <PackageType>Template</PackageType>
-        <PackageVersion>6.0.0</PackageVersion>
+        <PackageVersion>6.1.0</PackageVersion>
         <PackageId>CarterTemplate</PackageId>
         <Description>A dotnet-new template for Carter applications.</Description>
         <Authors>Jonathan Channon</Authors>
@@ -26,6 +26,6 @@
         <None Include="..\media\carterlogo.png" Pack="true" PackagePath="\"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Carter" Version="6.0.0"/>
+        <PackageReference Include="Carter" Version="6.1.0"/>
     </ItemGroup>
 </Project>
