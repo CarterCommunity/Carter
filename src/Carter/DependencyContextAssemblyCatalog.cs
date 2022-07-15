@@ -9,9 +9,13 @@ using Microsoft.Extensions.DependencyModel;
 
 public class DependencyContextAssemblyCatalog
 {
-    private readonly DependencyContext dependencyContext;
     private static readonly string fluentValidationAssemblyName;
+
     private static readonly string carterAssemblyName;
+
+    private readonly DependencyContext dependencyContext;
+
+    private readonly Assembly[] overriddenAssemblies = Array.Empty<Assembly>();
 
     static DependencyContextAssemblyCatalog()
     {
@@ -38,6 +42,15 @@ public class DependencyContextAssemblyCatalog
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="DependencyContextAssemblyCatalog"/> class,
+    /// using assemblies passed in to disable dependency scanning.
+    /// </summary>
+    public DependencyContextAssemblyCatalog(params Assembly[] assemblies)
+    {
+        this.overriddenAssemblies = assemblies;
+    }
+
+    /// <summary>
     /// Gets all <see cref="Assembly"/> instances in the catalog.
     /// </summary>
     /// <returns>An <see cref="IReadOnlyCollection{T}"/> of <see cref="Assembly"/> instances.</returns>
@@ -48,13 +61,23 @@ public class DependencyContextAssemblyCatalog
             typeof(DependencyContextAssemblyCatalog).Assembly
         };
 
-        foreach (var library in this.dependencyContext.RuntimeLibraries)
+        if (this.overriddenAssemblies.Any())
         {
-            if (IsReferencingCarter(library) || IsReferencingFluentValidation(library))
+            foreach (var overriddenAssembly in this.overriddenAssemblies)
             {
-                foreach (var assemblyName in library.GetDefaultAssemblyNames(this.dependencyContext))
+                results.Add(overriddenAssembly);
+            }
+        }
+        else
+        {
+            foreach (var library in this.dependencyContext.RuntimeLibraries)
+            {
+                if (IsReferencingCarter(library) || IsReferencingFluentValidation(library))
                 {
-                    results.Add(SafeLoadAssembly(assemblyName));
+                    foreach (var assemblyName in library.GetDefaultAssemblyNames(this.dependencyContext))
+                    {
+                        results.Add(SafeLoadAssembly(assemblyName));
+                    }
                 }
             }
         }
