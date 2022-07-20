@@ -4,9 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Carter.OpenApi;
 using Carter.Response;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,7 +20,7 @@ public static class CarterExtensions
     /// </summary>
     /// <param name="builder">The <see cref="IApplicationBuilder"/> to configure.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public static void MapCarter(this IEndpointRouteBuilder builder)
+    public static IEndpointRouteBuilder MapCarter(this IEndpointRouteBuilder builder)
     {
         var loggerFactory = builder.ServiceProvider.GetRequiredService<ILoggerFactory>();
         var logger = loggerFactory.CreateLogger(typeof(CarterConfigurator));
@@ -26,10 +28,65 @@ public static class CarterExtensions
         var carterConfigurator = builder.ServiceProvider.GetRequiredService<CarterConfigurator>();
         carterConfigurator.LogDiscoveredCarterTypes(logger);
 
-        foreach (var newCarterModule in builder.ServiceProvider.GetServices<ICarterModule>())
+        foreach (var carterModuleInterface in builder.ServiceProvider.GetServices<ICarterModule>())
         {
-            newCarterModule.AddRoutes(builder);
+            if (carterModuleInterface is CarterModule carterModule)
+            {
+                var group = builder.MapGroup(carterModule.basePath);
+
+                if (carterModule.hosts.Any())
+                {
+                    //group = group.RequireHost(carterModule.hosts);
+                }
+
+                if (carterModule.requiresAuthentication)
+                {
+                    //group = group.RequireAuthorization();
+                }
+
+                if (!string.IsNullOrWhiteSpace(carterModule.corsPolicyName))
+                {
+                    //  group = group.RequireCors(carterModule.corsPolicyName);
+                }
+
+                if (carterModule.includeInOpenApi)
+                {
+                    group.IncludeInOpenApi();
+                }
+
+                if (carterModule.Before != null)
+                {
+                    group.AddRouteHandlerFilter(async (context, next) =>
+                    {
+                        var result = carterModule.Before.Invoke(context);
+                        if (result != null)
+                        {
+                            return result;
+                        }
+
+                        return await next(context);
+                    });
+                }
+
+                if (carterModule.After != null)
+                {
+                    group.AddRouteHandlerFilter(async (context, next) =>
+                    {
+                        var result = await next(context);
+                        carterModule.After.Invoke(context);
+                        return result;
+                    });
+                }
+
+                carterModule.AddRoutes(group);
+            }
+            else
+            {
+                carterModuleInterface.AddRoutes(builder);
+            }
         }
+
+        return builder;
     }
 
     /// <summary>
@@ -61,6 +118,8 @@ public static class CarterExtensions
 
         var newModules = GetNewModules(carterConfigurator, assemblies);
 
+        //var modules = GetModules(carterConfigurator, assemblies);
+
         var responseNegotiators = GetResponseNegotiators(carterConfigurator, assemblies);
 
         services.AddSingleton(carterConfigurator);
@@ -77,6 +136,11 @@ public static class CarterExtensions
         {
             services.AddSingleton(typeof(ICarterModule), newModule);
         }
+
+        // foreach (var newModule in modules)
+        // {
+        //     services.AddSingleton(typeof(CarterModule), newModule);
+        // }
 
         foreach (var negotiator in responseNegotiators)
         {
@@ -131,6 +195,30 @@ public static class CarterExtensions
 
             carterConfigurator.ModuleTypes.AddRange(modules);
         }
+
+        return modules;
+    }
+
+    private static IEnumerable<Type> GetModules(CarterConfigurator carterConfigurator,
+        IReadOnlyCollection<Assembly> assemblies)
+    {
+        // IEnumerable<Type> modules;
+        // if (carterConfigurator.ExcludeModules || carterConfigurator.ModuleTypes.Any())
+        // {
+        //     modules = carterConfigurator.ModuleTypes;
+        // }
+        // else
+        //{
+        var modules = assemblies.SelectMany(x => x.GetTypes()
+            .Where(t =>
+                !t.IsAbstract &&
+                typeof(CarterModule).IsAssignableFrom(t) &&
+                t != typeof(CarterModule) &&
+                t.IsPublic
+            ));
+
+        //carterConfigurator.ModuleTypes.AddRange(modules);
+        //}
 
         return modules;
     }
