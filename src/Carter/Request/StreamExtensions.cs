@@ -16,7 +16,7 @@ public static class StreamExtensions
     /// <returns>Awaited <see cref="Task{String}"/></returns>
     public static async Task<string> AsStringAsync(this Stream stream, Encoding encoding = null, CancellationToken cancellationToken = default)
     {
-        using (var reader = new StreamReader(stream, encoding ?? Encoding.UTF8))
+        using (var reader = new StreamReader(stream, encoding ?? Encoding.UTF8, leaveOpen:true))
         {
             var readStream = await reader.ReadToEndAsync();
 
