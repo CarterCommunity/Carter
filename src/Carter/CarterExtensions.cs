@@ -56,7 +56,7 @@ public static class CarterExtensions
 
                 if (carterModule.Before != null)
                 {
-                    group.AddRouteHandlerFilter(async (context, next) =>
+                    group.AddEndpointFilter(async (context, next) =>
                     {
                         var result = carterModule.Before.Invoke(context);
                         if (result != null)
@@ -70,7 +70,7 @@ public static class CarterExtensions
 
                 if (carterModule.After != null)
                 {
-                    group.AddRouteHandlerFilter(async (context, next) =>
+                    group.AddEndpointFilter(async (context, next) =>
                     {
                         var result = await next(context);
                         carterModule.After.Invoke(context);
@@ -165,8 +165,7 @@ public static class CarterExtensions
                     !t.IsAbstract &&
                     typeof(IResponseNegotiator).IsAssignableFrom(t) &&
                     t != typeof(IResponseNegotiator) &&
-                    t != typeof(DefaultJsonResponseNegotiator) &&
-                    t != typeof(NewtonsoftJsonResponseNegotiator)
+                    t != typeof(DefaultJsonResponseNegotiator) 
                 ));
 
             carterConfigurator.ResponseNegotiatorTypes.AddRange(responseNegotiators);

@@ -147,7 +147,7 @@ namespace Carter.Tests
 
             //Then
             var validators = serviceCollection.Where(x => x.ServiceType == typeof(IValidator));
-            Assert.Equal(0,validators.Count());
+            Assert.Empty(validators);
         }
         
         [Fact]
@@ -161,7 +161,7 @@ namespace Carter.Tests
 
             //Then
             var modules = serviceCollection.Where(x => x.ServiceType == typeof(ICarterModule));
-            Assert.Equal(0,modules.Count());
+            Assert.Empty(modules);
         }
         
         [Fact]
@@ -175,7 +175,7 @@ namespace Carter.Tests
 
             //Then
             var responseNegotiators = serviceCollection.Where(x => x.ServiceType == typeof(IResponseNegotiator));
-            Assert.Equal(1,responseNegotiators.Count());
+            Assert.Single(responseNegotiators);
         }
     }
 }

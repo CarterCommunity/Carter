@@ -5,6 +5,7 @@ namespace Carter.Samples.Tests
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
+    using CarterSample;
     using CarterSample.Features.FunctionalProgramming;
     using CarterSample.Features.FunctionalProgramming.CreateDirector;
     using CarterSample.Features.FunctionalProgramming.DeleteDirector;
