@@ -1,4 +1,4 @@
-namespace Carter.Tests.ModelBinding
+namespace Carter.Tests.Modelbinding
 {
     using System;
     using System.Collections.Generic;
