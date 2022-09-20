@@ -1,7 +1,7 @@
 namespace Carter.Tests
 {
     using Carter.Tests.ContentNegotiation;
-    using Carter.Tests.ModelBinding;
+    using Carter.Tests.Modelbinding;
     using Carter.Tests.StreamTests;
     using Xunit;
 
@@ -175,7 +175,7 @@ namespace Carter.Tests
             var sameconfigurator = configurator.WithEmptyModules();
             
             //Then
-            Assert.Equal(0, sameconfigurator.ModuleTypes.Count);
+            Assert.Empty(sameconfigurator.ModuleTypes);
         }
         
         [Fact]
@@ -188,7 +188,7 @@ namespace Carter.Tests
             var sameconfigurator = configurator.WithResponseNegotiators();
             
             //Then
-            Assert.Equal(0, sameconfigurator.ResponseNegotiatorTypes.Count);
+            Assert.Empty(sameconfigurator.ResponseNegotiatorTypes);
         }
         
         [Fact]
@@ -201,7 +201,7 @@ namespace Carter.Tests
             var sameconfigurator = configurator.WithEmptyValidators();
             
             //Then
-            Assert.Equal(0, sameconfigurator.ValidatorTypes.Count);
+            Assert.Empty(sameconfigurator.ValidatorTypes);
         }
     }
 }

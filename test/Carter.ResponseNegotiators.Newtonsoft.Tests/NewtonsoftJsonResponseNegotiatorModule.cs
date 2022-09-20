@@ -1,4 +1,4 @@
-namespace Carter.Tests.ContentNegotiation.Newtonsoft
+namespace Carter.ResponseNegotiators.Newtonsoft.Tests
 {
     using Carter.Response;
     using Microsoft.AspNetCore.Builder;

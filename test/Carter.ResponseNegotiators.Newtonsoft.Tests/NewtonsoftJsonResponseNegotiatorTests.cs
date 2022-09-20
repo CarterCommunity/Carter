@@ -1,4 +1,4 @@
-namespace Carter.Tests.ContentNegotiation.Newtonsoft
+namespace Carter.ResponseNegotiators.Newtonsoft.Tests
 {
     using System;
     using System.Net.Http;

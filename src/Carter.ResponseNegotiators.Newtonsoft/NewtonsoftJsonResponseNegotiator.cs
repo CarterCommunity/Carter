@@ -1,13 +1,17 @@
-namespace Carter.Response;
+namespace Carter.ResponseNegotiators.Newtonsoft;
 
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using global::Newtonsoft.Json;
+using global::Newtonsoft.Json.Serialization;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
+/// <summary>
+/// A Newtonsoft implementation of <see cref="IResponseNegotiator"/>
+/// </summary>
 public class NewtonsoftJsonResponseNegotiator : IResponseNegotiator
 {
     private readonly JsonSerializerSettings jsonSettings;
