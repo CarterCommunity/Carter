@@ -119,9 +119,9 @@ public abstract class CarterModule : ICarterModule
         return this;
     }
 
-    public Func<RouteHandlerInvocationContext, IResult> Before { get; set; }
+    public Func<EndpointFilterInvocationContext, IResult> Before { get; set; }
 
-    public Action<RouteHandlerInvocationContext> After { get; set; }
+    public Action<EndpointFilterInvocationContext> After { get; set; }
 }
 
 /// <summary>
