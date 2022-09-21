@@ -19,7 +19,7 @@ public static class ValidationExtensions
     /// <returns><see cref="ValidationResult"/></returns>
     public static ValidationResult Validate<T>(this HttpRequest request, T model)
     {
-        var validatorLocator = request.HttpContext.RequestServices.GetService<IValidatorLocator>();
+        var validatorLocator = request.HttpContext.RequestServices.GetRequiredService<IValidatorLocator>();
         var validator = validatorLocator.GetValidator<T>();
 
         return validator == null
