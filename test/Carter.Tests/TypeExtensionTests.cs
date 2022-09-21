@@ -2,7 +2,6 @@ namespace Carter.Tests
 {
     using System;
     using System.Linq;
-    using Carter.Tests.ModelBinding;
     using Carter.Tests.StreamTests;
     using Xunit;
 

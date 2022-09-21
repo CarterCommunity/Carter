@@ -1,7 +1,5 @@
 namespace CarterSample.Features.Home;
 
-using Carter.OpenApi;
-
 public class HomeModule : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)

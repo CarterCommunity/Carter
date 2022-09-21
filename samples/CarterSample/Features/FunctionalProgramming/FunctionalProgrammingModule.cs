@@ -4,7 +4,6 @@ using System;
 using System.Threading.Tasks;
 using Carter;
 using Carter.ModelBinding;
-using Carter.Request;
 using Carter.Response;
 using Microsoft.AspNetCore.Routing;
 

@@ -1,9 +1,6 @@
 namespace Carter;
 
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
@@ -11,13 +8,13 @@ public abstract class CarterModule : ICarterModule
 {
     private IEndpointRouteBuilder app;
 
-    internal string[] hosts;
+    internal string[] hosts = Array.Empty<string>();
 
     internal string corsPolicyName;
 
     internal string openApiDescription;
 
-    internal object[] metaData;
+    internal object[] metaData = Array.Empty<object>();
 
     internal string openApiName;
 
@@ -27,13 +24,19 @@ public abstract class CarterModule : ICarterModule
 
     internal string openApiGroupName;
 
-    internal string[] tags;
+    internal string[] tags = Array.Empty<string>();
 
     internal bool includeInOpenApi;
 
-    internal bool requiresAuthentication { get; private set; }
+    internal bool requiresAuthorization;
 
-    internal string basePath { get; private set; } = "/";
+    internal string cacheOutputPolicyName;
+
+    internal readonly string basePath = "/";
+
+    internal bool disableRateLimiting;
+
+    internal string rateLimitingPolicyName;
 
     /// <summary>
     /// Initializes a new instance of <see cref="CarterModule"/>
@@ -53,7 +56,7 @@ public abstract class CarterModule : ICarterModule
 
     public CarterModule RequireAuthorization()
     {
-        this.requiresAuthentication = true;
+        this.requiresAuthorization = true;
         return this;
     }
 
@@ -116,6 +119,24 @@ public abstract class CarterModule : ICarterModule
     public CarterModule IncludeInOpenApi()
     {
         this.includeInOpenApi = true;
+        return this;
+    }
+
+    public CarterModule WithCacheOutput(string policyName)
+    {
+        this.cacheOutputPolicyName = policyName;
+        return this;
+    }
+
+    public CarterModule DisableRateLimiting()
+    {
+        this.disableRateLimiting = true;
+        return this;
+    }
+    
+    public CarterModule RequireRateLimiting(string policyName)
+    {
+        this.rateLimitingPolicyName = policyName;
         return this;
     }
 
