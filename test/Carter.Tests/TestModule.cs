@@ -7,6 +7,7 @@ namespace Carter.Tests
     using Carter.ModelBinding;
     using Carter.Request;
     using Carter.Response;
+    using Carter.Tests.ModelBinding;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;
@@ -100,6 +101,9 @@ namespace Carter.Tests
             app.MapMethods("/head", new[]{"HEAD"}, async (HttpContext ctx) => { await ctx.Response.WriteAsync("Hello"); });
             app.MapMethods("/", new[]{"PATCH"}, async (HttpContext ctx) => { await ctx.Response.WriteAsync("Hello"); });
             app.MapMethods("/", new[]{"OPTIONS"}, async (HttpContext ctx) => { await ctx.Response.WriteAsync("Hello"); });
+
+            app.MapPost<TestModel>("/endpointfilter", (TestModel testModel,IDependency dependency) => "POST");
+            app.MapPut<TestModel>("/endpointfilter", (IDependency dependency, TestModel testModel) => "PUT");
         }
     }
 }

@@ -7,20 +7,20 @@ public class DirectorsModule : CarterModule
 {
     public DirectorsModule() : base("/directors")
     {
-        this.RequireAuthorization()
-            .RequireHost("*:5000")
-            .RequireCors("myorigins")
-            .WithDescription("Directors API allows users to interact with the directors resources")
-            .WithMetadata(new SuppressLinkGenerationMetadata())
-            .WithName("Directors API")
-            .WithSummary("An API resource for Directors")
-            .WithTags("directors", "api")
-            .WithDisplayName("Directors")
-            .WithGroupName("directors-api")
-            .WithCacheOutput("cachepolicyoutputname")
-            //.DisableRateLimiting()
-            .RequireRateLimiting("rateLimitingPolicyName")
-            .IncludeInOpenApi();
+        // this.RequireAuthorization()
+        //     .RequireHost("*:5000")
+        //     .RequireCors("myorigins")
+        //     .WithDescription("Directors API allows users to interact with the directors resources")
+        //     .WithMetadata(new SuppressLinkGenerationMetadata())
+        //     .WithName("Directors API")
+        //     .WithSummary("An API resource for Directors")
+        //     .WithTags("directors", "api")
+        //     .WithDisplayName("Directors")
+        //     .WithGroupName("directors-api")
+        //     .WithCacheOutput("cachepolicyoutputname")
+        //     //.DisableRateLimiting()
+        //     .RequireRateLimiting("rateLimitingPolicyName")
+        //     .IncludeInOpenApi();
 
         this.Before = context =>
         {
@@ -45,19 +45,24 @@ public class DirectorsModule : CarterModule
         });
 
         app.MapPut<Person>("/",
-            Results<NoContent, BadRequest>(IUpdatePersonCommand updatePersonCommand, Person person) =>
+            Results<NoContent, BadRequest>(IUpdatePersonCommand updatePersonCommand,Person person) =>
             {
                 var success = updatePersonCommand.Execute(person);
-
+        
                 if (!success)
                 {
                     return TypedResults.BadRequest();
                 }
-
+        
                 return TypedResults.NoContent();
             });
+
+        //app.MapPut<Person>("/", (Person person) => "PUT");
+        app.MapPost<Person>("/", (Person person ) => "POST");
     }
 }
+
+
 
 public class Person
 {
@@ -81,3 +86,11 @@ internal interface IUpdatePersonCommand
 {
     bool Execute(Person person);
 }
+
+internal class UpdatePersonComand :IUpdatePersonCommand
+{
+    public bool Execute(Person person)
+    {
+        return true;
+    }
+} 

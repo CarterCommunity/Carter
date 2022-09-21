@@ -1,8 +1,10 @@
 ﻿using Carter.OpenApi;
+using CarterSample.Features.Directors;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton<IUpdatePersonCommand, UpdatePersonComand>();
 builder.Services.AddSingleton<IGetActorsQuery, GetActorsQuery>();
 builder.Services.AddSingleton<IGetActorByIdQuery, GetActorByIdQuery>();
 builder.Services.AddSingleton<IDeleteActorCommand, DeleteActorCommand>();
