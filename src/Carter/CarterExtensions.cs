@@ -36,22 +36,72 @@ public static class CarterExtensions
 
                 if (carterModule.hosts.Any())
                 {
-                    //group = group.RequireHost(carterModule.hosts);
+                    group = group.RequireHost(carterModule.hosts);
                 }
 
-                if (carterModule.requiresAuthentication)
+                if (carterModule.requiresAuthorization)
                 {
-                    //group = group.RequireAuthorization();
+                    group = group.RequireAuthorization();
                 }
 
                 if (!string.IsNullOrWhiteSpace(carterModule.corsPolicyName))
                 {
-                    //  group = group.RequireCors(carterModule.corsPolicyName);
+                    group = group.RequireCors(carterModule.corsPolicyName);
                 }
 
                 if (carterModule.includeInOpenApi)
                 {
                     group.IncludeInOpenApi();
+                }
+
+                if (!string.IsNullOrWhiteSpace(carterModule.openApiDescription))
+                {
+                    group = group.WithDescription(carterModule.openApiDescription);
+                }
+
+                if (carterModule.metaData.Any())
+                {
+                    group = group.WithMetadata(carterModule.metaData);
+                }
+
+                if (!string.IsNullOrWhiteSpace(carterModule.openApiName))
+                {
+                    group = group.WithName(carterModule.openApiName);
+                }
+
+                if (!string.IsNullOrWhiteSpace(carterModule.openApisummary))
+                {
+                    group = group.WithSummary(carterModule.openApisummary);
+                }
+
+                if (!string.IsNullOrWhiteSpace(carterModule.openApiDisplayName))
+                {
+                    group = group.WithDisplayName(carterModule.openApiDisplayName);
+                }
+
+                if (!string.IsNullOrWhiteSpace(carterModule.openApiGroupName))
+                {
+                    group = group.WithGroupName(carterModule.openApiGroupName);
+                }
+
+                if (carterModule.tags.Any())
+                {
+                    group = group.WithTags(carterModule.tags);
+                }
+
+                if (!string.IsNullOrWhiteSpace(carterModule.cacheOutputPolicyName))
+                {
+                    group = group.CacheOutput(carterModule.cacheOutputPolicyName);
+                }
+
+                if (carterModule.disableRateLimiting)
+                {
+                    group = group.DisableRateLimiting();
+                }
+
+                if (!string.IsNullOrWhiteSpace(carterModule.rateLimitingPolicyName))
+                {
+                    group = group.RequireRateLimiting(carterModule.rateLimitingPolicyName);
                 }
 
                 if (carterModule.Before != null)
@@ -165,7 +215,7 @@ public static class CarterExtensions
                     !t.IsAbstract &&
                     typeof(IResponseNegotiator).IsAssignableFrom(t) &&
                     t != typeof(IResponseNegotiator) &&
-                    t != typeof(DefaultJsonResponseNegotiator) 
+                    t != typeof(DefaultJsonResponseNegotiator)
                 ));
 
             carterConfigurator.ResponseNegotiatorTypes.AddRange(responseNegotiators);

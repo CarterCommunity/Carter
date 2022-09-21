@@ -17,6 +17,9 @@ public class DirectorsModule : CarterModule
             .WithTags("directors", "api")
             .WithDisplayName("Directors")
             .WithGroupName("directors-api")
+            .WithCacheOutput("cachepolicyoutputname")
+            //.DisableRateLimiting()
+            .RequireRateLimiting("rateLimitingPolicyName")
             .IncludeInOpenApi();
 
         this.Before = context =>
