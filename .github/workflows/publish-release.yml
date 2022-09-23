@@ -22,7 +22,7 @@ jobs:
     - name: Build with dotnet
       run: find . -path ./template -prune -false -o -name '*.csproj' -execdir dotnet build --configuration Release --nologo {} \;
     # - name: Run tests
-    #   run: dotnet test --configuration Release --no-build --nologo
+      # run: dotnet test --configuration Release --no-build --nologo
     - name: Push release package to NuGet
       run: ./push.sh carter nuget
 env:

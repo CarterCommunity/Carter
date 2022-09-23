@@ -21,8 +21,8 @@ jobs:
       run: echo ${{github.ref}} and ${{github.event_name}}
     - name: Build with dotnet
       run: find . -path ./template -prune -false -o -name '*.csproj' -execdir dotnet build --configuration Release --nologo {} \;
-    - name: Run tests
-      run: dotnet test --configuration Release --no-build --nologo
+    # - name: Run tests
+      # run: dotnet test --configuration Release --no-build --nologo
     - name: Push release package to NuGet
       run: ./push.sh newtonsoft nuget
 env:
