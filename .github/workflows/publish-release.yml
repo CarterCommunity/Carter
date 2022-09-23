@@ -1,4 +1,4 @@
-name: Tag created workflow
+name: Main tag created workflow
 
 on:
   push:

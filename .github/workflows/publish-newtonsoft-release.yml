@@ -1,4 +1,4 @@
-name: Tag created workflow
+name: Newtonsoft tag created workflow
 
 on:
   push:
