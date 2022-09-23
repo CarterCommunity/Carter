@@ -3,7 +3,7 @@ name: Pull request merged workflow
 on:
   push:
     branches:
-    - main
+    - defaultinterface
 
 jobs:
   build:
