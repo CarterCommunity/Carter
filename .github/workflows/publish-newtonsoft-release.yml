@@ -15,7 +15,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 7
+        dotnet-version: 7.*
         include-prerelease: true
     - name: Build Reason
       run: echo ${{github.ref}} and ${{github.event_name}}
