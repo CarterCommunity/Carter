@@ -1,11 +1,12 @@
-name: Pull request opened workflow
+name: Tag created workflow
 
 on:
-  pull_request:
+  push:
+    tags:
+    - 'newtonsoft-*'
 
 jobs:
   build:
-
     name: Github Actions Build
     runs-on: ubuntu-latest
 
@@ -22,7 +23,7 @@ jobs:
       run: find . -path ./template -prune -false -o -name '*.csproj' -execdir dotnet build --configuration Release --nologo {} \;
     - name: Run tests
       run: dotnet test --configuration Release --no-build --nologo
-    - name: Push prerelease package to Feedz
-      run: ./push.sh carter feedz
+    - name: Push release package to NuGet
+      run: ./push.sh newtonsoft nuget
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
