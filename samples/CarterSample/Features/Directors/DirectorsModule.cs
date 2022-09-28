@@ -45,24 +45,32 @@ public class DirectorsModule : CarterModule
         });
 
         app.MapPut<Person>("/",
-            Results<NoContent, BadRequest>(IUpdatePersonCommand updatePersonCommand,Person person) =>
+            Results<NoContent, BadRequest>(IUpdatePersonCommand updatePersonCommand, Person person) =>
             {
                 var success = updatePersonCommand.Execute(person);
-        
+
                 if (!success)
                 {
                     return TypedResults.BadRequest();
                 }
-        
+
                 return TypedResults.NoContent();
             });
 
         //app.MapPut<Person>("/", (Person person) => "PUT");
-        app.MapPost<Person>("/", (Person person ) => "POST");
+
+        app.MapPost("/", (HttpRequest req, Person person) =>
+        {
+            var asName = req.Query.As<string>("name");
+            var asBar = req.Query.As<int>("bar");
+            var asFoo = req.Query.AsMultiple<int>("foo");
+
+            return "POST";
+        });
+
+        app.MapGet("/qs", (string name, int[] numbers) => name + string.Join(",", numbers));
     }
 }
-
-
 
 public class Person
 {
@@ -87,10 +95,10 @@ internal interface IUpdatePersonCommand
     bool Execute(Person person);
 }
 
-internal class UpdatePersonComand :IUpdatePersonCommand
+internal class UpdatePersonComand : IUpdatePersonCommand
 {
     public bool Execute(Person person)
     {
         return true;
     }
-} 
+}

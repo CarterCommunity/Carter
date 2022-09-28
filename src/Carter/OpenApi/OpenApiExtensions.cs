@@ -14,7 +14,6 @@ public static class OpenApiExtensions
     public static RouteGroupBuilder IncludeInOpenApi(this RouteGroupBuilder builder)
     {
         builder.WithMetadata(new IncludeOpenApi());
-        //builder.Add(endpointBuilder => { endpointBuilder.Metadata.Add(new IncludeOpenApi()); });
         return builder;
     }
 }
