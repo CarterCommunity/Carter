@@ -3,7 +3,8 @@ name: .NET Core
 on:
   pull_request:
     branches:
-    - main
+    # This will need to be changed to main
+    - defaultinterface
   push:
     tags:
     - '*'
