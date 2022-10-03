@@ -2,20 +2,28 @@
 set -euo pipefail
 
 TARGET_PACKAGE=$1
+NUGET_TARGET_SERVICE=$2
+NUGET_API_KEY=$3
+
 if [ "$TARGET_PACKAGE" = "carter" ]; then
   TARGET_PACKAGE_PATH="./src/Carter/**/*.nupkg"
 elif [ "$TARGET_PACKAGE" = "newtonsoft" ]; then
   TARGET_PACKAGE_PATH="./src/Carter.ResponseNegotiators.Newtonsoft/**/*.nupkg"
+else
+  echo "Unexpected target package name \"$TARGET_PACKAGE\"; Accepted values: carter, newtonsoft"
+  exit 1
 fi
 
-NUGET_TARGET_SERVICE=$2
 if [ "$NUGET_TARGET_SERVICE" = "feedz" ]; then
   NUGET_TARGET_URL="https://f.feedz.io/carter/carter/nuget/index.json"
 elif [ "$NUGET_TARGET_SERVICE" = "nuget" ]; then
-  NUGET_TARGET_URL="https://somenugeturl/index.json"
+  NUGET_TARGET_URL="https://api.nuget.org/v3/index.json"
+else
+  echo "Unexpected NuGet service name \"$NUGET_TARGET_SERVICE\"; Accepted values: feedz, nuget"
+  exit 1
 fi
 
 for package in $(find -wholename "$TARGET_PACKAGE_PATH" | grep "test" -v); do
   echo "${0##*/}": Pushing $package to $NUGET_TARGET_SERVICE \($NUGET_TARGET_URL\)...
-  # dotnet nuget push $package --source https://f.feedz.io/carter/carter/nuget/index.json --api-key $1
+  dotnet nuget push $package --source $NUGET_TARGET_URL --api-key $NUGET_API_KEY
 done

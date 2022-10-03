@@ -29,17 +29,17 @@ jobs:
     # PR opened, push prelease Carter package to feedz
     - if: github.event_name == 'pull_request'
       name: Push prerelease Carter package to Feedz
-      run: ./push.sh carter feedz
+      run: ./push.sh carter feedz ${{ secrets.FEEDZ_KEY }}
 
     # Main tag created, push release Carter package to NuGet
     - if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !startsWith(github.ref, 'refs/tags/newtonsoft-')
       name: Push release Carter package to NuGet
-      run: ./push.sh carter nuget
+      run: ./push.sh carter nuget ${{ secrets.NUGET_KEY }}
 
     # Newtonsoft tag created, push release Newtonsoft package to NuGet
     - if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && startsWith(github.ref, 'refs/tags/newtonsoft-')
       name: Push release Newtonsoft package to NuGet
-      run: ./push.sh newtonsoft nuget
+      run: ./push.sh newtonsoft nuget ${{ secrets.NUGET_KEY }}
 
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
