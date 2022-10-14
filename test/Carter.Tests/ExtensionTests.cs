@@ -32,6 +32,8 @@ public class ExtensionTests
                         b.SetMinimumLevel(LogLevel.Debug);
                     });
 
+                    x.AddSingleton<IDependency, Dependency>();
+
                     x.AddRouting();
                     x.AddCarter(configurator: c =>
                         c.WithModule<TestModule>()

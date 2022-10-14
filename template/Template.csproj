@@ -16,7 +16,7 @@
         <ContentTargetFolders>content</ContentTargetFolders>
         <NoWarn>$(NoWarn);NU5128</NoWarn>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <Content Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**"/>
         <Compile Remove="**\*"/>
@@ -24,8 +24,5 @@
 
     <ItemGroup>
         <None Include="..\media\carterlogo.png" Pack="true" PackagePath="\"/>
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Carter" Version="6.1.1"/>
     </ItemGroup>
 </Project>
