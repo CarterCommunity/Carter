@@ -1,7 +1,9 @@
 bin/
 obj/
 .vs/
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 .idea/
 codeship.aes
 /*.user
