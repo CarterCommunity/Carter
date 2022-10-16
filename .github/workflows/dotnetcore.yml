@@ -28,7 +28,7 @@ jobs:
       run: |
         CARTER_VERSION=$(dotnet minver --verbosity error)
         echo "Computed version by MinVer: $CARTER_VERSION"
-        echo "MINVERVERSIONOVERRIDE=$CARTER_VERSION" >> GITHUB_ENV
+        echo "MINVERVERSIONOVERRIDE=$CARTER_VERSION" >> $GITHUB_ENV
     - name: Build Reason
       run: echo ${{github.ref}} and ${{github.event_name}}
     - name: Build with dotnet
