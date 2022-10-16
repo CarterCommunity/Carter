@@ -51,8 +51,13 @@ jobs:
           path: '**/*.trx'
           reporter: dotnet-trx
 
-    # PR opened, push prelease Carter and template package to feedz
-    - if: github.event_name == 'pull_request'
+    # If we intend on publishing the CarterTemplate package, we need to
+    # replace the <ProjectReference /> element with a <PackageReference /> one
+    # and create the NuGet package
+    - if: >-
+        (github.event_name == 'pull_request')
+        ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !startsWith(github.ref, 'refs/tags/newtonsoft-'))
       name: Replace project reference with NuGet package reference in template project
       run: >-
         ./replace-project-reference-with-package-reference.ps1
@@ -60,20 +65,24 @@ jobs:
         -PackageVersion $env:MINVERVERSIONOVERRIDE
       shell: pwsh
 
-    - if: github.event_name == 'pull_request'
+    - if: >-
+        (github.event_name == 'pull_request')
+        ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !startsWith(github.ref, 'refs/tags/newtonsoft-'))
       name: Create Carter template NuGet package
       run: >-
         dotnet pack ./template/Template.csproj
         --configuration Release
         --nologo
 
+    # PR opened, push prelease Carter and CarterTemplate packages to feedz
     - if: github.event_name == 'pull_request'
-      name: Push prerelease Carter package to Feedz
+      name: Push prerelease Carter packages to Feedz
       run: ./push.sh carter feedz ${{ secrets.FEEDZ_KEY }}
 
-    # Main tag created, push release Carter package to NuGet
+    # Main tag created, push prelease Carter and CarterTemplate packages to NuGet
     - if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !startsWith(github.ref, 'refs/tags/newtonsoft-')
-      name: Push release Carter package to NuGet
+      name: Push release Carter packages to NuGet
       run: ./push.sh carter nuget ${{ secrets.NUGET_KEY }}
 
     # Newtonsoft tag created, push release Newtonsoft package to NuGet
