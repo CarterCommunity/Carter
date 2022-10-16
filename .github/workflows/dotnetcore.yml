@@ -29,6 +29,21 @@ jobs:
         CARTER_VERSION=$(dotnet minver --verbosity error)
         echo "Computed version by MinVer: $CARTER_VERSION"
         echo "MINVERVERSIONOVERRIDE=$CARTER_VERSION" >> $GITHUB_ENV
+    - name: Override MinVer version for pull requests
+      if: github.event_name == 'pull_request'
+      run: |
+        $minVerVersion = $env:MINVERVERSIONOVERRIDE
+
+        # From https://github.com/adamralph/minver/blob/dac9135c9085b364686cf318962741acdbf0f1af/MinVer/build/MinVer.targets#L54-L56
+        $major = $minVerVersion.Split('.')[0]
+        $minor = $minVerVersion.Split('.')[1]
+        $patch = $minVerVersion.Split('.')[2].Split('-')[0].Split('+')[0]
+
+        $pullRequestMinVerVersion = '{0}.{1}.{2}-pr.{3}.build.{4}' -f $major, $minor, $patch, '${{ github.event.number }}', $env:GITHUB_RUN_ID
+        Write-Output -Value ('Pull request MinVer version: {0}' -f $pullRequestMinVerVersion)
+
+        ('MINVERVERSIONOVERRIDE={0}' -f $pullRequestMinVerVersion) >> $env:GITHUB_ENV
+      shell: pwsh
     - name: Build Reason
       run: echo ${{github.ref}} and ${{github.event_name}}
     - name: Build with dotnet
