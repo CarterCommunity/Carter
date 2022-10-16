@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "minver-cli": {
+      "version": "2.5.0",
+      "commands": [
+        "minver"
+      ]
+    }
+  }
+}
