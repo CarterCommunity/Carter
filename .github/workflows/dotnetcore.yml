@@ -40,7 +40,7 @@ jobs:
         $patch = $minVerVersion.Split('.')[2].Split('-')[0].Split('+')[0]
 
         $pullRequestMinVerVersion = '{0}.{1}.{2}-pr.{3}.build.{4}' -f $major, $minor, $patch, '${{ github.event.number }}', $env:GITHUB_RUN_ID
-        Write-Output -Value ('Pull request MinVer version: {0}' -f $pullRequestMinVerVersion)
+        Write-Output -InputObject ('Pull request MinVer version: {0}' -f $pullRequestMinVerVersion)
 
         ('MINVERVERSIONOVERRIDE={0}' -f $pullRequestMinVerVersion) >> $env:GITHUB_ENV
       shell: pwsh
