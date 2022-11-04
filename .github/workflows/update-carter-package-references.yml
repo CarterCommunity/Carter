@@ -52,10 +52,16 @@ jobs:
       run: git diff
 
     # https://github.com/marketplace/actions/checkout#push-a-commit-using-the-built-in-token
-    # - name: Commit changes and push
-    #   run: |
-    #     git config user.name github-actions
-    #     git config user.email github-actions@github.com
+    - name: Commit changes and push if necessary
+      run: |
+        GIT_CHANGES=$(git status --porcelain)
+        if [ "$GIT_CHANGES" == "" ]; then
+          echo "No changes to commit"
+        else
+          echo "Committing and pushing changes"
+        fi
+    #     git config user.name Jonathan Channon
+    #     git config user.email jonathan.channon@gmail.com
     #     git add .
     #     git commit -m "Update Carter NuGet package references"
     #     git push
