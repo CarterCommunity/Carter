@@ -1,0 +1,47 @@
+name: Update Carter NuGet package references
+
+on:
+  workflow_dispatch:
+    inputs:
+      includePrerelease:
+        type: boolean
+        default: false
+        description: Whether to include prerelease versions when searching for the latest version of the Carter NuGet package
+
+      overrideVersion:
+        type: string
+        description: Shunts the search process and uses a specific version of the Carter NuGet package
+
+jobs:
+  update-carter-package-references:
+    name: Update Carter NuGet package references
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - if: github.event.inputs.overrideVersion != ''
+      name: Update package references with user-provided version
+      run: >-
+        ./update-carter-package-dependencies.ps1
+        -OverrideVersion '${{ github.event.inputs.overrideVersion }}'
+      shell: pwsh
+
+    - if: github.event.inputs.overrideVersion == ''
+      name: Update package references with latest version from NuGet
+      run: >-
+        ./update-carter-package-dependencies.ps1
+        -IncludePrerelease:$${{ github.event.inputs.includePrerelease }}
+      shell: pwsh
+
+    - name: Show Git diff
+      run: git diff
+
+    # https://github.com/marketplace/actions/checkout#push-a-commit-using-the-built-in-token
+    # - name: Commit changes and push
+    #   run: |
+    #     git config user.name github-actions
+    #     git config user.email github-actions@github.com
+    #     git add .
+    #     git commit -m "Update Carter NuGet package references"
+    #     git push
