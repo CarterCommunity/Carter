@@ -23,14 +23,25 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - if: github.event.inputs.overrideVersion != ''
+    # Temporary hack to run the workflow, as it can only be manually run when it's in the default branch
+    # See https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow#configuring-a-workflow-to-run-manually
+    - if: github.event.name == 'push'
+      name: '[TEST] Update package references'
+      run: >-
+        ./update-carter-package-dependencies.ps1
+        -OverrideVersion '7.0.0'
+      shell: pwsh
+
+    # The "github.event.name == 'workflow_dispatch'" conditions will be removed eventually
+    # as the workflow will ONLY be manually run
+    - if: github.event.name == 'workflow_dispatch' && github.event.inputs.overrideVersion != ''
       name: Update package references with user-provided version
       run: >-
         ./update-carter-package-dependencies.ps1
         -OverrideVersion '${{ github.event.inputs.overrideVersion }}'
       shell: pwsh
 
-    - if: github.event.inputs.overrideVersion == ''
+    - if: github.event.name == 'workflow_dispatch' && github.event.inputs.overrideVersion == ''
       name: Update package references with latest version from NuGet
       run: >-
         ./update-carter-package-dependencies.ps1
