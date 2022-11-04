@@ -1,6 +1,9 @@
 name: Update Carter NuGet package references
 
 on:
+  push:
+    branches:
+      - mderriey/update-carter-package-references
   workflow_dispatch:
     inputs:
       includePrerelease:
