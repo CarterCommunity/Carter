@@ -29,7 +29,6 @@ jobs:
       name: '[TEST] Update package references'
       run: >-
         ./update-carter-package-dependencies.ps1
-        -OverrideVersion '7.0.0'
       shell: pwsh
 
     # The "github.event_name == 'workflow_dispatch'" conditions will be removed eventually
