@@ -7,11 +7,13 @@ NUGET_API_KEY=$3
 
 if [ "$TARGET_PACKAGE" = "carter" ]; then
   # Publish both the Carter and the CarterTemplate packages
+  TARGET_PACKAGES="$(find -wholename "./src/Carter/**/*.nupkg")"
+elif [ "$TARGET_PACKAGE" = "carter-and-cartertemplate" ]; then
   TARGET_PACKAGES="$(find -wholename "./src/Carter/**/*.nupkg" -or -wholename "./template/**/*.nupkg")"
 elif [ "$TARGET_PACKAGE" = "newtonsoft" ]; then
   TARGET_PACKAGES="$(find -wholename "./src/Carter.ResponseNegotiators.Newtonsoft/**/*.nupkg")"
 else
-  echo "Unexpected target package name \"$TARGET_PACKAGE\"; Accepted values: carter, newtonsoft"
+  echo "Unexpected target package name \"$TARGET_PACKAGE\"; Accepted values: carter, carter-and-cartertemplate, newtonsoft"
   exit 1
 fi
 
