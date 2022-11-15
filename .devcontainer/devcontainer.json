@@ -1,9 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
-  "build": {
-    "dockerfile": "./Dockerfile",
-    "context": "."
-  },
+  "image": "mcr.microsoft.com/vscode/devcontainers/dotnet:0-7.0",
   "features": {
     "ghcr.io/devcontainers/features/common-utils:1": {
       "installZsh": "true",
@@ -30,7 +27,7 @@
       "extensions": [
         "EditorConfig.EditorConfig",
         "ms-dotnettools.csharp",
-        "redhat.vscode-yaml",
+        "redhat.vscode-yaml"
       ]
     }
   },
