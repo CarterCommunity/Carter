@@ -62,7 +62,7 @@ jobs:
     # Main tag created, push Carter and CarterTemplate packages to NuGet
     - if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !startsWith(github.ref, 'refs/tags/newtonsoft-')
       name: Push Carter and CarterTemplate packages to NuGet
-      run: ./push.sh carter-and-cartertemplate nuget ${{ secrets.NUGET_KEY }}
+      run: ./push.sh carter nuget ${{ secrets.NUGET_KEY }}
 
     # Newtonsoft tag created, push Newtonsoft package to NuGet
     - if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && startsWith(github.ref, 'refs/tags/newtonsoft-')
