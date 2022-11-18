@@ -11,6 +11,7 @@
     "identity": "Carter.Template",
     "shortName": "carter",
     "tags": {
+        "type": "project",
         "language": "C#"
     },
     "sourceName": "CarterTemplate"

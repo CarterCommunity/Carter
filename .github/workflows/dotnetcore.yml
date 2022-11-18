@@ -24,11 +24,13 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 7.*
-        include-prerelease: true
     - name: Build Reason
       run: echo ${{github.ref}} and ${{github.event_name}}
     - name: Build with dotnet
-      run: find . -path ./template -prune -false -o -name '*.csproj' -execdir dotnet build --configuration Release --nologo {} \;
+      run: >-
+        dotnet build
+        --configuration Release
+        --nologo
     - name: Run tests
       run: >-
         dotnet test
@@ -44,19 +46,27 @@ jobs:
           path: '**/*.trx'
           reporter: dotnet-trx
 
-    # PR merged, push prelease Carter package to feedz
+    # PR merged or main tag created, create the CarterTemplate NuGet package
+    - if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/newtonsoft-')
+      name: Create Carter template NuGet package
+      run: >-
+        dotnet pack ./template/Template.csproj
+        --configuration Release
+        --nologo
+
+    # PR merged, push prelease and CarterTemplate Carter packages to feedz
     - if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads')
-      name: Push prerelease Carter package to Feedz
+      name: Push prelease and CarterTemplate Carter packages to feedz
       run: ./push.sh carter feedz ${{ secrets.FEEDZ_KEY }}
 
-    # Main tag created, push release Carter package to NuGet
+    # Main tag created, push Carter and CarterTemplate packages to NuGet
     - if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !startsWith(github.ref, 'refs/tags/newtonsoft-')
-      name: Push release Carter package to NuGet
+      name: Push Carter and CarterTemplate packages to NuGet
       run: ./push.sh carter nuget ${{ secrets.NUGET_KEY }}
 
-    # Newtonsoft tag created, push release Newtonsoft package to NuGet
+    # Newtonsoft tag created, push Newtonsoft package to NuGet
     - if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && startsWith(github.ref, 'refs/tags/newtonsoft-')
-      name: Push release Newtonsoft package to NuGet
+      name: Push Newtonsoft package to NuGet
       run: ./push.sh newtonsoft nuget ${{ secrets.NUGET_KEY }}
 
 env:
