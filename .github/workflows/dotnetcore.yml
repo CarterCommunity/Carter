@@ -48,7 +48,7 @@ jobs:
           reporter: dotnet-trx
 
     # PR merged or main tag created, create the CarterTemplate NuGet package
-    - if: github.event_name == 'push' !startsWith(github.ref, 'refs/tags/newtonsoft-')
+    - if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/newtonsoft-')
       name: Create Carter template NuGet package
       run: >-
         dotnet pack ./template/Template.csproj
