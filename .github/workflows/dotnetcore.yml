@@ -47,16 +47,16 @@ jobs:
           path: '**/*.trx'
           reporter: dotnet-trx
 
-    - if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !startsWith(github.ref, 'refs/tags/newtonsoft-')
+    - if: github.event_name == 'push' !startsWith(github.ref, 'refs/tags/newtonsoft-')
       name: Create Carter template NuGet package
       run: >-
         dotnet pack ./template/Template.csproj
         --configuration Release
         --nologo
 
-    # PR merged, push prelease Carter package to feedz
+    # PR merged, push prelease and CarterTemplate Carter packages to feedz
     - if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads')
-      name: Push prerelease Carter package to Feedz
+      name: Push prelease and CarterTemplate Carter packages to feedz
       run: ./push.sh carter feedz ${{ secrets.FEEDZ_KEY }}
 
     # Main tag created, push Carter and CarterTemplate packages to NuGet
