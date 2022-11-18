@@ -6,6 +6,9 @@ on:
     # This will need to be changed to main
     - defaultinterface
   push:
+    branches:
+    # This will need to be changed to main
+    - defaultinterface
     tags:
     - '*'
 
@@ -41,8 +44,8 @@ jobs:
           path: '**/*.trx'
           reporter: dotnet-trx
 
-    # PR opened, push prelease Carter package to feedz
-    - if: github.event_name == 'pull_request'
+    # PR merged, push prelease Carter package to feedz
+    - if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads')
       name: Push prerelease Carter package to Feedz
       run: ./push.sh carter feedz ${{ secrets.FEEDZ_KEY }}
 
