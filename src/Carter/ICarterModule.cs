@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.Routing;
 
 public abstract class CarterModule : ICarterModule
 {
-    private IEndpointRouteBuilder app;
-
     internal string[] hosts = Array.Empty<string>();
 
     internal string corsPolicyName;

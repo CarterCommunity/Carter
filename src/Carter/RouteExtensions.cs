@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Routing;
 
 public static class RouteExtensions
 {
-    private static async ValueTask<object?> RouteHandler<T>(EndpointFilterInvocationContext context,
+    private static async ValueTask<object> RouteHandler<T>(EndpointFilterInvocationContext context,
         EndpointFilterDelegate next)
     {
         var param = (T)context.Arguments.FirstOrDefault(x => x?.GetType() == typeof(T));
