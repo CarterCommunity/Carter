@@ -1,0 +1,50 @@
+<!--
+    This replaces the <ProjectReference> element to the Carter project by a <PackageReference> element
+    so that we can publish two packages at the same time:
+      - the Carter NuGet package, and
+      - the CarterTemplate NuGet package, which references the Carter package with the same version
+-->
+
+<Project>
+    <PropertyGroup>
+        <!--
+            BeforePack is built in the NuGet MSBuild process and executed before creating the NuGet package
+            See https://github.com/NuGet/NuGet.Client/blob/d1620d3bc77030d05e7e76b5adf06c33c4dc8374/src/NuGet.Core/NuGet.Build.Tasks.Pack/NuGet.Build.Tasks.Pack.targets#L41
+
+            We run MinVer before our task as well to ensure that the PackageVersion property has been set by MinVer
+        -->
+        <BeforePack>MinVer; ReplaceProjectReferenceWithPackageReference</BeforePack>
+    </PropertyGroup>
+
+    <UsingTask TaskName="ReplaceProjectReferenceWithPackageReference"
+               TaskFactory="RoslynCodeTaskFactory"
+               AssemblyFile="$(MSBuildBinPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <ProjectFilePath ParameterType="System.String" Required="true" />
+            <PackageVersion ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Text" />
+            <Using Namespace="System.Text.RegularExpressions" />
+            <Code Type="Fragment" Language="cs">
+                <![CDATA[
+                var projectFileContents = File.ReadAllText(ProjectFilePath, Encoding.UTF8);
+                var newProjectFileContents = Regex.Replace(
+                    projectFileContents,
+                    @"<ProjectReference [\s\S]+?/>",
+                    $"<PackageReference Include=\"Carter\" Version=\"{PackageVersion}\" />");
+
+                File.WriteAllText(ProjectFilePath, newProjectFileContents);
+                ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <Target Name="ReplaceProjectReferenceWithPackageReference">
+        <ReplaceProjectReferenceWithPackageReference
+            ProjectFilePath="$(MSBuildThisFileDirectory)content\CarterTemplate.csproj"
+            PackageVersion="$(PackageVersion)" />
+    </Target>
+</Project>
