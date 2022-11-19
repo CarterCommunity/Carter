@@ -1,9 +1,6 @@
 name: Update Carter NuGet package references
 
 on:
-  push:
-    branches:
-      - mderriey/update-carter-package-references
   workflow_dispatch:
     inputs:
       includePrerelease:
@@ -24,18 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    # Temporary hack to run the workflow, as it can only be manually run when it's in the default branch
-    # See https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow#configuring-a-workflow-to-run-manually
-    - if: github.event_name == 'push'
-      name: '[TEST] Update package references'
-      run: >-
-        ./update-carter-package-dependencies.ps1 -IncludePrerelease
-      shell: pwsh
-
-    # The "github.event_name == 'workflow_dispatch'" conditions will be removed eventually
-    # as the workflow will ONLY be manually run
-    - if: github.event_name == 'workflow_dispatch'
-      name: Update package references with latest version from NuGet
+    - name: Update package references with latest version from NuGet
       run: >-
         ./update-carter-package-dependencies.ps1
         -IncludePrerelease:$${{ github.event.inputs.includePrerelease }}
@@ -45,7 +31,7 @@ jobs:
       run: git diff
 
     # https://github.com/marketplace/actions/checkout#push-a-commit-using-the-built-in-token
-    - if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.commitAndPush)
+    - if: github.event.inputs.commitAndPush
       name: Commit changes and push if necessary
       run: |
         GIT_CHANGES=$(git status --porcelain)
