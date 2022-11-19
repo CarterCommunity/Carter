@@ -11,6 +11,11 @@ on:
         default: false
         description: Whether to include prerelease versions when searching for the latest version of the Carter NuGet package
 
+      commitAndPush:
+        type: boolean
+        default: false
+        description: Whether to commit and push the changes; Useful to test the process by looking at the resulting Git diff
+
       overrideVersion:
         type: string
         description: Shunts the search process and uses a specific version of the Carter NuGet package
@@ -51,16 +56,17 @@ jobs:
       run: git diff
 
     # https://github.com/marketplace/actions/checkout#push-a-commit-using-the-built-in-token
-    - name: Commit changes and push if necessary
+    - if: github.event_name == 'workflow_dispatch' && github.event.inputs.commitAndPush
+      name: Commit changes and push if necessary
       run: |
         GIT_CHANGES=$(git status --porcelain)
         if [ "$GIT_CHANGES" == "" ]; then
           echo "No changes to commit"
         else
           echo "Committing and pushing changes"
+          git config user.name Jonathan Channon
+          git config user.email jonathan.channon@gmail.com
+          git add .
+          git commit -m "Update Carter NuGet package references"
+          git push
         fi
-    #     git config user.name Jonathan Channon
-    #     git config user.email jonathan.channon@gmail.com
-    #     git add .
-    #     git commit -m "Update Carter NuGet package references"
-    #     git push
