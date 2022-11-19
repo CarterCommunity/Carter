@@ -1,14 +1,15 @@
 name: .NET Core
 
 on:
+  # Run on all PRs
   pull_request:
-    branches:
-    # This will need to be changed to main
-    - defaultinterface
+
+  # Run when:
+  #  - The main branch is pushed to, i.e. a PR targeting main is merged
+  #  - The repo is tagged
   push:
     branches:
-    # This will need to be changed to main
-    - defaultinterface
+    - main
     tags:
     - '*'
 
