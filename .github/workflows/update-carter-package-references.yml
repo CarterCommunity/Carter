@@ -16,10 +16,6 @@ on:
         default: false
         description: Whether to commit and push the changes; Useful to test the process by looking at the resulting Git diff
 
-      overrideVersion:
-        type: string
-        description: Shunts the search process and uses a specific version of the Carter NuGet package
-
 jobs:
   update-carter-package-references:
     name: Update Carter NuGet package references
@@ -38,14 +34,7 @@ jobs:
 
     # The "github.event_name == 'workflow_dispatch'" conditions will be removed eventually
     # as the workflow will ONLY be manually run
-    - if: github.event_name == 'workflow_dispatch' && github.event.inputs.overrideVersion != ''
-      name: Update package references with user-provided version
-      run: >-
-        ./update-carter-package-dependencies.ps1
-        -OverrideVersion '${{ github.event.inputs.overrideVersion }}'
-      shell: pwsh
-
-    - if: github.event_name == 'workflow_dispatch' && github.event.inputs.overrideVersion == ''
+    - if: github.event_name == 'workflow_dispatch'
       name: Update package references with latest version from NuGet
       run: >-
         ./update-carter-package-dependencies.ps1

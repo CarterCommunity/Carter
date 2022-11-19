@@ -1,12 +1,8 @@
-[CmdletBinding(DefaultParameterSetName = 'Default')]
+[CmdletBinding()]
 param(
-    [Parameter(ParameterSetName = 'Default')]
+    [Parameter()]
     [switch]
-    $IncludePrerelease,
-
-    [Parameter(ParameterSetName = 'Override')]
-    [string]
-    $OverrideVersion
+    $IncludePrerelease
 )
 
 function Get-LatestCarterPackageVersion {
@@ -86,10 +82,5 @@ function Update-CarterPackageReferences {
     }
 }
 
-if ($PSCmdlet.ParameterSetName -eq 'Default') {
-    $targetCarterPackageVersion = Get-LatestCarterPackageVersion -IncludePrerelease:$IncludePrerelease
-} else {
-    $targetCarterPackageVersion = $OverrideVersion
-}
-
+$targetCarterPackageVersion = Get-LatestCarterPackageVersion -IncludePrerelease:$IncludePrerelease
 Update-CarterPackageReferences -RootPath $PSScriptRoot -PackageVersion $targetCarterPackageVersion
