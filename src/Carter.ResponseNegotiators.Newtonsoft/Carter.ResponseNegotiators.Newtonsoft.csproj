@@ -1,9 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <Authors>Jonathan Channon</Authors>
         <Description>Carter is framework that is a thin layer of extension methods and functionality over ASP.NET Core allowing code to be more explicit and most importantly more enjoyable.</Description>
         <PackageTags>asp.net core;nancy;.net core;routing;carter</PackageTags>
