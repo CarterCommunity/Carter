@@ -1,7 +1,0 @@
-{
-  "recommendations": [
-    "EditorConfig.EditorConfig",
-    "ms-dotnettools.csharp",
-    "redhat.vscode-yaml",
-  ]
-}

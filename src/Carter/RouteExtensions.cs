@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Routing;
 
 public static class RouteExtensions
 {
-    private static async ValueTask<object?> RouteHandler<T>(EndpointFilterInvocationContext context,
+    private static async ValueTask<object> RouteHandler<T>(EndpointFilterInvocationContext context,
         EndpointFilterDelegate next)
     {
         var param = (T)context.Arguments.FirstOrDefault(x => x?.GetType() == typeof(T));
@@ -27,6 +27,14 @@ public static class RouteExtensions
         return await next(context);
     }
 
+    /// <summary>
+    /// Add a POST handler that will validate your model and return 422 if validation fails
+    /// </summary>
+    /// <param name="endpoints"></param>
+    /// <param name="pattern">The route path pattern</param>
+    /// <param name="handler">The route handler</param>
+    /// <typeparam name="T">The model to validate</typeparam>
+    /// <returns></returns>
     public static RouteHandlerBuilder MapPost<T>(
         this IEndpointRouteBuilder endpoints,
         [StringSyntax("Route")] string pattern,
@@ -35,6 +43,14 @@ public static class RouteExtensions
         return endpoints.MapPost(pattern, handler).AddEndpointFilter(async (context, next) => await RouteHandler<T>(context, next));
     }
 
+    /// <summary>
+    /// Add a PUT handler that will validate your model and return 422 if validation fails
+    /// </summary>
+    /// <param name="endpoints"></param>
+    /// <param name="pattern">The route path pattern</param>
+    /// <param name="handler">The route handler</param>
+    /// <typeparam name="T">The model to validate</typeparam>
+    /// <returns></returns>
     public static RouteHandlerBuilder MapPut<T>(
         this IEndpointRouteBuilder endpoints,
         [StringSyntax("Route")] string pattern,

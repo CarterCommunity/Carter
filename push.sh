@@ -6,9 +6,10 @@ NUGET_TARGET_SERVICE=$2
 NUGET_API_KEY=$3
 
 if [ "$TARGET_PACKAGE" = "carter" ]; then
-  TARGET_PACKAGE_PATH="./src/Carter/**/*.nupkg"
+  # Publish both the Carter and the CarterTemplate packages
+  TARGET_PACKAGES="$(find -wholename "./src/Carter/**/*.nupkg" -or -wholename "./template/**/*.nupkg")"
 elif [ "$TARGET_PACKAGE" = "newtonsoft" ]; then
-  TARGET_PACKAGE_PATH="./src/Carter.ResponseNegotiators.Newtonsoft/**/*.nupkg"
+  TARGET_PACKAGES="$(find -wholename "./src/Carter.ResponseNegotiators.Newtonsoft/**/*.nupkg")"
 else
   echo "Unexpected target package name \"$TARGET_PACKAGE\"; Accepted values: carter, newtonsoft"
   exit 1
@@ -23,7 +24,7 @@ else
   exit 1
 fi
 
-for package in $(find -wholename "$TARGET_PACKAGE_PATH" | grep "test" -v); do
+for package in $(echo "$TARGET_PACKAGES" | grep "test" -v); do
   echo "${0##*/}": Pushing $package to $NUGET_TARGET_SERVICE \($NUGET_TARGET_URL\)...
   dotnet nuget push $package --source $NUGET_TARGET_URL --api-key $NUGET_API_KEY
 done
