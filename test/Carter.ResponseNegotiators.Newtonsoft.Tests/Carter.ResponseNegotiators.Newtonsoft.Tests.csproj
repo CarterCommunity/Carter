@@ -4,7 +4,7 @@
 
     <ItemGroup>
         <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.1.0" />
-        <PackageReference Include="Carter" Version="7.0.0-beta" />
+        <PackageReference Include="Carter" Version="7.0.0" />
     </ItemGroup>
 
 
