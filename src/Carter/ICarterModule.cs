@@ -62,18 +62,10 @@ public abstract class CarterModule : ICarterModule
     /// <summary>
     /// Add authorization to all routes
     /// </summary>
-    /// <returns></returns>
-    public CarterModule RequireAuthorization()
-    {
-        this.requiresAuthorization = true;
-        this.authorizationPolicyNames = null;
-        return this;
-    }
-
-    /// <summary>
-    /// Add authorization to all routes
-    /// </summary>
-    /// <param name="policyNames">A collection of policy names. If empty, the default authorization policy will be used.</param>
+    /// <param name="policyNames">
+    /// A collection of policy names.
+    /// If <c>null</c> or empty, the default authorization policy will be used.
+    /// </param>
     /// <returns></returns>
     public CarterModule RequireAuthorization(params string[] policyNames)
     {
