@@ -41,7 +41,14 @@ public static class CarterExtensions
 
                 if (carterModule.requiresAuthorization)
                 {
-                    group = group.RequireAuthorization();
+                    if (carterModule.authorizationPolicyNames is null)
+                    {
+                        group = group.RequireAuthorization();
+                    }
+                    else
+                    {
+                        group = group.RequireAuthorization(carterModule.authorizationPolicyNames);
+                    }
                 }
 
                 if (!string.IsNullOrWhiteSpace(carterModule.corsPolicyName))
