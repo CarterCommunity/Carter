@@ -24,14 +24,15 @@ public class DefaultAuthorizationTestModule : AuthorizationTestModuleBase
 }
 
 /// <summary>
-/// Test module that requires authorization specified by the <see cref="SpecificPolicyAuthorizationTestModule.SpecificPolicy"/> policy for all the added routes.
+/// Test module that requires authorization specified by the <see cref="SpecificPolicyOne"/> and <see cref="SpecificPolicyTwo"/> policies for all the added routes.
 /// </summary>
 public class SpecificPolicyAuthorizationTestModule : AuthorizationTestModuleBase
 {
-    public const string SpecificPolicy = nameof(SpecificPolicy);
+    public const string SpecificPolicyOne = nameof(SpecificPolicyOne);
+    public const string SpecificPolicyTwo = nameof(SpecificPolicyTwo);
 
     public SpecificPolicyAuthorizationTestModule()
     {
-        RequireAuthorization(SpecificPolicy);
+        RequireAuthorization(SpecificPolicyOne, SpecificPolicyTwo);
     }
 }

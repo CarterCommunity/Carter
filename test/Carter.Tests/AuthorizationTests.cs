@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Net.Http;
+using System.Linq;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,41 +23,56 @@ public class AuthorizationTests : IDisposable
 
     private TestServer server;
 
-    private HttpClient httpClient;
-
-    private bool defaultPolicyEvaluated;
-
-    private bool specificPolicyEvaluated;
-
     public AuthorizationTests(ITestOutputHelper outputHelper) =>
         this.outputHelper = outputHelper;
 
     [Fact]
-    public async Task Should_evaluate_default_policy_when_no_specific_policy_is_specified()
+    public void Should_contain_endpoint_with_default_authz_metadata()
     {
-        // Arrange
+        // Arrange and act
         BuildTestServer<DefaultAuthorizationTestModule>();
 
-        // Act
-        _ = await this.httpClient.GetAsync("/authorizedendpoint");
-
         // Assert
-        Assert.True(defaultPolicyEvaluated);
-        Assert.False(specificPolicyEvaluated);
+        var endpoint = server.Services
+            .GetServices<EndpointDataSource>()
+            .SelectMany(x => x.Endpoints)
+            .OfType<RouteEndpoint>()
+            .Single(x => x.RoutePattern.RawText == "/authorizedendpoint");
+
+        var authorizeMetadata = endpoint
+            .Metadata
+            .GetRequiredMetadata<AuthorizeAttribute>();
+
+        Assert.NotNull(authorizeMetadata);
+        Assert.Null(authorizeMetadata.Policy);
     }
 
     [Fact]
-    public async Task Should_evaluate_specific_policy_when_it_is_specified()
+    public void Should_contain_endpoint_with_specific_authz_metadata()
     {
-        // Arrange
+        // Arrange and act
         BuildTestServer<SpecificPolicyAuthorizationTestModule>();
 
-        // Act
-        _ = await this.httpClient.GetAsync("/authorizedendpoint");
-
         // Assert
-        Assert.True(specificPolicyEvaluated);
-        Assert.False(defaultPolicyEvaluated);
+        var endpoint = server.Services
+            .GetServices<EndpointDataSource>()
+            .SelectMany(x => x.Endpoints)
+            .OfType<RouteEndpoint>()
+            .Single(x => x.RoutePattern.RawText == "/authorizedendpoint");
+
+        var authorizeMetadata = endpoint
+            .Metadata
+            .OfType<AuthorizeAttribute>()
+            .ToList();
+
+        Assert.NotEmpty(authorizeMetadata);
+        Assert.Equivalent(
+            authorizeMetadata.ConvertAll(x => x.Policy),
+            new[]
+            {
+                SpecificPolicyAuthorizationTestModule.SpecificPolicyOne,
+                SpecificPolicyAuthorizationTestModule.SpecificPolicyTwo
+            });
     }
 
     /// <summary>
@@ -76,26 +92,6 @@ public class AuthorizationTests : IDisposable
                         b.SetMinimumLevel(LogLevel.Debug);
                     });
 
-                    x.AddAuthentication().AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("TestScheme", options => { });
-                    x.AddAuthorization(configure: c =>
-                    {
-                        c.DefaultPolicy = new AuthorizationPolicyBuilder("TestScheme")
-                            .RequireAssertion(handler: c =>
-                            {
-                                this.defaultPolicyEvaluated = true;
-                                return true;
-                            })
-                            .Build();
-
-                        c.AddPolicy(SpecificPolicyAuthorizationTestModule.SpecificPolicy, new AuthorizationPolicyBuilder("TestScheme")
-                            .RequireAssertion(handler: c =>
-                            {
-                                this.specificPolicyEvaluated = true;
-                                return true;
-                            })
-                            .Build());
-                    });
-
                     x.AddRouting();
                     x.AddCarter(configurator: c =>
                     {
@@ -105,18 +101,13 @@ public class AuthorizationTests : IDisposable
                 .Configure(x =>
                 {
                     x.UseRouting();
-                    x.UseAuthentication();
-                    x.UseAuthorization();
                     x.UseEndpoints(builder => builder.MapCarter());
                 })
             );
-
-        this.httpClient = this.server.CreateClient();
     }
 
     public void Dispose()
     {
-        this.httpClient?.Dispose();
         this.server?.Dispose();
     }
 
