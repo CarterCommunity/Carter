@@ -52,9 +52,11 @@ You can get started using either the template or by adding the package manually 
 
 1. Install the template - `dotnet new -i CarterTemplate`
 
-2. Create a new application using template - `dotnet new Carter -n MyCarterApp`
+2. Create a new application using template - `dotnet new carter -n MyCarterApp -o MyCarterApp`
 
-3. Run the application - `dotnet run`
+3. Go into the new directory created for the application `cd MyCarterApp`
+
+4. Run the application - `dotnet run`
 
 #### Package
 
