@@ -33,7 +33,7 @@ public abstract class CarterModule : ICarterModule
 
     internal bool requiresAuthorization;
 
-    internal string[] authorizationPolicyNames;
+    internal string[] authorizationPolicyNames = Array.Empty<string>();
 
     internal string cacheOutputPolicyName;
 
