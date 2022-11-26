@@ -50,7 +50,7 @@ You can get started using either the template or by adding the package manually 
 
 [https://www.nuget.org/packages/CarterTemplate/](https://www.nuget.org/packages/CarterTemplate/)
 
-1. Install the template - `dotnet new -i CarterTemplate`
+1. Install the template - `dotnet new install CarterTemplate`
 
 2. Create a new application using template - `dotnet new carter -n MyCarterApp -o MyCarterApp`
 
