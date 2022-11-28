@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2002
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carter", "src\Carter\Carter.csproj", "{A6D020CF-1722-4AB3-A8B3-69F54319AD6A}"
 EndProject
@@ -12,6 +12,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{35DE35A0-758D-4FDD-BDA3-67F04F65677D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{DCB5B9A0-F06D-4BDF-917D-A459C790C718}"
+	ProjectSection(SolutionItems) = preProject
+		test\Directory.Build.props = test\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carter.Tests", "test\Carter.Tests\Carter.Tests.csproj", "{32E3C950-F6C1-4635-B87F-0EA30044E2F4}"
 EndProject
@@ -19,15 +22,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "template", "template", "{47
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarterTemplate", "template\content\CarterTemplate.csproj", "{572762BB-5DFF-425F-8F66-500B973DBB0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carter.Samples.Tests", "test\Carter.Samples.Tests\Carter.Samples.Tests.csproj", "{DD5E942A-D546-489B-A5E9-8CB42C61BEC1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carter.Samples.Tests", "test\Carter.Samples.Tests\Carter.Samples.Tests.csproj", "{DD5E942A-D546-489B-A5E9-8CB42C61BEC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarterAndMVC", "samples\CarterAndMVC\CarterAndMVC.csproj", "{CE26885C-BB25-4A2C-B550-1D807CD1A066}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarterAndMVC", "samples\CarterAndMVC\CarterAndMVC.csproj", "{CE26885C-BB25-4A2C-B550-1D807CD1A066}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidatorOnlyProject", "samples\ValidatorOnlyProject\ValidatorOnlyProject.csproj", "{E5D99119-96EB-4C01-9EC2-A06FC3EEC182}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValidatorOnlyProject", "samples\ValidatorOnlyProject\ValidatorOnlyProject.csproj", "{E5D99119-96EB-4C01-9EC2-A06FC3EEC182}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carter.ResponseNegotiators.Newtonsoft", "src\Carter.ResponseNegotiators.Newtonsoft\Carter.ResponseNegotiators.Newtonsoft.csproj", "{D30E87B0-39AE-41FE-8BA3-E5F9FBFFDD64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carter.ResponseNegotiators.Newtonsoft", "src\Carter.ResponseNegotiators.Newtonsoft\Carter.ResponseNegotiators.Newtonsoft.csproj", "{D30E87B0-39AE-41FE-8BA3-E5F9FBFFDD64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carter.ResponseNegotiators.Newtonsoft.Tests", "test\Carter.ResponseNegotiators.Newtonsoft.Tests\Carter.ResponseNegotiators.Newtonsoft.Tests.csproj", "{47DD3AA8-F072-41E3-AF7F-119DBBD8D14A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carter.ResponseNegotiators.Newtonsoft.Tests", "test\Carter.ResponseNegotiators.Newtonsoft.Tests\Carter.ResponseNegotiators.Newtonsoft.Tests.csproj", "{47DD3AA8-F072-41E3-AF7F-119DBBD8D14A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

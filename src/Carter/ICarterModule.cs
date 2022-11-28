@@ -33,6 +33,8 @@ public abstract class CarterModule : ICarterModule
 
     internal bool requiresAuthorization;
 
+    internal string[] authorizationPolicyNames = Array.Empty<string>();
+
     internal string cacheOutputPolicyName;
 
     internal readonly string basePath = "/";
@@ -60,10 +62,15 @@ public abstract class CarterModule : ICarterModule
     /// <summary>
     /// Add authorization to all routes
     /// </summary>
+    /// <param name="policyNames">
+    /// A collection of policy names.
+    /// If <c>null</c> or empty, the default authorization policy will be used.
+    /// </param>
     /// <returns></returns>
-    public CarterModule RequireAuthorization()
+    public CarterModule RequireAuthorization(params string[] policyNames)
     {
         this.requiresAuthorization = true;
+        this.authorizationPolicyNames = policyNames;
         return this;
     }
 
