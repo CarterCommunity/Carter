@@ -1,6 +1,10 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Update Carter NuGet package references
 
 on:
+  push:
+    branches:
+      - mderriey/reusable-workflows
   workflow_dispatch:
     inputs:
       includePrerelease:
@@ -15,33 +19,7 @@ on:
 
 jobs:
   update-carter-package-references:
-    name: Update Carter NuGet package references
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Update package references with latest version from NuGet
-      run: >-
-        ./update-carter-package-dependencies.ps1
-        -IncludePrerelease:$${{ github.event.inputs.includePrerelease }}
-      shell: pwsh
-
-    - name: Show Git diff
-      run: git diff
-
-    # https://github.com/marketplace/actions/checkout#push-a-commit-using-the-built-in-token
-    - if: github.event.inputs.commitAndPush
-      name: Commit changes and push if necessary
-      run: |
-        GIT_CHANGES=$(git status --porcelain)
-        if [ "$GIT_CHANGES" == "" ]; then
-          echo "No changes to commit"
-        else
-          echo "Committing and pushing changes"
-          git config user.name Jonathan Channon
-          git config user.email jonathan.channon@gmail.com
-          git add .
-          git commit -m "Update Carter NuGet package references"
-          git push
-        fi
+    uses: CarterCommunity/.github/workflows/update-carter-package-references/workflow.yml@mderriey/reusable-workflows
+    with:
+      includePrerelease: false
+      commitAndPush: false
