@@ -19,7 +19,7 @@ on:
 
 jobs:
   update-carter-package-references:
-    uses: CarterCommunity/.github/.github/workflows/update-carter-package-references/workflow.yml@mderriey/reusable-workflows
+    uses: CarterCommunity/.github/.github/workflows/workflow.yml@mderriey/reusable-workflows
     with:
       includePrerelease: false
       commitAndPush: false
