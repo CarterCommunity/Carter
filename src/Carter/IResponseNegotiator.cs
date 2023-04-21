@@ -23,5 +23,5 @@ public interface IResponseNegotiator
     /// <param name="model">View model</param>
     /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
     /// <returns><see cref="Task"/></returns>
-    Task Handle(HttpRequest req, HttpResponse res, object model, CancellationToken cancellationToken);
+    Task Handle<T>(HttpRequest req, HttpResponse res, T model, CancellationToken cancellationToken);
 }

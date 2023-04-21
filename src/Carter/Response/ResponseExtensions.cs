@@ -18,10 +18,10 @@ public static class ResponseExtensions
     /// Executes content negotiation on current <see cref="HttpResponse"/>, utilizing an accepted media type if possible and defaulting to "application/json" if none found.
     /// </summary>
     /// <param name="response">Current <see cref="HttpResponse"/></param>
-    /// <param name="obj">View model</param>
+    /// <param name="model">View model</param>
     /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
     /// <returns><see cref="Task"/></returns>
-    public static Task Negotiate(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
+    public static Task Negotiate<T>(this HttpResponse response, T model, CancellationToken cancellationToken = default)
     {
         var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>().ToList();
         IResponseNegotiator negotiator = null;
@@ -46,23 +46,23 @@ public static class ResponseExtensions
             negotiator = negotiators.First(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
         }
 
-        return negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
+        return negotiator.Handle(response.HttpContext.Request, response, model, cancellationToken);
     }
 
     /// <summary>
     /// Returns a Json response
     /// </summary>
     /// <param name="response">Current <see cref="HttpResponse"/></param>
-    /// <param name="obj">View model</param>
+    /// <param name="model">View model</param>
     /// <param name="cancellationToken"><see cref="CancellationToken"/></param>
     /// <returns><see cref="Task"/></returns>
-    public static Task AsJson(this HttpResponse response, object obj, CancellationToken cancellationToken = default)
+    public static Task AsJson<T>(this HttpResponse response, T model, CancellationToken cancellationToken = default)
     {
         var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
 
         var negotiator = negotiators.First(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
 
-        return negotiator.Handle(response.HttpContext.Request, response, obj, cancellationToken);
+        return negotiator.Handle(response.HttpContext.Request, response, model, cancellationToken);
     }
 
     /// <summary>
