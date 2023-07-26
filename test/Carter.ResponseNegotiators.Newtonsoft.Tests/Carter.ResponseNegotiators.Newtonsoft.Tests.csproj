@@ -1,16 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 
-
     <ItemGroup>
-        <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.1.0" />
-        <PackageReference Include="Carter" Version="7.0.0" />
+        <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.1.0"/>
     </ItemGroup>
 
 
-
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Carter.ResponseNegotiators.Newtonsoft\Carter.ResponseNegotiators.Newtonsoft.csproj" />
+        <ProjectReference Include="..\..\src\Carter.ResponseNegotiators.Newtonsoft\Carter.ResponseNegotiators.Newtonsoft.csproj"/>
     </ItemGroup>
 
 

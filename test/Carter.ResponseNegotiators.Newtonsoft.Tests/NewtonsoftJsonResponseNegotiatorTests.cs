@@ -87,7 +87,7 @@ namespace Carter.ResponseNegotiators.Newtonsoft.Tests
             .IndexOf("application/vnd.badger+json",
                 StringComparison.OrdinalIgnoreCase) >= 0;
 
-        public async Task Handle(HttpRequest req, HttpResponse res, object model,
+        public async Task Handle<T>(HttpRequest req, HttpResponse res, T model,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             await res.WriteAsync("Non default json Response", cancellationToken);
