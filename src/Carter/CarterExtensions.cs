@@ -176,11 +176,11 @@ public static class CarterExtensions
 
         foreach (var validator in validators)
         {
-            services.AddSingleton(typeof(IValidator), validator);
-            services.AddSingleton(validator);
+            services.AddScoped(typeof(IValidator), validator);
+            services.AddScoped(validator);
         }
 
-        services.AddSingleton<IValidatorLocator, DefaultValidatorLocator>();
+        services.AddScoped<IValidatorLocator, DefaultValidatorLocator>();
 
         foreach (var newModule in newModules)
         {
