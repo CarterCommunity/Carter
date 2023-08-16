@@ -1,9 +1,5 @@
 namespace Carter;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Carter.OpenApi;
 using Carter.Response;
 using FluentValidation;
@@ -12,6 +8,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 public static class CarterExtensions
 {
@@ -145,6 +145,7 @@ public static class CarterExtensions
     /// <param name="services">The <see cref="IServiceCollection"/> to add Carter to.</param>
     /// <param name="assemblyCatalog">Optional <see cref="DependencyContextAssemblyCatalog"/> containing assemblies to add to the services collection. If not provided, the default catalog of assemblies is added, which includes Assembly.GetEntryAssembly.</param>
     /// <param name="configurator">Optional <see cref="CarterConfigurator"/> to enable registration of specific types within Carter</param>
+    /// <param name="validatorServiceLifetime">Optional <see href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.servicelifetime"/> to enable registration of validators reporting to ServiceLifetime within Carter. ServiceLifetime defaults to Singleton.</param>
     public static IServiceCollection AddCarter(this IServiceCollection services,
         DependencyContextAssemblyCatalog assemblyCatalog = null,
         Action<CarterConfigurator> configurator = null)
@@ -176,11 +177,24 @@ public static class CarterExtensions
 
         foreach (var validator in validators)
         {
-            services.AddScoped(typeof(IValidator), validator);
-            services.AddScoped(validator);
+            services.Add(
+                new ServiceDescriptor(
+                    serviceType: typeof(IValidator),
+                    implementationType: validator,
+                    lifetime: carterConfigurator.ValidatorServiceLifetime));
+
+            services.Add(
+               new ServiceDescriptor(
+                   serviceType: validator,
+                   implementationType: validator,
+                   lifetime: carterConfigurator.ValidatorServiceLifetime));
         }
 
-        services.AddScoped<IValidatorLocator, DefaultValidatorLocator>();
+        services.Add(
+                new ServiceDescriptor(
+                    serviceType: typeof(IValidatorLocator),
+                    implementationType: typeof(DefaultValidatorLocator),
+                    lifetime: carterConfigurator.ValidatorServiceLifetime));
 
         foreach (var newModule in newModules)
         {
