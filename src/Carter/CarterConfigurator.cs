@@ -162,5 +162,4 @@ public class CarterConfigurator
         this.ValidatorServiceLifetime = serviceLifetime;
         return this;
     }
-
 }
