@@ -3,6 +3,7 @@ namespace Carter;
 using System;
 using System.Collections.Generic;
 using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -15,6 +16,7 @@ public class CarterConfigurator
         this.ModuleTypes = new List<Type>();
         this.ValidatorTypes = new List<Type>();
         this.ResponseNegotiatorTypes = new List<Type>();
+        this.ValidatorServiceLifetime = ServiceLifetime.Singleton;
     }
 
     internal bool ExcludeValidators;
@@ -22,6 +24,8 @@ public class CarterConfigurator
     internal bool ExcludeModules;
         
     internal bool ExcludeResponseNegotiators;
+
+    internal ServiceLifetime ValidatorServiceLifetime;
 
     internal List<Type> ModuleTypes { get; }
 
@@ -145,6 +149,17 @@ public class CarterConfigurator
     public CarterConfigurator WithEmptyResponseNegotiators()
     {
         this.ExcludeResponseNegotiators = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Define the lifetime of the validator
+    /// Default: Singleton
+    /// </summary>
+    /// <returns></returns>
+    public CarterConfigurator WithValidatorLifetime(ServiceLifetime serviceLifetime)
+    {
+        this.ValidatorServiceLifetime = serviceLifetime;
         return this;
     }
 }
