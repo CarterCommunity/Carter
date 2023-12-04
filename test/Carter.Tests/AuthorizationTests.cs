@@ -112,7 +112,7 @@ public class AuthorizationTests : IDisposable
     }
 
     /// <summary>
-    /// See https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-7.0#mock-authentication
+    /// See https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-8.0#mock-authentication
     /// </summary>
     private class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
@@ -138,5 +138,3 @@ public class AuthorizationTests : IDisposable
         }
     }
 }
-
-
