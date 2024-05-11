@@ -6,15 +6,21 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 
 public class DefaultJsonResponseNegotiator : IResponseNegotiator
 {
     private readonly JsonSerializerOptions jsonSettings;
 
-    public DefaultJsonResponseNegotiator()
+    public DefaultJsonResponseNegotiator(IOptions<JsonOptions> options = default)
     {
-        this.jsonSettings = new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        this.jsonSettings = options?.Value.SerializerOptions ?? new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
     }
 
     public bool CanHandle(MediaTypeHeaderValue accept)
