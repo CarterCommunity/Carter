@@ -36,10 +36,10 @@ public class RouteExtensionsTests
 
                     x.AddRouting();
                     x.AddCarter(configurator: c =>
-                        {
-                            c.WithModule<TestModule>();
-                            c.WithValidator<TestModelValidator>();
-                        }
+                    {
+                        c.WithModule<TestModule>();
+                        c.WithValidator<TestModelValidator>();
+                    }
                     );
                 })
                 .Configure(x =>
@@ -82,13 +82,60 @@ public class RouteExtensionsTests
     {
         var res = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod(httpMethod), "/endpointfilter")
         {
-            Content = new StringContent(JsonConvert.SerializeObject(new TestModel{MyStringProperty = "hi", MyIntProperty = 123}), Encoding.UTF8, "application/json")
+            Content = new StringContent(JsonConvert.SerializeObject(new TestModel { MyStringProperty = "hi", MyIntProperty = 123 }), Encoding.UTF8, "application/json")
         });
 
         var body = await res.Content.ReadAsStringAsync();
-        
+
         Assert.Equal(httpMethod, body);
     }
+}
+public class NestedRouteExtensionsTests
+{
+    private readonly TestServer server;
+
+    private readonly HttpClient httpClient;
+
+    public NestedRouteExtensionsTests(ITestOutputHelper outputHelper)
+    {
+        this.server = new TestServer(
+            new WebHostBuilder()
+                .ConfigureServices(x =>
+                {
+                    x.AddLogging(b =>
+                    {
+                        XUnitLoggerExtensions.AddXUnit((ILoggingBuilder)b, outputHelper, x => x.IncludeScopes = true);
+                        b.SetMinimumLevel(LogLevel.Debug);
+                    });
+
+                    x.AddSingleton<IDependency, Dependency>();
+
+                    x.AddRouting();
+                    x.AddCarter(configurator: c => {
+                        c.WithValidator<TestModelValidator>();
+                    }
+                    );
+                })
+                .Configure(x =>
+                {
+                    x.UseRouting();
+                    x.UseEndpoints(builder => builder.MapCarter());
+                })
+        );
+        this.httpClient = this.server.CreateClient();
+    }
+
+    [Theory]
+    [InlineData("GET")]
+    public async Task Should_have_nested_class_registered(string httpMethod)
+    {
+        var res = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod(httpMethod), "/nested")
+        {
+            Content = new StringContent(JsonConvert.SerializeObject(new TestModel()), Encoding.UTF8, "application/json")
+        });
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+    }
+
 }
 
 internal interface IDependency
