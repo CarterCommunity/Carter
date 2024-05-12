@@ -106,4 +106,22 @@ namespace Carter.Tests
             app.MapPut<TestModel>("/endpointfilter", (IDependency dependency, TestModel testModel) => "PUT");
         }
     }
+    public static class NestedTestModule
+    {
+        public class TestModule : ICarterModule
+        {
+            private Guid instanceId;
+
+            public TestModule()
+            {
+                this.instanceId = Guid.NewGuid();
+            }
+
+            public void AddRoutes(IEndpointRouteBuilder app)
+            {
+                app.MapGet("/nested", async (HttpContext ctx) => { await ctx.Response.WriteAsync("Hello Nested"); });
+            }
+        }
+    }
+
 }

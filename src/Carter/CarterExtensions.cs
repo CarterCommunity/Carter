@@ -253,7 +253,7 @@ public static class CarterExtensions
                     !t.IsAbstract &&
                     typeof(ICarterModule).IsAssignableFrom(t) &&
                     t != typeof(ICarterModule) &&
-                    t.IsPublic
+                    (t.IsPublic || t.IsNestedPublic)
                 ));
 
             carterConfigurator.ModuleTypes.AddRange(modules);
