@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 public static class ValidationExtensions
 {
@@ -25,6 +26,23 @@ public static class ValidationExtensions
         return validator == null
             ? throw new InvalidOperationException($"Cannot find validator for model of type '{typeof(T).Name}'")
             : validator.Validate(new ValidationContext<T>(model));
+    }
+    
+    /// <summary>
+    /// Performs validation on the specified <paramref name="model"/> instance
+    /// </summary>
+    /// <typeparam name="T">The type of the <paramref name="model"/> that is being validated</typeparam>
+    /// <param name="request">Current <see cref="HttpRequest"/></param>
+    /// <param name="model">The model instance that is being validated</param>
+    /// <returns><see cref="Task{ValidationResult}"/></returns>
+    public static async Task<ValidationResult> ValidateAsync<T>(this HttpRequest request, T model)
+    {
+        var validatorLocator = request.HttpContext.RequestServices.GetRequiredService<IValidatorLocator>();
+        var validator = validatorLocator.GetValidator<T>();
+
+        return validator == null
+            ? throw new InvalidOperationException($"Cannot find validator for model of type '{typeof(T).Name}'")
+            : await validator.ValidateAsync(new ValidationContext<T>(model));
     }
 
     /// <summary>
