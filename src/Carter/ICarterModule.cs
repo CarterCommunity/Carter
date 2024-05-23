@@ -54,7 +54,9 @@ public abstract class CarterModule : ICarterModule
     /// Initializes a new instance of <see cref="CarterModule"/>
     /// </summary>
     /// <param name="basePath">A base path to group routes in your <see cref="CarterModule"/></param>
+#pragma warning disable CARTER1
     protected CarterModule(string basePath)
+#pragma warning restore CARTER1
     {
         this.basePath = basePath;
     }
