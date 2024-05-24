@@ -18,7 +18,9 @@ jobs:
 
     name: Github Actions Build
     runs-on: ubuntu-latest
-
+    permissions: 
+      checks: write
+    
     steps:
     - uses: actions/checkout@v1
     - name: Setup .NET Core
