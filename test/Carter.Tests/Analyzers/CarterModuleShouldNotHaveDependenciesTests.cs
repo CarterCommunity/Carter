@@ -1,8 +1,12 @@
-namespace Carter.Analyzers.Tests;
+namespace Carter.Tests.Analyzers;
 
+using System.IO;
+using System.Threading.Tasks;
+using Carter.Analyzers;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
+using Xunit;
 
 public sealed class CarterModuleShouldNotHaveDependenciesTests
 {

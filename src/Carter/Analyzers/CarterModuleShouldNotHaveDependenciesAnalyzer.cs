@@ -67,6 +67,5 @@ internal sealed class CarterModuleShouldNotHaveDependenciesAnalyzer : Diagnostic
         }
     }
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies];
 }
