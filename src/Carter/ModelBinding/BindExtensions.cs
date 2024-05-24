@@ -88,6 +88,7 @@ public static class BindExtensions
 
     private static async Task SaveFileInternal(IFormFile file, string saveLocation, string fileName = "")
     {
+#pragma warning disable RS1035
         if (!Directory.Exists(saveLocation))
             Directory.CreateDirectory(saveLocation);
 
@@ -95,5 +96,6 @@ public static class BindExtensions
 
         using (var fileToSave = File.Create(Path.Combine(saveLocation, fileName)))
             await file.CopyToAsync(fileToSave);
+#pragma warning restore RS1035
     }
 }
