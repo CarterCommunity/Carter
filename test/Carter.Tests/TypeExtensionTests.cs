@@ -10,7 +10,7 @@ namespace Carter.Tests
         [Fact]
         public void MustDeriveFrom_TypesDerivingFrom_WontThrow()
         {
-            var types = new[] { typeof(TestModule), typeof(StreamModule) }.ToArray();
+            var types = new[] { typeof(TestModule), typeof(StreamModule), typeof(NestedTestModule.TestModule) }.ToArray();
             types.MustDeriveFrom<ICarterModule>();
         }
 
