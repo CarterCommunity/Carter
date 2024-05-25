@@ -41,7 +41,7 @@ public static class BindExtensions
     /// </summary>
     /// <param name="request">Current <see cref="HttpRequest"/></param>
     /// <returns><see cref="IEnumerable{IFormFile}"/></returns>
-    private static Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request)
+    public static Task<IEnumerable<IFormFile>> BindFiles(this HttpRequest request)
     {
         return request.BindFiles(returnOnFirst: false);
     }
@@ -51,7 +51,7 @@ public static class BindExtensions
     /// </summary>
     /// <param name="request">Current <see cref="HttpRequest"/></param>
     /// <returns><see cref="IFormFile"/></returns>
-    private static async Task<IFormFile> BindFile(this HttpRequest request)
+    public static async Task<IFormFile> BindFile(this HttpRequest request)
     {
         var files = await request.BindFiles(returnOnFirst: true);
 
@@ -88,6 +88,7 @@ public static class BindExtensions
 
     private static async Task SaveFileInternal(IFormFile file, string saveLocation, string fileName = "")
     {
+#pragma warning disable RS1035
         if (!Directory.Exists(saveLocation))
             Directory.CreateDirectory(saveLocation);
 
@@ -95,5 +96,6 @@ public static class BindExtensions
 
         using (var fileToSave = File.Create(Path.Combine(saveLocation, fileName)))
             await file.CopyToAsync(fileToSave);
+#pragma warning restore RS1035
     }
 }

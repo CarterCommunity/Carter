@@ -12,20 +12,28 @@
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
         <MinVerSkip Condition="'$(Configuration)' == 'Debug'">true</MinVerSkip>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <NoWarn>RS2008</NoWarn>
     </PropertyGroup>
     <ItemGroup>
         <None Include="..\..\media\carterlogo.png" Pack="true" PackagePath="\" />
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="FluentValidation" Version="11.8.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" PrivateAssets="compile" />
         <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.0" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="all" />
         <PackageReference Include="MinVer" Version="2.5.0">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-
+    </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="$(AssemblyName).Tests" />
     </ItemGroup>
 </Project>

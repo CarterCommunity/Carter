@@ -4,9 +4,9 @@ public class CastMemberModule : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost("/castmembers", (HttpRequest req, CastMember castMember) =>
+        app.MapPost("/castmembers", async (HttpRequest req, CastMember castMember) =>
         {
-            var result = req.Validate<CastMember>(castMember);
+            var result = await req.ValidateAsync<CastMember>(castMember);
 
             if (!result.IsValid)
             {

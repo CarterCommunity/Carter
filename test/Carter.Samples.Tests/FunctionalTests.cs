@@ -14,6 +14,7 @@ namespace Carter.Samples.Tests
     using CarterSample.Features.FunctionalProgramming.UpdateDirector;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Newtonsoft.Json;
+    using ValidatorOnlyProject;
     using Xunit;
 
     public class FunctionalTests
@@ -23,13 +24,7 @@ namespace Carter.Samples.Tests
         public FunctionalTests()
         {            
             var server = new WebApplicationFactory<Program>()
-                .WithWebHostBuilder(builder =>
-                {
-                    builder.ConfigureServices(services =>
-                    {
-                        //services.AddSingleton<IHelloService, MockHelloService>();
-                    });
-                });
+                .WithWebHostBuilder(builder => { });
 
             this.client = server.CreateClient();
         }
@@ -191,6 +186,19 @@ namespace Carter.Samples.Tests
 
             //Then
             Assert.Equal(403, (int)res.StatusCode);
+        }
+        
+        [Fact]
+        public async Task Should_return_422_for_blank_castmember_with_async_validation()
+        {
+            
+            //When
+            var res = await this.client.PostAsync("/castmembers",
+                new StringContent(JsonConvert.SerializeObject(new CastMember{ Name = "" }), Encoding.UTF8,
+                    "application/json"));
+
+            //Then
+            Assert.Equal(422, (int)res.StatusCode);
         }
     }
 }

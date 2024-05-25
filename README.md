@@ -6,7 +6,7 @@ For a better understanding, take a good look at the [samples](https://github.com
 
 Other extensions include:
 
-* `Validate<T>` - [FluentValidation](https://github.com/JeremySkinner/FluentValidation) extensions to validate incoming HTTP requests which is not available with ASP.NET Core Minimal APIs.
+* `Validate<T> / ValidateAsync<T>` - [FluentValidation](https://github.com/JeremySkinner/FluentValidation) extensions to validate incoming HTTP requests which is not available with ASP.NET Core Minimal APIs.
 * `BindFile/BindFiles/BindFileAndSave/BindFilesAndSave` - Allows you to easily get access to a file/files that has been uploaded. Alternatively you can call `BindFilesAndSave` and this will save it to a path you specify.
 * Routes to use in common ASP.NET Core middleware e.g., `app.UseExceptionHandler("/errorhandler");`.
 * `IResponseNegotiator`s allow you to define how the response should look on a certain Accept header(content negotiation). Handling JSON is built in the default response but implementing an interface allows the user to choose how they want to represent resources.
@@ -21,7 +21,7 @@ Other extensions include:
 
 ### Join our Slack Channel
 
-<a href="https://join.slack.com/t/cartercommunity/shared_invite/enQtMzY2Nzc0NjU2MTgyLWY3M2Y2Yjk3NzViN2Y3YTQ4ZDA5NWFlMTYxMTIwNDFkMTc5YWEwMDFiOWUyM2Q4ZmY5YmRkODYyYTllZDViMmE"><img src="./slack.svg" width="140px"/></a>
+[![Join our slack channel](https://raw.githubusercontent.com/CarterCommunity/Carter/main/slack.png)](https://join.slack.com/t/cartercommunity/shared_invite/enQtMzY2Nzc0NjU2MTgyLWY3M2Y2Yjk3NzViN2Y3YTQ4ZDA5NWFlMTYxMTIwNDFkMTc5YWEwMDFiOWUyM2Q4ZmY5YmRkODYyYTllZDViMmE)
 
 #### Routing
 
