@@ -44,28 +44,28 @@ internal sealed class CarterModuleShouldNotHaveDependenciesAnalyzer : Diagnostic
             foreach (var syntaxReference in constructor.DeclaringSyntaxReferences)
             {
                 var node = syntaxReference.GetSyntax();
-                SyntaxToken identifier;
-                if (node is ConstructorDeclarationSyntax constructorDeclaration)
+                SyntaxToken? identifier = node switch
                 {
-                    identifier = constructorDeclaration.Identifier;
-                } else if (node is RecordDeclarationSyntax recordDeclaration)
-                {
-                    identifier = recordDeclaration.Identifier;
-                }
-                else
+                    ConstructorDeclarationSyntax constructorDeclaration => constructorDeclaration.Identifier,
+                    RecordDeclarationSyntax recordDeclaration => recordDeclaration.Identifier,
+                    ClassDeclarationSyntax classDeclaration => classDeclaration.Identifier,
+                    StructDeclarationSyntax structDeclaration => structDeclaration.Identifier,
+                    _ => null
+                };
+                if (!identifier.HasValue)
                 {
                     continue;
                 }
 
                 var diagnostic = Diagnostic.Create(
                     DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies,
-                    identifier.GetLocation(),
-                    identifier.Text
+                    identifier.Value.GetLocation(),
+                    identifier.Value.Text
                 );
                 context.ReportDiagnostic(diagnostic);
             }
         }
     }
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies];
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies);
 }

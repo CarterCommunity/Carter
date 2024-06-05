@@ -4,6 +4,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Carter\Carter.csproj" />
+    <ProjectReference Include="..\..\src\Carter.Analyzers\Carter.Analyzers.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.1.0" />
