@@ -89,9 +89,7 @@ public class DependencyContextAssemblyCatalog
     {
         try
         {
-#pragma warning disable RS1035
             return Assembly.Load(assemblyName);
-#pragma warning restore RS1035
         }
         catch (Exception)
         {

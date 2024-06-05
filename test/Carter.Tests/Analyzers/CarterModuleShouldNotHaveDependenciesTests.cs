@@ -1,9 +1,7 @@
 namespace Carter.Tests.Analyzers;
 
-using System.IO;
 using System.Threading.Tasks;
 using Carter.Analyzers;
-using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
 using Xunit;
@@ -33,7 +31,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
             .WithLocation(0)
             .WithArguments("MyCarterModule");
 
-        return this.VerifyAsync(code, diagnosticResult);
+        return VerifyAsync(code, diagnosticResult);
     }
 
     [Theory]
@@ -55,7 +53,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
             .WithLocation(0)
             .WithArguments("MyCarterModule");
 
-        return this.VerifyAsync(code, diagnosticResult);
+        return VerifyAsync(code, diagnosticResult);
     }
     
     [Theory]
@@ -81,7 +79,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
             .WithLocation(0)
             .WithArguments("MyCarterModule");
 
-        return this.VerifyAsync(code, diagnosticResult);
+        return VerifyAsync(code, diagnosticResult);
     }
     
     [Theory]
@@ -103,7 +101,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
             .WithLocation(0)
             .WithArguments("MyCarterModule");
 
-        return this.VerifyAsync(code, diagnosticResult);
+        return VerifyAsync(code, diagnosticResult);
     }
     
     [Theory]
@@ -129,7 +127,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
             .WithLocation(0)
             .WithArguments("MyCarterModule");
 
-        return this.VerifyAsync(code, diagnosticResult);
+        return VerifyAsync(code, diagnosticResult);
     }
     
     [Theory]
@@ -151,7 +149,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
             .WithLocation(0)
             .WithArguments("MyCarterModule");
 
-        return this.VerifyAsync(code, diagnosticResult);
+        return VerifyAsync(code, diagnosticResult);
     }
     
     [Theory]
@@ -173,7 +171,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                      }
                      """;
         
-        return this.VerifyAsync(code);
+        return VerifyAsync(code);
     }
     
     [Theory]
@@ -195,7 +193,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                      }
                      """;
         
-        return this.VerifyAsync(code);
+        return VerifyAsync(code);
     }
     
     [Theory]
@@ -217,7 +215,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                      }
                      """;
         
-        return this.VerifyAsync(code);
+        return VerifyAsync(code);
     }
     
     [Theory]
@@ -243,7 +241,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                      }
                      """;
         
-        return this.VerifyAsync(code);
+        return VerifyAsync(code);
     }
     
     [Theory]
@@ -262,7 +260,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                      }
                      """;
         
-        return this.VerifyAsync(code);
+        return VerifyAsync(code);
     }
     
     [Theory]
@@ -278,7 +276,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                      }
                      """;
         
-        return this.VerifyAsync(code);
+        return VerifyAsync(code);
     }
     
     [Theory]
@@ -301,22 +299,54 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                      }
                      """;
         
-        return this.VerifyAsync(code);
+        return VerifyAsync(code);
     }
 
-    private Task VerifyAsync(string code, DiagnosticResult? diagnosticResult = null)
+    [Theory]
+    [InlineData("class")]
+    [InlineData("struct")]
+    public Task EmptyPrimaryConstructor_NoDiagnostic(string type)
     {
-        var carterPackage = new PackageIdentity("Carter", "8.1.0");
-        var aspNetPackage = new PackageIdentity("Microsoft.AspNetCore.App.Ref", "8.0.0");
-        var bclPackage = new PackageIdentity("Microsoft.NETCore.App.Ref", "8.0.0");
-        var referenceAssemblies = new ReferenceAssemblies("net8.0", bclPackage, Path.Combine("ref", "net8.0"))
-            .AddPackages([carterPackage, aspNetPackage]);
-        AnalyzerTest<XUnitVerifier> test = new CSharpAnalyzerTest<CarterModuleShouldNotHaveDependenciesAnalyzer, XUnitVerifier>
-        {
-            TestCode = code,
-            ReferenceAssemblies = referenceAssemblies
-        };
+        var code = $$"""
+                     using Carter;
+                     using Microsoft.AspNetCore.Routing;
 
+                     {{type}} MyCarterModule() : ICarterModule
+                     {
+                         public void AddRoutes(IEndpointRouteBuilder app) {}
+                     }
+                     """;
+        
+        return VerifyAsync(code);
+    }
+
+    [Theory]
+    [InlineData("class", "string s")]
+    [InlineData("struct", "string s")]
+    [InlineData("class", "string s, int i")]
+    [InlineData("struct", "string s, int i")]
+    public Task PrimaryConstructor_Diagnostic(string type, string parameters)
+    {
+        var code = $$"""
+                     using Carter;
+                     using Microsoft.AspNetCore.Routing;
+
+                     {{type}} {|#0:MyCarterModule|}({{parameters}}) : ICarterModule
+                     {
+                         public void AddRoutes(IEndpointRouteBuilder app) {}
+                     }
+                     """;
+        
+        var diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies)
+            .WithLocation(0)
+            .WithArguments("MyCarterModule");
+        
+        return VerifyAsync(code, diagnosticResult);
+    }
+
+    private static Task VerifyAsync(string code, DiagnosticResult? diagnosticResult = null)
+    {
+        AnalyzerTest<XUnitVerifier> test = new CSharpPreviewAnalyzerTest<CarterModuleShouldNotHaveDependenciesAnalyzer>(code);
         if (diagnosticResult.HasValue)
         {
             test.ExpectedDiagnostics.Add(diagnosticResult.Value);
