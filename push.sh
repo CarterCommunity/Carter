@@ -7,7 +7,7 @@ NUGET_API_KEY=$3
 
 if [ "$TARGET_PACKAGE" = "carter" ]; then
   # Publish both the Carter and the CarterTemplate packages
-  TARGET_PACKAGES="$(find -wholename "./src/Carter/**/*.nupkg" -or -wholename "./template/**/*.nupkg")"
+  TARGET_PACKAGES="$(find -wholename "./src/Carter/**/*.nupkg" -or -wholename "./template/**/*.nupkg" -or -wholename "./src/Carter.Analyzers/**/*.nupkg")"
 elif [ "$TARGET_PACKAGE" = "newtonsoft" ]; then
   TARGET_PACKAGES="$(find -wholename "./src/Carter.ResponseNegotiators.Newtonsoft/**/*.nupkg")"
 else
