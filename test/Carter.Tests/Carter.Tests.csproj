@@ -1,13 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="fakeiteasy" Version="6.0.0" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\src\Carter\Carter.csproj" />
     <ProjectReference Include="..\..\src\Carter.Analyzers\Carter.Analyzers.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.1.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.XUnit" Version="1.1.1" />
+    <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.4.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.2" />
   </ItemGroup>
 </Project>

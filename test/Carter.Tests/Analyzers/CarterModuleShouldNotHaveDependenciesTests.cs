@@ -3,7 +3,6 @@ namespace Carter.Tests.Analyzers;
 using System.Threading.Tasks;
 using Carter.Analyzers;
 using Microsoft.CodeAnalysis.Testing;
-using Microsoft.CodeAnalysis.Testing.Verifiers;
 using Xunit;
 
 public sealed class CarterModuleShouldNotHaveDependenciesTests
@@ -346,7 +345,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
 
     private static Task VerifyAsync(string code, DiagnosticResult? diagnosticResult = null)
     {
-        AnalyzerTest<XUnitVerifier> test = new CSharpPreviewAnalyzerTest<CarterModuleShouldNotHaveDependenciesAnalyzer>(code);
+        AnalyzerTest<DefaultVerifier> test = new CSharpPreviewAnalyzerTest<CarterModuleShouldNotHaveDependenciesAnalyzer>(code);
         if (diagnosticResult.HasValue)
         {
             test.ExpectedDiagnostics.Add(diagnosticResult.Value);
