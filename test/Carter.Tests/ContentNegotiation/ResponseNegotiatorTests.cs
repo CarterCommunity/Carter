@@ -10,7 +10,6 @@ namespace Carter.Tests.ContentNegotiation
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
     using Microsoft.Extensions.DependencyInjection;
-    using Xunit;
     using MediaTypeHeaderValue = Microsoft.Net.Http.Headers.MediaTypeHeaderValue;
 
     public class ResponseNegotiatorTests
@@ -41,33 +40,33 @@ namespace Carter.Tests.ContentNegotiation
 
         private readonly HttpClient httpClient;
 
-        [Theory]
-        [InlineData("not/known")]
-        [InlineData("utt$r-rubbish-9")]
+        [Test]
+        [Arguments("not/known")]
+        [Arguments("utt$r-rubbish-9")]
         public async Task Should_fallback_to_json(string accept)
         {
             this.httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept", accept);
             var response = await this.httpClient.GetAsync("/negotiate");
-            Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
+            await Assert.That( response.Content.Headers.ContentType.ToString()).IsEqualTo("application/json; charset=utf-8");
         }
 
-        [Fact]
+        [Test]
         public async Task Should_camelCase_json()
         {
             this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
-            Assert.Equal("{\"firstName\":\"Jim\"}", body);
+            await Assert.That( body).IsEqualTo("{\"firstName\":\"Jim\"}");
         }
 
-        [Fact]
+        [Test]
         public async Task Should_fallback_to_json_even_if_no_accept_header()
         {
             var response = await this.httpClient.GetAsync("/negotiate");
-            Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
+            await Assert.That( response.Content.Headers.ContentType.ToString()).IsEqualTo("application/json; charset=utf-8");
         }
 
-        [Fact]
+        [Test]
         public async Task Should_pick_correctly_weighted_processor()
         {
             this.httpClient.DefaultRequestHeaders.Accept.Add(
@@ -75,10 +74,10 @@ namespace Carter.Tests.ContentNegotiation
             this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html", 0.3));
             var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
-            Assert.Equal("XML Response", body);
+            await Assert.That( body).IsEqualTo("XML Response");
         }
 
-        [Fact]
+        [Test]
         public async Task Should_pick_non_weighted_over_weighted()
         {
             this.httpClient.DefaultRequestHeaders.Accept.Add(
@@ -87,26 +86,26 @@ namespace Carter.Tests.ContentNegotiation
             this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("foo/bar"));
             var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
-            Assert.Equal("FOOBAR", body);
+            await Assert.That( body).IsEqualTo("FOOBAR");
         }
 
-        [Fact]
+        [Test]
         public async Task Should_use_appropriate_response_negotiator()
         {
             this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("foo/bar"));
             var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
-            Assert.Equal("FOOBAR", body);
+            await Assert.That( body).IsEqualTo("FOOBAR");
         }
 
-        [Fact]
+        [Test]
         public async Task Should_pick_default_json_processor_last()
         {
             this.httpClient.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/vnd.badger+json"));
             var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
-            Assert.Equal("Non default json Response", body);
+            await Assert.That( body).IsEqualTo("Non default json Response");
         }
     }
 

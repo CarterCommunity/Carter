@@ -1,17 +1,17 @@
 namespace Carter.Tests
 {
     using System.Linq;
+    using System.Threading.Tasks;
     using Carter.Tests.ContentNegotiation;
     using Carter.Tests.ModelBinding;
     using Carter.Tests.StreamTests;
     using FluentValidation;
     using Microsoft.Extensions.DependencyInjection;
-    using Xunit;
 
     public class CarterExtensionTests
     {
-        [Fact]
-        public void Should_register_assembly_scanned_modules_when_no_configurator_used()
+        [Test]
+        public async Task Should_register_assembly_scanned_modules_when_no_configurator_used()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -21,11 +21,11 @@ namespace Carter.Tests
 
             //Then
             var modules = serviceCollection.Where(x => x.ServiceType == typeof(ICarterModule));
-            Assert.True(modules.Count() > 1);
+            await Assert.That(modules.Count() > 1).IsTrue();
         }
 
-        [Fact]
-        public void Should_register_modules_passed_in_by_configurator()
+        [Test]
+        public async Task Should_register_modules_passed_in_by_configurator()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -35,11 +35,11 @@ namespace Carter.Tests
 
             //Then
             var modules = serviceCollection.Where(x => x.ServiceType == typeof(ICarterModule));
-            Assert.Single(modules);
+            await Assert.That(modules).HasSingleItem();
         }
         
-        [Fact]
-        public void Should_register_multiple_modules_passed_in_by_configurator()
+        [Test]
+        public async Task Should_register_multiple_modules_passed_in_by_configurator()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -49,11 +49,11 @@ namespace Carter.Tests
 
             //Then
             var modules = serviceCollection.Where(x => x.ServiceType == typeof(ICarterModule));
-            Assert.Equal(2,modules.Count());
+            await Assert.That(modules.Count()).IsEqualTo(2);
         }
         
-        [Fact]
-        public void Should_register_assembly_scanned_valdators_when_no_configurator_used()
+        [Test]
+        public async Task Should_register_assembly_scanned_valdators_when_no_configurator_used()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -63,11 +63,11 @@ namespace Carter.Tests
 
             //Then
             var validators = serviceCollection.Where(x => x.ServiceType == typeof(IValidator));
-            Assert.True(validators.Count() > 1);
+            await Assert.That(validators.Count() > 1).IsTrue();
         }
 
-        [Fact]
-        public void Should_register_validators_passed_in_by_configurator()
+        [Test]
+        public async Task Should_register_validators_passed_in_by_configurator()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -77,11 +77,11 @@ namespace Carter.Tests
 
             //Then
             var validators = serviceCollection.Where(x => x.ServiceType == typeof(IValidator));
-            Assert.Single(validators);
+            await Assert.That(validators).HasSingleItem();
         }
         
-        [Fact]
-        public void Should_register_multiple_validators_passed_in_by_configurator()
+        [Test]
+        public async Task Should_register_multiple_validators_passed_in_by_configurator()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -91,11 +91,11 @@ namespace Carter.Tests
 
             //Then
             var validators = serviceCollection.Where(x => x.ServiceType == typeof(IValidator));
-            Assert.Equal(2,validators.Count());
+            await Assert.That(validators.Count()).IsEqualTo(2);
         }
         
-        [Fact]
-        public void Should_register_assembly_scanned_responsenegotiators_when_no_configurator_used()
+        [Test]
+        public async Task Should_register_assembly_scanned_responsenegotiators_when_no_configurator_used()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -105,11 +105,11 @@ namespace Carter.Tests
 
             //Then
             var responsenegotiators = serviceCollection.Where(x => x.ServiceType == typeof(IResponseNegotiator));
-            Assert.True(responsenegotiators.Count() > 1);
+            await Assert.That(responsenegotiators.Count() > 1).IsTrue();
         }
 
-        [Fact]
-        public void Should_register_responsenegotiators_passed_in_by_configurator_and_default_json_negotiator()
+        [Test]
+        public async Task Should_register_responsenegotiators_passed_in_by_configurator_and_default_json_negotiator()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -119,11 +119,11 @@ namespace Carter.Tests
 
             //Then
             var responsenegotiators = serviceCollection.Where(x => x.ServiceType == typeof(IResponseNegotiator));
-            Assert.Equal(2, responsenegotiators.Count());
+            await Assert.That( responsenegotiators.Count()).IsEqualTo(2);
         }
         
-        [Fact]
-        public void Should_register_multiple_responsenegotiators_passed_in_by_configurator_and_default_json_negotiator()
+        [Test]
+        public async Task Should_register_multiple_responsenegotiators_passed_in_by_configurator_and_default_json_negotiator()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -133,11 +133,11 @@ namespace Carter.Tests
 
             //Then
             var responsenegotiators = serviceCollection.Where(x => x.ServiceType == typeof(IResponseNegotiator));
-            Assert.Equal(3,responsenegotiators.Count());
+            await Assert.That(responsenegotiators.Count()).IsEqualTo(3);
         }
         
-        [Fact]
-        public void Should_register_no_validators_passed_in_by_configurator()
+        [Test]
+        public async Task Should_register_no_validators_passed_in_by_configurator()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -147,11 +147,11 @@ namespace Carter.Tests
 
             //Then
             var validators = serviceCollection.Where(x => x.ServiceType == typeof(IValidator));
-            Assert.Empty(validators);
+            await Assert.That(validators).IsEmpty();
         }
         
-        [Fact]
-        public void Should_register_no_modules_passed_in_by_configurator()
+        [Test]
+        public async Task Should_register_no_modules_passed_in_by_configurator()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -161,11 +161,11 @@ namespace Carter.Tests
 
             //Then
             var modules = serviceCollection.Where(x => x.ServiceType == typeof(ICarterModule));
-            Assert.Empty(modules);
+            await Assert.That(modules).IsEmpty();
         }
         
-        [Fact]
-        public void Should_register_no_response_negotiators_passed_in_by_configurator()
+        [Test]
+        public async Task Should_register_no_response_negotiators_passed_in_by_configurator()
         {
             //Given
             var serviceCollection = new ServiceCollection();
@@ -175,7 +175,7 @@ namespace Carter.Tests
 
             //Then
             var responseNegotiators = serviceCollection.Where(x => x.ServiceType == typeof(IResponseNegotiator));
-            Assert.Single(responseNegotiators);
+            await Assert.That(responseNegotiators).HasSingleItem();
         }
     }
 }

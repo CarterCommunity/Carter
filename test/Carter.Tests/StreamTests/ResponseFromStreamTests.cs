@@ -9,7 +9,6 @@
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
     using Microsoft.Extensions.DependencyInjection;
-    using Xunit;
 
     public class ResponseFromStreamTests
     {
@@ -34,11 +33,11 @@
 
         private readonly HttpClient httpClient;
 
-        [Theory]
-        [InlineData("0-2", "0-2", "012")]
-        [InlineData("2-4", "2-4", "234")]
-        [InlineData("4-6", "4-6", "456")]
-        [InlineData("0-", "0-9", "0123456789")]
+        [Test]
+        [Arguments("0-2", "0-2", "012")]
+        [Arguments("2-4", "2-4", "234")]
+        [Arguments("4-6", "4-6", "456")]
+        [Arguments("0-", "0-9", "0123456789")]
         public async Task Should_return_range(string range, string expectedRange, string expectedBody)
         {
             //Given & When
@@ -48,14 +47,14 @@
             var body = await response.Content.ReadAsStringAsync();
 
             //Then
-            Assert.Equal(expectedBody, body);
-            Assert.Equal(HttpStatusCode.PartialContent, response.StatusCode);
-            Assert.Equal($"bytes {expectedRange}/10", response.Content.Headers.ContentRange.ToString());
+            await Assert.That( body).IsEqualTo(expectedBody);
+            await Assert.That( response.StatusCode).IsEqualTo(HttpStatusCode.PartialContent);
+            await Assert.That( response.Content.Headers.ContentRange.ToString()).IsEqualTo($"bytes {expectedRange}/10");
         }
 
-        [Theory]
-        [InlineData("-1")]
-        [InlineData("0-9999999999")]
+        [Test]
+        [Arguments("-1")]
+        [Arguments("0-9999999999")]
         public async Task Should_return_requested_range_not_satisfiable(string range)
         {
             //Given & When
@@ -63,12 +62,12 @@
             var response = await this.httpClient.GetAsync("/downloadrange");
 
             //Then
-            Assert.Equal(HttpStatusCode.RequestedRangeNotSatisfiable, response.StatusCode);
+            await Assert.That( response.StatusCode).IsEqualTo(HttpStatusCode.RequestedRangeNotSatisfiable);
         }
 
-        [Theory]
-        [InlineData("3-1")]
-        [InlineData("1+2")]
+        [Test]
+        [Arguments("3-1")]
+        [Arguments("1+2")]
         public async Task Should_return_full_stream_on_invalid_headers(string range)
         {
             //Given
@@ -80,11 +79,11 @@
             var body = await response.Content.ReadAsStringAsync();
 
             //Then
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal("0123456789", body);
+            await Assert.That( response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That( body).IsEqualTo("0123456789");
         }
 
-        [Fact]
+        [Test]
         public async Task Should_not_set_content_disposition_header_by_default()
         {
             //Given & When
@@ -92,13 +91,13 @@
             var body = await response.Content.ReadAsStringAsync();
 
             //Then
-            Assert.Null(response.Content.Headers.ContentDisposition);
-            Assert.Equal("application/csv", response.Content.Headers.ContentType.MediaType);
-            Assert.Equal("hi", body);
-            Assert.Equal("bytes", response.Headers.AcceptRanges.FirstOrDefault());
+            await Assert.That(response.Content.Headers.ContentDisposition).IsNull();
+            await Assert.That( response.Content.Headers.ContentType.MediaType).IsEqualTo("application/csv");
+            await Assert.That( body).IsEqualTo("hi");
+            await Assert.That( response.Headers.AcceptRanges.FirstOrDefault()).IsEqualTo("bytes");
         }
 
-        [Fact]
+        [Test]
         public async Task Should_set_content_type_body_acceptrange_header_content_disposition()
         {
             //Given & When
@@ -107,10 +106,10 @@
             var filename = response.Content.Headers.ContentDisposition.FileName;
 
             //Then
-            Assert.Equal("application/csv", response.Content.Headers.ContentType.MediaType);
-            Assert.Equal("hi", body);
-            Assert.Equal("bytes", response.Headers.AcceptRanges.FirstOrDefault());
-            Assert.Equal("journal.csv", filename);
+            await Assert.That( response.Content.Headers.ContentType.MediaType).IsEqualTo("application/csv");
+            await Assert.That( body).IsEqualTo("hi");
+            await Assert.That( response.Headers.AcceptRanges.FirstOrDefault()).IsEqualTo("bytes");
+            await Assert.That( filename).IsEqualTo("journal.csv");
         }
     }
 }

@@ -11,8 +11,6 @@ using System.Threading.Tasks;
 using Carter.Tests.ModelBinding;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Xunit;
-using Xunit.Abstractions;
 
 public class RouteExtensionsTests
 {
@@ -20,7 +18,7 @@ public class RouteExtensionsTests
 
     private readonly HttpClient httpClient;
 
-    public RouteExtensionsTests(ITestOutputHelper outputHelper)
+    public RouteExtensionsTests()
     {
         this.server = new TestServer(
             new WebHostBuilder()
@@ -28,7 +26,6 @@ public class RouteExtensionsTests
                 {
                     x.AddLogging(b =>
                     {
-                        XUnitLoggerExtensions.AddXUnit((ILoggingBuilder)b, outputHelper, x => x.IncludeScopes = true);
                         b.SetMinimumLevel(LogLevel.Debug);
                     });
 
@@ -50,33 +47,33 @@ public class RouteExtensionsTests
         this.httpClient = this.server.CreateClient();
     }
 
-    [Theory]
-    [InlineData("POST")]
-    [InlineData("PUT")]
+    [Test]
+    [Arguments("POST")]
+    [Arguments("PUT")]
     public async Task Should_return_422_on_validation_failure(string httpMethod)
     {
         var res = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod(httpMethod), "/endpointfilter")
         {
             Content = new StringContent(JsonConvert.SerializeObject(new TestModel()), Encoding.UTF8, "application/json")
         });
-        Assert.Equal(HttpStatusCode.UnprocessableEntity, res.StatusCode);
+        await Assert.That( res.StatusCode).IsEqualTo(HttpStatusCode.UnprocessableEntity);
     }
 
-    [Theory]
-    [InlineData("POST")]
-    [InlineData("PUT")]
+    [Test]
+    [Arguments("POST")]
+    [Arguments("PUT")]
     public async Task Should_pick_type_to_validate_no_matter_of_delegate_position(string httpMethod)
     {
         var res = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod(httpMethod), "/endpointfilter")
         {
             Content = new StringContent(JsonConvert.SerializeObject(new TestModel()), Encoding.UTF8, "application/json")
         });
-        Assert.Equal(HttpStatusCode.UnprocessableEntity, res.StatusCode);
+        await Assert.That( res.StatusCode).IsEqualTo(HttpStatusCode.UnprocessableEntity);
     }
 
-    [Theory]
-    [InlineData("POST")]
-    [InlineData("PUT")]
+    [Test]
+    [Arguments("POST")]
+    [Arguments("PUT")]
     public async Task Should_hit_route_if_validation_successful(string httpMethod)
     {
         var res = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod(httpMethod), "/endpointfilter")
@@ -86,7 +83,7 @@ public class RouteExtensionsTests
 
         var body = await res.Content.ReadAsStringAsync();
 
-        Assert.Equal(httpMethod, body);
+        await Assert.That( body).IsEqualTo(httpMethod);
     }
 }
 public class NestedRouteExtensionsTests
@@ -95,7 +92,7 @@ public class NestedRouteExtensionsTests
 
     private readonly HttpClient httpClient;
 
-    public NestedRouteExtensionsTests(ITestOutputHelper outputHelper)
+    public NestedRouteExtensionsTests()
     {
         this.server = new TestServer(
             new WebHostBuilder()
@@ -103,7 +100,6 @@ public class NestedRouteExtensionsTests
                 {
                     x.AddLogging(b =>
                     {
-                        XUnitLoggerExtensions.AddXUnit((ILoggingBuilder)b, outputHelper, x => x.IncludeScopes = true);
                         b.SetMinimumLevel(LogLevel.Debug);
                     });
 
@@ -124,15 +120,15 @@ public class NestedRouteExtensionsTests
         this.httpClient = this.server.CreateClient();
     }
 
-    [Theory]
-    [InlineData("GET")]
+    [Test]
+    [Arguments("GET")]
     public async Task Should_have_nested_class_registered(string httpMethod)
     {
         var res = await this.httpClient.SendAsync(new HttpRequestMessage(new HttpMethod(httpMethod), "/nested")
         {
             Content = new StringContent(JsonConvert.SerializeObject(new TestModel()), Encoding.UTF8, "application/json")
         });
-        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+        await Assert.That( res.StatusCode).IsEqualTo(HttpStatusCode.OK);
     }
 
 }

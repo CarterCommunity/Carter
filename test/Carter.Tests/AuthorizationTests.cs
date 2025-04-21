@@ -12,22 +12,18 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Carter.Tests;
 
 public class AuthorizationTests : IDisposable
 {
-    private readonly ITestOutputHelper outputHelper;
 
     private TestServer server;
 
-    public AuthorizationTests(ITestOutputHelper outputHelper) =>
-        this.outputHelper = outputHelper;
+   
 
-    [Fact]
-    public void Should_contain_endpoint_with_default_authz_metadata()
+    [Test]
+    public async Task Should_contain_endpoint_with_default_authz_metadata()
     {
         // Arrange and act
         BuildTestServer<DefaultAuthorizationTestModule>();
@@ -43,12 +39,12 @@ public class AuthorizationTests : IDisposable
             .Metadata
             .GetRequiredMetadata<AuthorizeAttribute>();
 
-        Assert.NotNull(authorizeMetadata);
-        Assert.Null(authorizeMetadata.Policy);
+        await Assert.That(authorizeMetadata).IsNotNull();
+        await Assert.That(authorizeMetadata.Policy).IsNull();
     }
 
-    [Fact]
-    public void Should_contain_endpoint_with_specific_authz_metadata()
+    [Test]
+    public async Task Should_contain_endpoint_with_specific_authz_metadata()
     {
         // Arrange and act
         BuildTestServer<SpecificPolicyAuthorizationTestModule>();
@@ -65,14 +61,14 @@ public class AuthorizationTests : IDisposable
             .OfType<AuthorizeAttribute>()
             .ToList();
 
-        Assert.NotEmpty(authorizeMetadata);
-        Assert.Equivalent(
-            authorizeMetadata.ConvertAll(x => x.Policy),
-            new[]
-            {
-                SpecificPolicyAuthorizationTestModule.SpecificPolicyOne,
-                SpecificPolicyAuthorizationTestModule.SpecificPolicyTwo
-            });
+        await Assert.That(authorizeMetadata).IsNotEmpty();
+        await Assert.That(
+            authorizeMetadata.ConvertAll(x => x.Policy)
+        ).IsEquivalentTo(new[]
+        {
+            SpecificPolicyAuthorizationTestModule.SpecificPolicyOne,
+            SpecificPolicyAuthorizationTestModule.SpecificPolicyTwo
+        });
     }
 
     /// <summary>
@@ -88,22 +84,18 @@ public class AuthorizationTests : IDisposable
                 {
                     x.AddLogging(b =>
                     {
-                        XUnitLoggerExtensions.AddXUnit((ILoggingBuilder)b, outputHelper, x => x.IncludeScopes = true);
                         b.SetMinimumLevel(LogLevel.Debug);
                     });
 
                     x.AddRouting();
-                    x.AddCarter(configurator: c =>
-                    {
-                        c.WithModule<TModule>();
-                    });
+                    x.AddCarter(configurator: c => { c.WithModule<TModule>(); });
                 })
                 .Configure(x =>
                 {
                     x.UseRouting();
                     x.UseEndpoints(builder => builder.MapCarter());
                 })
-            );
+        );
     }
 
     public void Dispose()

@@ -3,15 +3,14 @@ namespace Carter.Tests.Analyzers;
 using System.Threading.Tasks;
 using Carter.Analyzers;
 using Microsoft.CodeAnalysis.Testing;
-using Xunit;
 
 public sealed class CarterModuleShouldNotHaveDependenciesTests
 {
-    [Theory]
-    [InlineData("class")]
-    [InlineData("struct")]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("class")]
+    [Arguments("struct")]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task TypeWithDependency_Diagnostic(string type)
     {
         var code = $$"""
@@ -33,9 +32,9 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code, diagnosticResult);
     }
 
-    [Theory]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task RecordWithDependency_Diagnostic(string type)
     {
         var code = $$"""
@@ -55,11 +54,11 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code, diagnosticResult);
     }
     
-    [Theory]
-    [InlineData("class")]
-    [InlineData("struct")]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("class")]
+    [Arguments("struct")]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task TypeWithMultipleDependencies_Diagnostic(string type)
     {
         var code = $$"""
@@ -81,9 +80,9 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code, diagnosticResult);
     }
     
-    [Theory]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task RecordWithMultipleDependencies_Diagnostic(string type)
     {
         var code = $$"""
@@ -103,11 +102,11 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code, diagnosticResult);
     }
     
-    [Theory]
-    [InlineData("class")]
-    [InlineData("struct")]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("class")]
+    [Arguments("struct")]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task TypeWithDefaultDependencies_Diagnostic(string type)
     {
         var code = $$"""
@@ -129,9 +128,9 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code, diagnosticResult);
     }
     
-    [Theory]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task RecordWithDefaultDependencies_Diagnostic(string type)
     {
         var code = $$"""
@@ -151,11 +150,11 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code, diagnosticResult);
     }
     
-    [Theory]
-    [InlineData("class")]
-    [InlineData("struct")]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("class")]
+    [Arguments("struct")]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task TypeWithDependencies_WhenConstructorIsPrivate_NoDiagnostic(string type)
     {
         var code = $$"""
@@ -173,11 +172,11 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code);
     }
     
-    [Theory]
-    [InlineData("class")]
-    [InlineData("struct")]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("class")]
+    [Arguments("struct")]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task TypeWithDependencies_WhenConstructorIsImplicitlyPrivate_NoDiagnostic(string type)
     {
         var code = $$"""
@@ -195,11 +194,11 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code);
     }
     
-    [Theory]
-    [InlineData("class")]
-    [InlineData("struct")]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("class")]
+    [Arguments("struct")]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task TypeWithoutConstructor_NoDiagnostic(string type)
     {
         var code = $$"""
@@ -217,11 +216,11 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code);
     }
     
-    [Theory]
-    [InlineData("class")]
-    [InlineData("struct")]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("class")]
+    [Arguments("struct")]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task TypeWithZeroParameterConstructor_NoDiagnostic(string type)
     {
         var code = $$"""
@@ -243,11 +242,11 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code);
     }
     
-    [Theory]
-    [InlineData("class")]
-    [InlineData("struct")]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("class")]
+    [Arguments("struct")]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task NonCarterModuleWithConstructorDependencies_NoDiagnostic(string type)
     {
         var code = $$"""
@@ -262,9 +261,9 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code);
     }
     
-    [Theory]
-    [InlineData("record")]
-    [InlineData("record struct")]
+    [Test]
+    [Arguments("record")]
+    [Arguments("record struct")]
     public Task RecordNonCarterModuleWithConstructorDependencies_NoDiagnostic(string type)
     {
         var code = $$"""
@@ -278,9 +277,9 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code);
     }
     
-    [Theory]
-    [InlineData("class")]
-    [InlineData("record")]
+    [Test]
+    [Arguments("class")]
+    [Arguments("record")]
     public Task CarterSubModuleWithConstructorDependencies_NoDiagnostic(string type)
     {
         var code = $$"""
@@ -301,9 +300,9 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code);
     }
 
-    [Theory]
-    [InlineData("class")]
-    [InlineData("struct")]
+    [Test]
+    [Arguments("class")]
+    [Arguments("struct")]
     public Task EmptyPrimaryConstructor_NoDiagnostic(string type)
     {
         var code = $$"""
@@ -319,11 +318,11 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         return VerifyAsync(code);
     }
 
-    [Theory]
-    [InlineData("class", "string s")]
-    [InlineData("struct", "string s")]
-    [InlineData("class", "string s, int i")]
-    [InlineData("struct", "string s, int i")]
+    [Test]
+    [Arguments("class", "string s")]
+    [Arguments("struct", "string s")]
+    [Arguments("class", "string s, int i")]
+    [Arguments("struct", "string s, int i")]
     public Task PrimaryConstructor_Diagnostic(string type, string parameters)
     {
         var code = $$"""

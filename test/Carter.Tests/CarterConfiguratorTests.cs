@@ -1,14 +1,14 @@
 namespace Carter.Tests
 {
+    using System.Threading.Tasks;
     using Carter.Tests.ContentNegotiation;
     using Carter.Tests.ModelBinding;
     using Carter.Tests.StreamTests;
-    using Xunit;
 
     public class CarterConfiguratorTests
     {
-        [Fact]
-        public void Should_add_single_module()
+        [Test]
+        public async Task Should_add_single_module()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -17,11 +17,11 @@ namespace Carter.Tests
             configurator.WithModule<TestModule>();
 
             //Then
-            Assert.Single(configurator.ModuleTypes);
+            await Assert.That(configurator.ModuleTypes).HasSingleItem();
         }
 
-        [Fact]
-        public void Should_return_same_instance_when_adding_module()
+        [Test]
+        public async Task Should_return_same_instance_when_adding_module()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -30,11 +30,11 @@ namespace Carter.Tests
             var sameconfigurator = configurator.WithModule<TestModule>();
 
             //Then
-            Assert.Same(configurator, sameconfigurator);
+            await Assert.That(configurator).IsSameReferenceAs(sameconfigurator);
         }
 
-        [Fact]
-        public void Should_add_multiple_modules()
+        [Test]
+        public async Task Should_add_multiple_modules()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -43,11 +43,11 @@ namespace Carter.Tests
             configurator.WithModules(typeof(TestModule), typeof(StreamModule));
 
             //Then
-            Assert.Equal(2, configurator.ModuleTypes.Count);
+            await Assert.That(configurator.ModuleTypes.Count).IsEqualTo(2);
         }
 
-        [Fact]
-        public void Should_return_same_instance_when_adding_multiple_modules()
+        [Test]
+        public async Task Should_return_same_instance_when_adding_multiple_modules()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -56,11 +56,11 @@ namespace Carter.Tests
             var sameconfigurator = configurator.WithModules(typeof(TestModule), typeof(StreamModule));
 
             //Then
-            Assert.Same(configurator, sameconfigurator);
+            await Assert.That(configurator).IsSameReferenceAs(sameconfigurator);
         }
 
-        [Fact]
-        public void Should_add_single_validator()
+        [Test]
+        public async Task Should_add_single_validator()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -69,11 +69,11 @@ namespace Carter.Tests
             configurator.WithValidator<TestModelValidator>();
 
             //Then
-            Assert.Single(configurator.ValidatorTypes);
+            await Assert.That(configurator.ValidatorTypes).HasSingleItem();
         }
 
-        [Fact]
-        public void Should_return_same_instance_when_adding_validator()
+        [Test]
+        public async Task Should_return_same_instance_when_adding_validator()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -82,11 +82,11 @@ namespace Carter.Tests
             var sameconfigurator = configurator.WithValidator<TestModelValidator>();
 
             //Then
-            Assert.Same(configurator, sameconfigurator);
+            await Assert.That(configurator).IsSameReferenceAs(sameconfigurator);
         }
 
-        [Fact]
-        public void Should_add_multiple_validators()
+        [Test]
+        public async Task Should_add_multiple_validators()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -95,11 +95,11 @@ namespace Carter.Tests
             configurator.WithValidators(typeof(TestModelValidator), typeof(DuplicateTestModelOne));
 
             //Then
-            Assert.Equal(2, configurator.ValidatorTypes.Count);
+            await Assert.That(configurator.ValidatorTypes.Count).IsEqualTo(2);
         }
 
-        [Fact]
-        public void Should_return_same_instance_when_adding_multiple_validators()
+        [Test]
+        public async Task Should_return_same_instance_when_adding_multiple_validators()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -109,11 +109,11 @@ namespace Carter.Tests
                 configurator.WithValidators(typeof(TestModelValidator), typeof(DuplicateTestModelOne));
 
             //Then
-            Assert.Same(configurator, sameconfigurator);
+            await Assert.That(configurator).IsSameReferenceAs(sameconfigurator);
         }
 
-        [Fact]
-        public void Should_add_single_responsenegotiator()
+        [Test]
+        public async Task Should_add_single_responsenegotiator()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -122,11 +122,11 @@ namespace Carter.Tests
             configurator.WithResponseNegotiator<TestResponseNegotiator>();
 
             //Then
-            Assert.Single(configurator.ResponseNegotiatorTypes);
+            await Assert.That(configurator.ResponseNegotiatorTypes).HasSingleItem();
         }
 
-        [Fact]
-        public void Should_return_same_instance_when_adding_responsenegotiator()
+        [Test]
+        public async Task Should_return_same_instance_when_adding_responsenegotiator()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -135,11 +135,11 @@ namespace Carter.Tests
             var sameconfigurator = configurator.WithResponseNegotiator<TestResponseNegotiator>();
 
             //Then
-            Assert.Same(configurator, sameconfigurator);
+            await Assert.That(configurator).IsSameReferenceAs(sameconfigurator);
         }
 
-        [Fact]
-        public void Should_add_multiple_responsenegotiators()
+        [Test]
+        public async Task Should_add_multiple_responsenegotiators()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -148,11 +148,11 @@ namespace Carter.Tests
             configurator.WithResponseNegotiators(typeof(TestResponseNegotiator), typeof(TestXmlResponseNegotiator));
 
             //Then
-            Assert.Equal(2, configurator.ResponseNegotiatorTypes.Count);
+            await Assert.That(configurator.ResponseNegotiatorTypes.Count).IsEqualTo(2);
         }
 
-        [Fact]
-        public void Should_return_same_instance_when_adding_multiple_responsenegotiators()
+        [Test]
+        public async Task Should_return_same_instance_when_adding_multiple_responsenegotiators()
         {
             //Given
             var configurator = new CarterConfigurator();
@@ -162,46 +162,46 @@ namespace Carter.Tests
                 configurator.WithResponseNegotiators(typeof(TestResponseNegotiator), typeof(TestXmlResponseNegotiator));
 
             //Then
-            Assert.Same(configurator, sameconfigurator);
+            await Assert.That(configurator).IsSameReferenceAs(sameconfigurator);
         }
 
-        [Fact]
-        public void Should_exclude_modules()
+        [Test]
+        public async Task Should_exclude_modules()
         {
             //Given
             var configurator = new CarterConfigurator();
 
             //When
             var sameconfigurator = configurator.WithEmptyModules();
-            
+
             //Then
-            Assert.Empty(sameconfigurator.ModuleTypes);
+            await Assert.That(sameconfigurator.ModuleTypes).IsEmpty();
         }
-        
-        [Fact]
-        public void Should_exclude_negotiators()
+
+        [Test]
+        public async Task Should_exclude_negotiators()
         {
             //Given
             var configurator = new CarterConfigurator();
 
             //When
             var sameconfigurator = configurator.WithResponseNegotiators();
-            
+
             //Then
-            Assert.Empty(sameconfigurator.ResponseNegotiatorTypes);
+            await Assert.That(sameconfigurator.ResponseNegotiatorTypes).IsEmpty();
         }
-        
-        [Fact]
-        public void Should_exclude_validators()
+
+        [Test]
+        public async Task Should_exclude_validators()
         {
             //Given
             var configurator = new CarterConfigurator();
 
             //When
             var sameconfigurator = configurator.WithEmptyValidators();
-            
+
             //Then
-            Assert.Empty(sameconfigurator.ValidatorTypes);
+            await Assert.That(sameconfigurator.ValidatorTypes).IsEmpty();
         }
     }
 }

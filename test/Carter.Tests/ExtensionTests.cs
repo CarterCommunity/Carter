@@ -1,5 +1,6 @@
 namespace Carter.Tests;
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -11,8 +12,8 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Xunit;
-using Xunit.Abstractions;
+using TUnit.Core.Logging;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 public class ExtensionTests
 {
@@ -20,16 +21,16 @@ public class ExtensionTests
 
     private readonly HttpClient httpClient;
 
-    public ExtensionTests(ITestOutputHelper outputHelper)
+    public ExtensionTests()
     {
         this.server = new TestServer(
             new WebHostBuilder()
                 .ConfigureServices(x =>
                 {
-                    x.AddLogging(b =>
-                    {
-                        XUnitLoggerExtensions.AddXUnit((ILoggingBuilder)b, outputHelper, x => x.IncludeScopes = true);
-                        b.SetMinimumLevel(LogLevel.Debug);
+                    x.AddLogging(b => { b.SetMinimumLevel(LogLevel.Trace);
+                        b.AddConsole();
+                        b.AddDebug();
+                        b.AddProvider(new TUnitLogerProvider());
                     });
 
                     x.AddSingleton<IDependency, Dependency>();
@@ -51,22 +52,25 @@ public class ExtensionTests
     //make a request to /multiquerystring
     //with query string parameters:1,2,3
 
-    [Theory]
-    [InlineData("/multiquerystring?id=1&id=2")]
-    [InlineData("/multiquerystring?id=1,2")]
+    [Test]
+    [Arguments("/multiquerystring?id=1&id=2")]
+    [Arguments("/multiquerystring?id=1,2")]
     public async Task Should_return_GET_requests_with_multiple_parsed_querystring(string url)
     {
         var response = await this.httpClient.GetAsync(url);
 
         var body = await response.Content.ReadAsStringAsync();
-
-        Assert.Equal(200, (int)response.StatusCode);
-        Assert.Contains("Managed to parse multiple ints 2", body);
+        Console.WriteLine("opo");
+        var logger = TestContext.Current!.GetDefaultLogger();
+        //logger.Log(TUnit.Core.Logging.LogLevel.Trace, "Hekki");
+        LoggingExtensions.LogTrace(logger, "Hekki");;
+        await Assert.That((int)response.StatusCode).IsEqualTo(200);
+        await Assert.That(body).Contains("Managed to parse multiple ints 2");
     }
 
-    [Theory]
-    [InlineData("/nullablemultiquerystring?id=1&id=2")]
-    [InlineData("/nullablemultiquerystring?id=1,2")]
+    [Test]
+    [Arguments("/nullablemultiquerystring?id=1&id=2")]
+    [Arguments("/nullablemultiquerystring?id=1,2")]
     public async Task Should_return_GET_requests_with_multiple_parsed_querystring_with_nullable_parameters(
         string url)
     {
@@ -74,11 +78,11 @@ public class ExtensionTests
 
         var body = await response.Content.ReadAsStringAsync();
 
-        Assert.Equal(200, (int)response.StatusCode);
-        Assert.Contains("Managed to parse multiple Nullable<int>s 2", body);
+        await Assert.That((int)response.StatusCode).IsEqualTo(200);
+        await Assert.That(body).Contains("Managed to parse multiple Nullable<int>s 2");
     }
 
-    [Fact]
+    [Test]
     public async Task Should_return_GET_requests_with_parsed_querystring()
     {
         const int idToTest = 69;
@@ -86,11 +90,11 @@ public class ExtensionTests
 
         var body = await response.Content.ReadAsStringAsync();
 
-        Assert.Equal(200, (int)response.StatusCode);
-        Assert.Contains($"Managed to parse an int {idToTest}", body);
+        await Assert.That((int)response.StatusCode).IsEqualTo(200);
+        await Assert.That(body).Contains($"Managed to parse an int {idToTest}");
     }
 
-    [Fact]
+    [Test]
     public async Task Should_return_GET_requests_with_parsed_querystring_with_nullable_parameter()
     {
         const int idToTest = 69;
@@ -98,11 +102,11 @@ public class ExtensionTests
 
         var body = await response.Content.ReadAsStringAsync();
 
-        Assert.Equal(200, (int)response.StatusCode);
-        Assert.Contains($"Managed to parse a Nullable<int> {idToTest}", body);
+        await Assert.That((int)response.StatusCode).IsEqualTo(200);
+        await Assert.That(body).Contains($"Managed to parse a Nullable<int> {idToTest}");
     }
 
-    [Fact]
+    [Test]
     public async Task Should_return_POST_request_body_AsStringAsync()
     {
         const string content = "Hello";
@@ -111,11 +115,11 @@ public class ExtensionTests
 
         var body = await response.Content.ReadAsStringAsync();
 
-        Assert.Equal(200, (int)response.StatusCode);
-        Assert.Contains(content, body);
+        await Assert.That((int)response.StatusCode).IsEqualTo(200);
+        await Assert.That(body).Contains(content);
     }
 
-    [Fact]
+    [Test]
     public async Task Should_create_file_with_custom_filename()
     {
         var multipartFormData = new MultipartFormDataContent();
@@ -138,19 +142,19 @@ public class ExtensionTests
             var body = await res.Content.ReadAsStringAsync();
             var model = JsonConvert.DeserializeObject<PathTestModel>(body);
 
-            Assert.True(res.IsSuccessStatusCode);
-            Assert.True(Directory.Exists(model.Path));
+            await Assert.That(res.IsSuccessStatusCode).IsTrue();
+            await Assert.That(Directory.Exists(model.Path)).IsTrue();
 
             var files = Directory.GetFiles(model.Path);
 
-            Assert.NotEmpty(files);
-            Assert.True(files.All(x => new FileInfo(x).Name.Equals("mycustom.txt")));
+            await Assert.That(files).IsNotEmpty();
+            await Assert.That(files.All(x => new FileInfo(x).Name.Equals("mycustom.txt"))).IsTrue();
 
             Directory.Delete(model.Path, true);
         }
     }
 
-    [Fact]
+    [Test]
     public async Task Should_create_file_with_default_filename()
     {
         var multipartFormData = new MultipartFormDataContent();
@@ -173,19 +177,20 @@ public class ExtensionTests
             var body = await res.Content.ReadAsStringAsync();
             var model = JsonConvert.DeserializeObject<PathTestModel>(body);
 
-            Assert.True(res.IsSuccessStatusCode);
-            Assert.True(Directory.Exists(model.Path));
+            await Assert.That(res.IsSuccessStatusCode).IsTrue();
+            await Assert.That(Directory.Exists(model.Path)).IsTrue();
 
             var files = Directory.GetFiles(model.Path);
 
-            Assert.NotEmpty(files);
-            Assert.True(files.All(x => new FileInfo(x).Name.Equals("test.txt")));
+            await Assert.That(files).IsNotEmpty();
+            ;
+            await Assert.That(files.All(x => new FileInfo(x).Name.Equals("test.txt"))).IsTrue();
 
             Directory.Delete(model.Path, true);
         }
     }
 
-    [Fact]
+    [Test]
     public async Task Should_return_OK_and_path_for_bindsavefile()
     {
         var multipartFormData = new MultipartFormDataContent();
@@ -208,9 +213,9 @@ public class ExtensionTests
             var body = await res.Content.ReadAsStringAsync();
             var model = JsonConvert.DeserializeObject<PathTestModel>(body);
 
-            Assert.True(res.IsSuccessStatusCode);
-            Assert.True(Directory.Exists(model.Path));
-            Assert.NotEmpty(Directory.GetFiles(model.Path));
+            await Assert.That(res.IsSuccessStatusCode).IsTrue();
+            await Assert.That(Directory.Exists(model.Path)).IsTrue();
+            await Assert.That(Directory.GetFiles(model.Path)).IsNotEmpty();
 
             Directory.Delete(model.Path, true);
         }

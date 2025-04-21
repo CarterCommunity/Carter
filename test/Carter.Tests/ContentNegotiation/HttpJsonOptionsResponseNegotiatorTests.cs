@@ -7,7 +7,6 @@ namespace Carter.Tests.ContentNegotiation
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
     using Microsoft.Extensions.DependencyInjection;
-    using Xunit;
 
     public class HttpJsonOptionsResponseNegotiatorTests
     {
@@ -36,12 +35,12 @@ namespace Carter.Tests.ContentNegotiation
 
         private readonly HttpClient httpClient;
 
-        [Fact]
+        [Test]
         public async Task Should_obey_httpjsonoptions()
         {
             var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
-            Assert.Equal("{\"FIRST-NAME\":\"Jim\"}", body);
+            await Assert.That( body).IsEqualTo("{\"FIRST-NAME\":\"Jim\"}");
         }
     }
 }
