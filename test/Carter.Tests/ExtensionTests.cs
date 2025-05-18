@@ -17,11 +17,12 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 public class ExtensionTests
 {
-    private readonly TestServer server;
+    private TestServer server;
 
-    private readonly HttpClient httpClient;
+    private HttpClient httpClient;
 
-    public ExtensionTests()
+    [Before(Test)]
+    public void Setup(TestContext testContext)
     {
         this.server = new TestServer(
             new WebHostBuilder()
@@ -30,7 +31,7 @@ public class ExtensionTests
                     x.AddLogging(b => { b.SetMinimumLevel(LogLevel.Trace);
                         b.AddConsole();
                         b.AddDebug();
-                        b.AddProvider(new TUnitLogerProvider());
+                        b.AddProvider(new TUnitLoggerProvider(testContext));
                     });
 
                     x.AddSingleton<IDependency, Dependency>();
@@ -46,6 +47,7 @@ public class ExtensionTests
                     x.UseEndpoints(builder => builder.MapCarter());
                 })
         );
+        
         this.httpClient = this.server.CreateClient();
     }
 
