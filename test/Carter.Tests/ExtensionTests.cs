@@ -9,43 +9,46 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 
-public class ExtensionTests
+public class ExtensionTests(ITestOutputHelper outputHelper)
 {
-    private readonly TestServer server;
+    private HttpClient httpClient;
 
-    private readonly HttpClient httpClient;
-
-    public ExtensionTests(ITestOutputHelper outputHelper)
+    private async Task SetupServer()
     {
-        this.server = new TestServer(
-            new WebHostBuilder()
-                .ConfigureServices(x =>
-                {
-                    x.AddLogging(b =>
+        var host = new HostBuilder()
+            .ConfigureWebHost(webHostBuilder =>
+            {
+                webHostBuilder
+                    .UseTestServer() // If using TestServer
+                    .ConfigureServices(x =>
                     {
-                        XUnitLoggerExtensions.AddXUnit((ILoggingBuilder)b, outputHelper, x => x.IncludeScopes = true);
-                        b.SetMinimumLevel(LogLevel.Debug);
+                        x.AddLogging(b =>
+                        {
+                            b.AddXUnit(outputHelper, y => y.IncludeScopes = true);
+                            b.SetMinimumLevel(LogLevel.Debug);
+                        });
+
+                        x.AddSingleton<IDependency, Dependency>();
+                        x.AddRouting();
+                        x.AddCarter(configurator: c => { c.WithModule<TestModule>(); });
+                    })
+                    .Configure(x =>
+                    {
+                        x.UseRouting();
+                        x.UseEndpoints(builder => builder.MapCarter());
                     });
+            })
+            .Build();
 
-                    x.AddSingleton<IDependency, Dependency>();
+        await host.StartAsync();
 
-                    x.AddRouting();
-                    x.AddCarter(configurator: c =>
-                        c.WithModule<TestModule>()
-                    );
-                })
-                .Configure(x =>
-                {
-                    x.UseRouting();
-                    x.UseEndpoints(builder => builder.MapCarter());
-                })
-        );
-        this.httpClient = this.server.CreateClient();
+        this.httpClient = host.GetTestClient();
     }
 
     //make a request to /multiquerystring
@@ -56,6 +59,7 @@ public class ExtensionTests
     [InlineData("/multiquerystring?id=1,2")]
     public async Task Should_return_GET_requests_with_multiple_parsed_querystring(string url)
     {
+        await this.SetupServer();
         var response = await this.httpClient.GetAsync(url);
 
         var body = await response.Content.ReadAsStringAsync();
@@ -70,6 +74,7 @@ public class ExtensionTests
     public async Task Should_return_GET_requests_with_multiple_parsed_querystring_with_nullable_parameters(
         string url)
     {
+        await this.SetupServer();
         var response = await this.httpClient.GetAsync(url);
 
         var body = await response.Content.ReadAsStringAsync();
@@ -81,6 +86,7 @@ public class ExtensionTests
     [Fact]
     public async Task Should_return_GET_requests_with_parsed_querystring()
     {
+        await this.SetupServer();
         const int idToTest = 69;
         var response = await this.httpClient.GetAsync($"/querystring?id={idToTest}");
 
@@ -93,6 +99,7 @@ public class ExtensionTests
     [Fact]
     public async Task Should_return_GET_requests_with_parsed_querystring_with_nullable_parameter()
     {
+        await this.SetupServer();
         const int idToTest = 69;
         var response = await this.httpClient.GetAsync($"/nullablequerystring?id={idToTest}");
 
@@ -105,6 +112,7 @@ public class ExtensionTests
     [Fact]
     public async Task Should_return_POST_request_body_AsStringAsync()
     {
+        await this.SetupServer();
         const string content = "Hello";
 
         var response = await this.httpClient.PostAsync("/asstringasync", new StringContent(content));
@@ -118,6 +126,7 @@ public class ExtensionTests
     [Fact]
     public async Task Should_create_file_with_custom_filename()
     {
+        await this.SetupServer();
         var multipartFormData = new MultipartFormDataContent();
 
         using (var ms = new MemoryStream())
@@ -153,6 +162,7 @@ public class ExtensionTests
     [Fact]
     public async Task Should_create_file_with_default_filename()
     {
+        await this.SetupServer();
         var multipartFormData = new MultipartFormDataContent();
 
         using (var ms = new MemoryStream())
@@ -188,6 +198,7 @@ public class ExtensionTests
     [Fact]
     public async Task Should_return_OK_and_path_for_bindsavefile()
     {
+        await this.SetupServer();
         var multipartFormData = new MultipartFormDataContent();
 
         using (var ms = new MemoryStream())

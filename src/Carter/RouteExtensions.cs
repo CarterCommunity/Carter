@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Carter.ModelBinding;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
 public static class RouteExtensions
@@ -57,5 +58,21 @@ public static class RouteExtensions
         Delegate handler)
     {
         return endpoints.MapPut(pattern, handler).AddEndpointFilter(async (context, next) => await RouteHandler<T>(context, next));
+    }
+    
+    /// <summary>
+    /// Bind a form to a type without having to specify [FromForm]
+    /// </summary>
+    /// <param name="endpoints"></param>
+    /// <param name="pattern">The route path pattern</param>
+    /// <param name="handler">The route handler</param>
+    /// <typeparam name="T">The model to bind to</typeparam>
+    /// <returns></returns>
+    public static RouteHandlerBuilder MapFormPost<T>(
+        this IEndpointRouteBuilder endpoints, 
+        string pattern, 
+        Func<T, IResult> handler) where T : class
+    {
+        return endpoints.MapPost(pattern, ([FromForm] T data) => handler(data));
     }
 }
