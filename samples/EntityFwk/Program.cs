@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Carter;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,14 +7,11 @@ builder.Services.AddCarter();
 var app = builder.Build();
 app.MapCarter();
 
-
 app.Run();
-
 
 public class BloggingContext : DbContext
 {
     public DbSet<Blog> Blogs { get; set; }
-    public DbSet<Post> Posts { get; set; }
 
     public string DbPath { get; }
 
@@ -21,7 +19,7 @@ public class BloggingContext : DbContext
     {
         var folder = Environment.SpecialFolder.LocalApplicationData;
         var path = Environment.GetFolderPath(folder);
-        DbPath = System.IO.Path.Join(path, "blogging.db");
+        DbPath = Path.Join(path, "blogging.db");
     }
 
     // The following configures EF to create a Sqlite database file in the
@@ -33,7 +31,9 @@ public class BloggingContext : DbContext
 public class Blog
 {
     public int BlogId { get; set; }
-    public string Url { get; set; }
+
+    [MaxLength(255)]
+    public string Url { get; set; } = null!;
 
     public List<Post> Posts { get; } = new();
 }
@@ -41,9 +41,14 @@ public class Blog
 public class Post
 {
     public int PostId { get; set; }
-    public string Title { get; set; }
-    public string Content { get; set; }
+
+    [MaxLength(50)]
+    public string Title { get; set; } = null!;
+
+    [MaxLength(1000)]
+    public string Content { get; set; } = null!;
 
     public int BlogId { get; set; }
-    public Blog Blog { get; set; }
+
+    public Blog Blog { get; set; } = new();
 }
