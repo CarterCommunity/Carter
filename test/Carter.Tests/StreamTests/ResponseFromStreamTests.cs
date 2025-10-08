@@ -9,30 +9,39 @@
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.TestHost;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Xunit;
 
     public class ResponseFromStreamTests
     {
-        public ResponseFromStreamTests()
+        private async Task SetupServer()
         {
-            this.server = new TestServer(
-                new WebHostBuilder()
-                    .ConfigureServices(x =>
-                    {
-                        x.AddRouting();
-                        x.AddCarter(configurator: c => c.WithModule<StreamModule>());
-                    })
-                    .Configure(x =>
-                    {
-                        x.UseRouting();
-                        x.UseEndpoints(builder => builder.MapCarter());
-                    }));
-            this.httpClient = this.server.CreateClient();
+            var host = new HostBuilder()
+                .ConfigureWebHost(webHostBuilder =>
+                {
+                    webHostBuilder
+                        .UseTestServer() // If using TestServer
+                        .ConfigureServices(x =>
+                        {
+                            x.AddRouting();
+                            x.AddCarter(configurator: c => { c.WithModule<StreamModule>(); });
+                        })
+                        .Configure(x =>
+                        {
+                            x.UseRouting();
+                            x.UseEndpoints(builder => builder.MapCarter());
+                        })
+                        //.UseKestrel()
+                        ;
+                })
+                .Build();
+
+            await host.StartAsync();
+
+            this.httpClient = host.GetTestClient();
         }
 
-        private readonly TestServer server;
-
-        private readonly HttpClient httpClient;
+        private HttpClient httpClient;
 
         [Theory]
         [InlineData("0-2", "0-2", "012")]
@@ -42,6 +51,7 @@
         public async Task Should_return_range(string range, string expectedRange, string expectedBody)
         {
             //Given & When
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.Range = RangeHeaderValue.Parse($"bytes={range}");
             var response = await this.httpClient.GetAsync("/downloadrange");
 
@@ -59,6 +69,7 @@
         public async Task Should_return_requested_range_not_satisfiable(string range)
         {
             //Given & When
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.Range = RangeHeaderValue.Parse($"bytes={range}");
             var response = await this.httpClient.GetAsync("/downloadrange");
 
@@ -72,6 +83,7 @@
         public async Task Should_return_full_stream_on_invalid_headers(string range)
         {
             //Given
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Range", $"bytes={range}");
 
             //When
@@ -88,6 +100,7 @@
         public async Task Should_not_set_content_disposition_header_by_default()
         {
             //Given & When
+            await this.SetupServer();
             var response = await this.httpClient.GetAsync("/download");
             var body = await response.Content.ReadAsStringAsync();
 
@@ -102,6 +115,7 @@
         public async Task Should_set_content_type_body_acceptrange_header_content_disposition()
         {
             //Given & When
+            await this.SetupServer();
             var response = await this.httpClient.GetAsync("/downloadwithcd");
             var body = await response.Content.ReadAsStringAsync();
             var filename = response.Content.Headers.ContentDisposition.FileName;

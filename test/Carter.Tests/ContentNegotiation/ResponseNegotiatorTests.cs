@@ -10,42 +10,53 @@ namespace Carter.Tests.ContentNegotiation
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Xunit;
     using MediaTypeHeaderValue = Microsoft.Net.Http.Headers.MediaTypeHeaderValue;
 
     public class ResponseNegotiatorTests
     {
-        public ResponseNegotiatorTests()
+        private async Task SetupServer()
         {
-            this.server = new TestServer(
-                new WebHostBuilder()
-                    .ConfigureServices(x =>
-                    {
-                        x.AddRouting();
-                        x.AddCarter(configurator: c =>
-                            c.WithModule<NegotiatorModule>()
-                                .WithResponseNegotiator<TestResponseNegotiator>()
-                                .WithResponseNegotiator<TestJsonResponseNegotiator>()
-                                .WithResponseNegotiator<TestXmlResponseNegotiator>());
-                    })
-                    .Configure(x =>
-                    {
-                        x.UseRouting();
-                        x.UseEndpoints(builder => builder.MapCarter());
-                    })
-            );
-            this.httpClient = this.server.CreateClient();
+            var host = new HostBuilder()
+                .ConfigureWebHost(webHostBuilder =>
+                {
+                    webHostBuilder
+                        .UseTestServer() // If using TestServer
+                        .ConfigureServices(x =>
+                        {
+                            x.AddRouting();
+                            x.AddCarter(configurator: c =>
+                            {
+                                c.WithModule<NegotiatorModule>()
+                                    .WithResponseNegotiator<TestResponseNegotiator>()
+                                    .WithResponseNegotiator<TestJsonResponseNegotiator>()
+                                    .WithResponseNegotiator<TestXmlResponseNegotiator>();
+                            });
+                        })
+                        .Configure(x =>
+                        {
+                            x.UseRouting();
+                            x.UseEndpoints(builder => builder.MapCarter());
+                        })
+                        //.UseKestrel()
+                        ;
+                })
+                .Build();
+
+            await host.StartAsync();
+
+            this.httpClient = host.GetTestClient();
         }
 
-        private readonly TestServer server;
-
-        private readonly HttpClient httpClient;
+        private HttpClient httpClient;
 
         [Theory]
         [InlineData("not/known")]
         [InlineData("utt$r-rubbish-9")]
         public async Task Should_fallback_to_json(string accept)
         {
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept", accept);
             var response = await this.httpClient.GetAsync("/negotiate");
             Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
@@ -54,6 +65,7 @@ namespace Carter.Tests.ContentNegotiation
         [Fact]
         public async Task Should_camelCase_json()
         {
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
@@ -63,6 +75,7 @@ namespace Carter.Tests.ContentNegotiation
         [Fact]
         public async Task Should_fallback_to_json_even_if_no_accept_header()
         {
+            await this.SetupServer();
             var response = await this.httpClient.GetAsync("/negotiate");
             Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
         }
@@ -70,6 +83,7 @@ namespace Carter.Tests.ContentNegotiation
         [Fact]
         public async Task Should_pick_correctly_weighted_processor()
         {
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/xml", 0.5));
             this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html", 0.3));
@@ -81,6 +95,7 @@ namespace Carter.Tests.ContentNegotiation
         [Fact]
         public async Task Should_pick_non_weighted_over_weighted()
         {
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/xml", 0.5));
             this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/html", 0.3));
@@ -93,6 +108,7 @@ namespace Carter.Tests.ContentNegotiation
         [Fact]
         public async Task Should_use_appropriate_response_negotiator()
         {
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("foo/bar"));
             var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
@@ -102,6 +118,7 @@ namespace Carter.Tests.ContentNegotiation
         [Fact]
         public async Task Should_pick_default_json_processor_last()
         {
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/vnd.badger+json"));
             var response = await this.httpClient.GetAsync("/negotiate");

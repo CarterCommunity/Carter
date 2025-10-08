@@ -17,20 +17,17 @@ using Xunit.Abstractions;
 
 namespace Carter.Tests;
 
-public class AuthorizationTests : IDisposable
-{
-    private readonly ITestOutputHelper outputHelper;
+using Microsoft.Extensions.Hosting;
 
+public class AuthorizationTests(ITestOutputHelper outputHelper) : IDisposable
+{
     private TestServer server;
 
-    public AuthorizationTests(ITestOutputHelper outputHelper) =>
-        this.outputHelper = outputHelper;
-
     [Fact]
-    public void Should_contain_endpoint_with_default_authz_metadata()
+    public async Task Should_contain_endpoint_with_default_authz_metadata()
     {
         // Arrange and act
-        BuildTestServer<DefaultAuthorizationTestModule>();
+        await BuildTestServer<DefaultAuthorizationTestModule>();
 
         // Assert
         var endpoint = server.Services
@@ -48,10 +45,10 @@ public class AuthorizationTests : IDisposable
     }
 
     [Fact]
-    public void Should_contain_endpoint_with_specific_authz_metadata()
+    public async Task Should_contain_endpoint_with_specific_authz_metadata()
     {
         // Arrange and act
-        BuildTestServer<SpecificPolicyAuthorizationTestModule>();
+        await BuildTestServer<SpecificPolicyAuthorizationTestModule>();
 
         // Assert
         var endpoint = server.Services
@@ -79,31 +76,39 @@ public class AuthorizationTests : IDisposable
     /// Builds a test server with the module specified by the <typeparamref name="TModule"/> type parameter.
     /// </summary>
     /// <typeparam name="TModule">The type of Carter module to register.</typeparam>
-    private void BuildTestServer<TModule>()
+    private async Task BuildTestServer<TModule>()
         where TModule : AuthorizationTestModuleBase
     {
-        this.server = new TestServer(
-            new WebHostBuilder()
-                .ConfigureServices(x =>
-                {
-                    x.AddLogging(b =>
+        var host = new HostBuilder()
+            .ConfigureWebHost(webHostBuilder =>
+            {
+                webHostBuilder
+                    .UseTestServer() // If using TestServer
+                    .ConfigureServices(x =>
                     {
-                        XUnitLoggerExtensions.AddXUnit((ILoggingBuilder)b, outputHelper, x => x.IncludeScopes = true);
-                        b.SetMinimumLevel(LogLevel.Debug);
-                    });
+                        x.AddLogging(b =>
+                        {
+                            XUnitLoggerExtensions.AddXUnit((ILoggingBuilder)b, outputHelper,
+                                x => x.IncludeScopes = true);
+                            b.SetMinimumLevel(LogLevel.Debug);
+                        });
 
-                    x.AddRouting();
-                    x.AddCarter(configurator: c =>
+                        x.AddRouting();
+                        x.AddCarter(configurator: c => { c.WithModule<TModule>(); });
+                    })
+                    .Configure(x =>
                     {
-                        c.WithModule<TModule>();
-                    });
-                })
-                .Configure(x =>
-                {
-                    x.UseRouting();
-                    x.UseEndpoints(builder => builder.MapCarter());
-                })
-            );
+                        x.UseRouting();
+                        x.UseEndpoints(builder => builder.MapCarter());
+                    })
+                    //.UseKestrel()
+                    ;
+            })
+            .Build();
+
+        await host.StartAsync();
+
+        this.server = host.GetTestServer();
     }
 
     public void Dispose()

@@ -10,6 +10,7 @@ namespace Carter.Tests
     using Carter.Tests.ModelBinding;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Routing;
 
     public class TestModule : ICarterModule
@@ -102,8 +103,8 @@ namespace Carter.Tests
             app.MapMethods("/", new[]{"PATCH"}, async (HttpContext ctx) => { await ctx.Response.WriteAsync("Hello"); });
             app.MapMethods("/", new[]{"OPTIONS"}, async (HttpContext ctx) => { await ctx.Response.WriteAsync("Hello"); });
 
-            app.MapPost<TestModel>("/endpointfilter", (TestModel testModel,IDependency dependency) => "POST");
-            app.MapPut<TestModel>("/endpointfilter", (IDependency dependency, TestModel testModel) => "PUT");
+            app.MapPost<TestModel>("/endpointfilter", ([FromBody]TestModel testModel,IDependency dependency) => "POST");
+            app.MapPut<TestModel>("/endpointfilter", (IDependency dependency, [FromBody]TestModel testModel) => "PUT");
         }
     }
     public static class NestedTestModule
