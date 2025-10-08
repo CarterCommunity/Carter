@@ -30,9 +30,7 @@
                         {
                             x.UseRouting();
                             x.UseEndpoints(builder => builder.MapCarter());
-                        })
-                        //.UseKestrel()
-                        ;
+                        });
                 })
                 .Build();
 

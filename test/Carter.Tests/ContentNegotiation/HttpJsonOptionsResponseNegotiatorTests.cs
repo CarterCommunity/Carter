@@ -34,9 +34,7 @@ namespace Carter.Tests.ContentNegotiation
                         {
                             x.UseRouting();
                             x.UseEndpoints(builder => builder.MapCarter());
-                        })
-                        //.UseKestrel()
-                        ;
+                        });
                 })
                 .Build();
 

@@ -100,9 +100,7 @@ public class AuthorizationTests(ITestOutputHelper outputHelper) : IDisposable
                     {
                         x.UseRouting();
                         x.UseEndpoints(builder => builder.MapCarter());
-                    })
-                    //.UseKestrel()
-                    ;
+                    });
             })
             .Build();
 

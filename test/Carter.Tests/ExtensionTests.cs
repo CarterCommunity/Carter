@@ -43,9 +43,7 @@ public class ExtensionTests(ITestOutputHelper outputHelper)
                     {
                         x.UseRouting();
                         x.UseEndpoints(builder => builder.MapCarter());
-                    })
-                    //.UseKestrel()
-                    ;
+                    });
             })
             .Build();
 
