@@ -1,19 +1,17 @@
-namespace CarterAndMVC
-{
-    using System.IO;
-    using Microsoft.AspNetCore.Hosting;
+using Carter;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var host = new WebHostBuilder()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseKestrel()
-                .UseStartup<Startup>()
-                .Build();
+var builder = WebApplication.CreateBuilder(args);
 
-            host.Run();
-        }
-    }
-}
+builder.Services.AddCarter();
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.MapCarter();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();

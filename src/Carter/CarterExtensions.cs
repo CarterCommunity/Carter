@@ -184,17 +184,17 @@ public static class CarterExtensions
                     lifetime: carterConfigurator.ValidatorServiceLifetime));
 
             services.Add(
-               new ServiceDescriptor(
-                   serviceType: validator,
-                   implementationType: validator,
-                   lifetime: carterConfigurator.ValidatorServiceLifetime));
+                new ServiceDescriptor(
+                    serviceType: validator,
+                    implementationType: validator,
+                    lifetime: carterConfigurator.ValidatorServiceLifetime));
         }
 
         services.Add(
-                new ServiceDescriptor(
-                    serviceType: typeof(IValidatorLocator),
-                    implementationType: typeof(DefaultValidatorLocator),
-                    lifetime: carterConfigurator.ValidatorServiceLifetime));
+            new ServiceDescriptor(
+                serviceType: typeof(IValidatorLocator),
+                implementationType: typeof(DefaultValidatorLocator),
+                lifetime: carterConfigurator.ValidatorServiceLifetime));
 
         foreach (var newModule in newModules)
         {
@@ -258,30 +258,6 @@ public static class CarterExtensions
 
             carterConfigurator.ModuleTypes.AddRange(modules);
         }
-
-        return modules;
-    }
-
-    private static IEnumerable<Type> GetModules(CarterConfigurator carterConfigurator,
-        IReadOnlyCollection<Assembly> assemblies)
-    {
-        // IEnumerable<Type> modules;
-        // if (carterConfigurator.ExcludeModules || carterConfigurator.ModuleTypes.Any())
-        // {
-        //     modules = carterConfigurator.ModuleTypes;
-        // }
-        // else
-        //{
-        var modules = assemblies.SelectMany(x => x.GetTypes()
-            .Where(t =>
-                !t.IsAbstract &&
-                typeof(CarterModule).IsAssignableFrom(t) &&
-                t != typeof(CarterModule) &&
-                t.IsPublic
-            ));
-
-        //carterConfigurator.ModuleTypes.AddRange(modules);
-        //}
 
         return modules;
     }

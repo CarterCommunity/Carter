@@ -5,49 +5,55 @@ namespace Carter.ResponseNegotiators.Newtonsoft.Tests
     using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
-    using Carter.Response;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.TestHost;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Xunit;
     using MediaTypeHeaderValue = Microsoft.Net.Http.Headers.MediaTypeHeaderValue;
 
     public class NewtonsoftJsonResponseNegotiatorTests
     {
-        public NewtonsoftJsonResponseNegotiatorTests()
+        private async Task SetupServer()
         {
-            this.server = new TestServer(
-                new WebHostBuilder()
-                    .ConfigureServices(x =>
-                    {
-                        x.AddRouting();
-                        x.AddCarter(configurator: c =>
+            var host = new HostBuilder()
+                .ConfigureWebHost(webHostBuilder =>
+                {
+                    webHostBuilder
+                        .UseTestServer() // If using TestServer
+                        .ConfigureServices(x =>
                         {
-                            c.WithModule<NewtonsoftJsonResponseNegotiatorModule>();
-                            c.WithResponseNegotiator<TestJsonResponseNegotiator>();
-                            c.WithResponseNegotiator<NewtonsoftJsonResponseNegotiator>();
+                            x.AddRouting();
+                            x.AddCarter(configurator: c =>
+                            {
+                                c.WithModule<NewtonsoftJsonResponseNegotiatorModule>();
+                                c.WithResponseNegotiator<TestJsonResponseNegotiator>();
+                                c.WithResponseNegotiator<NewtonsoftJsonResponseNegotiator>();
+                            });
+                        })
+                        .Configure(x =>
+                        {
+                            x.UseRouting();
+                            x.UseEndpoints(builder => builder.MapCarter());
                         });
-                    })
-                    .Configure(x =>
-                    {
-                        x.UseRouting();
-                        x.UseEndpoints(builder => builder.MapCarter());
-                    })
-            );
-            this.httpClient = this.server.CreateClient();
+                })
+                .Build();
+
+            await host.StartAsync();
+
+            this.httpClient = host.GetTestClient();
         }
 
-        private readonly TestServer server;
-
-        private readonly HttpClient httpClient;
+        private HttpClient httpClient;
 
         [Theory]
         [InlineData("not/known")]
         [InlineData("utt$r-rubbish-9")]
         public async Task Should_fallback_to_json(string accept)
         {
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept", accept);
             var response = await this.httpClient.GetAsync("/negotiate");
             Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
@@ -56,6 +62,7 @@ namespace Carter.ResponseNegotiators.Newtonsoft.Tests
         [Fact]
         public async Task Should_camelCase_json()
         {
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var response = await this.httpClient.GetAsync("/negotiate");
             var body = await response.Content.ReadAsStringAsync();
@@ -65,6 +72,7 @@ namespace Carter.ResponseNegotiators.Newtonsoft.Tests
         [Fact]
         public async Task Should_fallback_to_json_even_if_no_accept_header()
         {
+            await this.SetupServer();
             var response = await this.httpClient.GetAsync("/negotiate");
             Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
         }
@@ -72,6 +80,7 @@ namespace Carter.ResponseNegotiators.Newtonsoft.Tests
         [Fact]
         public async Task Should_pick_default_json_processor_last()
         {
+            await this.SetupServer();
             this.httpClient.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/vnd.badger+json"));
             var response = await this.httpClient.GetAsync("/negotiate");
