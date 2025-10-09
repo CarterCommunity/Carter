@@ -159,7 +159,7 @@ public class Database : IDatabase
 
 ### Configuration
 
-As mentioned earlier Carter will scan for implementations in your app and register them for DI. However, if you want a more controlled app, Carter comes with a `CarterConfigurator` that allows you to register modules, validators and response negotiators manually.
+As mentioned earlier Carter will scan for implementations in your app and register them for DI. However, if you want a more controlled app, Carter comes with a `CarterConfigurator` that allows you to register modules, validators and response negotiators manually and configure validator lifetimes.
 
 Carter will use a response negotiator based on `System.Text.Json`, though it provides for custom implementations via the `IResponseNegotiator` interface. To use your own implementation of `IResponseNegotiator` (say, `CustomResponseNegotiator`), add the following line to the initial Carter configuration, in this case as part of `Program.cs`:
 
@@ -169,7 +169,9 @@ Carter will use a response negotiator based on `System.Text.Json`, though it pro
     {
         c.WithResponseNegotiator<CustomResponseNegotiator>();
         c.WithModule<MyModule>();
-        c.WithValidator<TestModelValidator>()
+        c.WithValidator<TestModelValidator>();
+        c.WithDefaultValidatorLifetime(ServiceLifetime.Singleton);
+        c.WithValidatorServiceLifetimeFactory(t => {if t is PersonValidator...})
     });
 
 ```

@@ -166,7 +166,6 @@ public class CarterConfigurator
     public CarterConfigurator WithDefaultValidatorLifetime(ServiceLifetime serviceLifetime)
     {
         this.DefaultValidatorServiceLifetime = serviceLifetime;
-        this.ValidatorServiceLifetimeFactory = (_) => serviceLifetime;
         return this;
     }
 
