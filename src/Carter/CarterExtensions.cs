@@ -173,7 +173,7 @@ public static class CarterExtensions
 
         services.AddSingleton(carterConfigurator);
 
-        ServiceLifetime validatorLocatorLifetime = ServiceLifetime.Singleton;
+        var validatorLocatorLifetime = ServiceLifetime.Singleton;
         foreach (var validator in validators)
         {
             var validatorServiceLifetime = carterConfigurator.ValidatorServiceLifetimeFactory(validator);
@@ -189,11 +189,12 @@ public static class CarterExtensions
                     implementationType: validator,
                     lifetime: validatorServiceLifetime));
 
-            if (validatorServiceLifetime < validatorLocatorLifetime)
+            if (validatorServiceLifetime > validatorLocatorLifetime)
             {
                 validatorLocatorLifetime = validatorServiceLifetime;
             }
         }
+
 
         services.Add(
             new ServiceDescriptor(
