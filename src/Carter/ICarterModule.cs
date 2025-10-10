@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Routing;
 /// <summary>
 /// A base class CarterModule to define settings for all the routes in a module
 /// </summary>
+[Obsolete("CarterModule will be removed in the next version. Please migrate to ICarterModule.")]
 public abstract class CarterModule : ICarterModule
 {
     internal string[] hosts = Array.Empty<string>();

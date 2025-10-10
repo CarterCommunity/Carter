@@ -8,8 +8,10 @@ Other extensions include:
 
 * `Validate<T> / ValidateAsync<T>` - [FluentValidation](https://github.com/JeremySkinner/FluentValidation) extensions to validate incoming HTTP requests which is not available with ASP.NET Core Minimal APIs.
 * `BindFile/BindFiles/BindFileAndSave/BindFilesAndSave` - Allows you to easily get access to a file/files that has been uploaded. Alternatively you can call `BindFilesAndSave` and this will save it to a path you specify.
-* Routes to use in common ASP.NET Core middleware e.g., `app.UseExceptionHandler("/errorhandler");`.
+* `MapPost<T>/MapPut<T>` - Allows Carter to validate `T` and if it fails it returns a 422 Problem Details response.
+* `MapFormPost<T>` - Allows Carter to model bind `T` when submitting a form to the route.
 * `IResponseNegotiator`s allow you to define how the response should look on a certain Accept header(content negotiation). Handling JSON is built in the default response but implementing an interface allows the user to choose how they want to represent resources.
+* Routes to use in common ASP.NET Core middleware e.g., `app.UseExceptionHandler("/errorhandler");`.
 * All interface implementations for Carter components are registered into ASP.NET Core DI automatically. Implement the interface and off you go.
 
 ### Releases
@@ -118,6 +120,7 @@ public class HomeModule : ICarterModule
         });
         app.MapGet("/conneg", (HttpResponse res) => res.Negotiate(new { Name = "Dave" }));
         app.MapPost("/validation", HandlePost);
+        app.MapFormPost("/formpost", (Person model) => TypedResults.Ok(model)).DisableAntiforgery();
     }
 
     private IResult HandlePost(HttpContext ctx, Person person, IDatabase database)
@@ -156,7 +159,7 @@ public class Database : IDatabase
 
 ### Configuration
 
-As mentioned earlier Carter will scan for implementations in your app and register them for DI. However, if you want a more controlled app, Carter comes with a `CarterConfigurator` that allows you to register modules, validators and response negotiators manually.
+As mentioned earlier Carter will scan for implementations in your app and register them for DI. However, if you want a more controlled app, Carter comes with a `CarterConfigurator` that allows you to register modules, validators and response negotiators manually and configure validator lifetimes.
 
 Carter will use a response negotiator based on `System.Text.Json`, though it provides for custom implementations via the `IResponseNegotiator` interface. To use your own implementation of `IResponseNegotiator` (say, `CustomResponseNegotiator`), add the following line to the initial Carter configuration, in this case as part of `Program.cs`:
 
@@ -166,16 +169,11 @@ Carter will use a response negotiator based on `System.Text.Json`, though it pro
     {
         c.WithResponseNegotiator<CustomResponseNegotiator>();
         c.WithModule<MyModule>();
-        c.WithValidator<TestModelValidator>()
+        c.WithValidator<TestModelValidator>();
+        c.WithDefaultValidatorLifetime(ServiceLifetime.Singleton);
+        c.WithValidatorServiceLifetimeFactory(t => {if t is PersonValidator...})
     });
 
 ```
 
-Here again, Carter already ships with a response negotiator using `Newtonsoft.Json`, so you can wire up the Newtonsoft implementation with the following line:
-
-```csharp
-    builder.Services.AddCarter(configurator: c =>
-    {
-        c.WithResponseNegotiator<NewtonsoftJsonResponseNegotiator>();
-    });
-```
+If you wish to use `Newtonsoft.Json` Carter already ships a response negotiator in the package `Carter.ResponseNegotiators.Newtonsoft`. Once installed, it will automatically pick it up with no registration needed.

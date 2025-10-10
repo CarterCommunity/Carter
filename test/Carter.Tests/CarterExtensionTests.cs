@@ -17,7 +17,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection);
+            serviceCollection.AddCarter();
 
             //Then
             var modules = serviceCollection.Where(x => x.ServiceType == typeof(ICarterModule));
@@ -31,7 +31,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection, configurator: configurator => configurator.WithModule<TestModule>());
+            serviceCollection.AddCarter(configurator: configurator => configurator.WithModule<TestModule>());
 
             //Then
             var modules = serviceCollection.Where(x => x.ServiceType == typeof(ICarterModule));
@@ -45,7 +45,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection, configurator: configurator => configurator.WithModules(typeof(TestModule), typeof(StreamModule)));
+            serviceCollection.AddCarter(configurator: configurator => configurator.WithModules(typeof(TestModule), typeof(StreamModule)));
 
             //Then
             var modules = serviceCollection.Where(x => x.ServiceType == typeof(ICarterModule));
@@ -59,7 +59,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection);
+            serviceCollection.AddCarter();
 
             //Then
             var validators = serviceCollection.Where(x => x.ServiceType == typeof(IValidator));
@@ -73,7 +73,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection, configurator: configurator => configurator.WithValidator<TestModelValidator>());
+            serviceCollection.AddCarter(configurator: configurator => configurator.WithValidator<TestModelValidator>());
 
             //Then
             var validators = serviceCollection.Where(x => x.ServiceType == typeof(IValidator));
@@ -87,7 +87,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection, configurator: configurator => configurator.WithValidators(typeof(TestModelValidator), typeof(DuplicateTestModelOne)));
+            serviceCollection.AddCarter(configurator: configurator => configurator.WithValidators(typeof(TestModelValidator), typeof(DuplicateTestModelOne)));
 
             //Then
             var validators = serviceCollection.Where(x => x.ServiceType == typeof(IValidator));
@@ -101,7 +101,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection);
+            serviceCollection.AddCarter();
 
             //Then
             var responsenegotiators = serviceCollection.Where(x => x.ServiceType == typeof(IResponseNegotiator));
@@ -115,7 +115,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection, configurator: configurator => configurator.WithResponseNegotiator<TestResponseNegotiator>());
+            serviceCollection.AddCarter(configurator: configurator => configurator.WithResponseNegotiator<TestResponseNegotiator>());
 
             //Then
             var responsenegotiators = serviceCollection.Where(x => x.ServiceType == typeof(IResponseNegotiator));
@@ -129,7 +129,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection, configurator: configurator => configurator.WithResponseNegotiators(typeof(TestResponseNegotiator), typeof(TestXmlResponseNegotiator)));
+            serviceCollection.AddCarter(configurator: configurator => configurator.WithResponseNegotiators(typeof(TestResponseNegotiator), typeof(TestXmlResponseNegotiator)));
 
             //Then
             var responsenegotiators = serviceCollection.Where(x => x.ServiceType == typeof(IResponseNegotiator));
@@ -143,7 +143,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection, configurator: configurator => configurator.WithEmptyValidators());
+            serviceCollection.AddCarter(configurator: configurator => configurator.WithEmptyValidators());
 
             //Then
             var validators = serviceCollection.Where(x => x.ServiceType == typeof(IValidator));
@@ -157,7 +157,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection, configurator: configurator => configurator.WithEmptyModules());
+            serviceCollection.AddCarter(configurator: configurator => configurator.WithEmptyModules());
 
             //Then
             var modules = serviceCollection.Where(x => x.ServiceType == typeof(ICarterModule));
@@ -171,7 +171,7 @@ namespace Carter.Tests
             var serviceCollection = new ServiceCollection();
 
             //When
-            CarterExtensions.AddCarter(serviceCollection, configurator: configurator => configurator.WithEmptyResponseNegotiators());
+            serviceCollection.AddCarter(configurator: configurator => configurator.WithEmptyResponseNegotiators());
 
             //Then
             var responseNegotiators = serviceCollection.Where(x => x.ServiceType == typeof(IResponseNegotiator));

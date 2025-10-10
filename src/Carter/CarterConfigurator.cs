@@ -2,6 +2,7 @@ namespace Carter;
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,16 +17,21 @@ public class CarterConfigurator
         this.ModuleTypes = new List<Type>();
         this.ValidatorTypes = new List<Type>();
         this.ResponseNegotiatorTypes = new List<Type>();
-        this.ValidatorServiceLifetime = ServiceLifetime.Singleton;
+        this.DefaultValidatorServiceLifetime = ServiceLifetime.Singleton;
+        this.ValidatorServiceLifetimeFactory = (validatorType) =>
+            validatorType.GetCustomAttribute<ValidatorLifetimeAttribute>()?.Lifetime ??
+            this.DefaultValidatorServiceLifetime;
     }
 
     internal bool ExcludeValidators;
 
     internal bool ExcludeModules;
-        
+
     internal bool ExcludeResponseNegotiators;
 
-    internal ServiceLifetime ValidatorServiceLifetime;
+    internal ServiceLifetime DefaultValidatorServiceLifetime;
+
+    internal Func<Type, ServiceLifetime> ValidatorServiceLifetimeFactory;
 
     internal List<Type> ModuleTypes { get; }
 
@@ -131,7 +137,7 @@ public class CarterConfigurator
         this.ExcludeValidators = true;
         return this;
     }
-        
+
     /// <summary>
     /// Do not register any modules
     /// </summary>
@@ -141,7 +147,7 @@ public class CarterConfigurator
         this.ExcludeModules = true;
         return this;
     }
-        
+
     /// <summary>
     /// Do not register any response negotiators
     /// </summary>
@@ -153,13 +159,23 @@ public class CarterConfigurator
     }
 
     /// <summary>
-    /// Define the lifetime of the validator
+    /// Define the default lifetime of the validator
     /// Default: Singleton
     /// </summary>
     /// <returns></returns>
-    public CarterConfigurator WithValidatorLifetime(ServiceLifetime serviceLifetime)
+    public CarterConfigurator WithDefaultValidatorLifetime(ServiceLifetime serviceLifetime)
     {
-        this.ValidatorServiceLifetime = serviceLifetime;
+        this.DefaultValidatorServiceLifetime = serviceLifetime;
+        return this;
+    }
+
+    /// <summary>
+    /// Define the validator lifetime factory for custom validator lifetimes based on their type
+    /// </summary>
+    public CarterConfigurator WithValidatorServiceLifetimeFactory(
+        Func<Type, ServiceLifetime> validatorServiceLifetimeFactory)
+    {
+        this.ValidatorServiceLifetimeFactory = validatorServiceLifetimeFactory;
         return this;
     }
 }

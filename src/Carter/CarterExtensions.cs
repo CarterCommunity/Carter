@@ -169,42 +169,43 @@ public static class CarterExtensions
 
         var newModules = GetNewModules(carterConfigurator, assemblies);
 
-        //var modules = GetModules(carterConfigurator, assemblies);
-
         var responseNegotiators = GetResponseNegotiators(carterConfigurator, assemblies);
 
         services.AddSingleton(carterConfigurator);
 
+        var validatorLocatorLifetime = ServiceLifetime.Singleton;
         foreach (var validator in validators)
         {
+            var validatorServiceLifetime = carterConfigurator.ValidatorServiceLifetimeFactory(validator);
             services.Add(
                 new ServiceDescriptor(
                     serviceType: typeof(IValidator),
                     implementationType: validator,
-                    lifetime: carterConfigurator.ValidatorServiceLifetime));
+                    lifetime: validatorServiceLifetime));
 
             services.Add(
-               new ServiceDescriptor(
-                   serviceType: validator,
-                   implementationType: validator,
-                   lifetime: carterConfigurator.ValidatorServiceLifetime));
+                new ServiceDescriptor(
+                    serviceType: validator,
+                    implementationType: validator,
+                    lifetime: validatorServiceLifetime));
+
+            if (validatorServiceLifetime > validatorLocatorLifetime)
+            {
+                validatorLocatorLifetime = validatorServiceLifetime;
+            }
         }
 
+
         services.Add(
-                new ServiceDescriptor(
-                    serviceType: typeof(IValidatorLocator),
-                    implementationType: typeof(DefaultValidatorLocator),
-                    lifetime: carterConfigurator.ValidatorServiceLifetime));
+            new ServiceDescriptor(
+                serviceType: typeof(IValidatorLocator),
+                implementationType: typeof(DefaultValidatorLocator),
+                lifetime: validatorLocatorLifetime));
 
         foreach (var newModule in newModules)
         {
             services.AddSingleton(typeof(ICarterModule), newModule);
         }
-
-        // foreach (var newModule in modules)
-        // {
-        //     services.AddSingleton(typeof(CarterModule), newModule);
-        // }
 
         foreach (var negotiator in responseNegotiators)
         {
@@ -258,30 +259,6 @@ public static class CarterExtensions
 
             carterConfigurator.ModuleTypes.AddRange(modules);
         }
-
-        return modules;
-    }
-
-    private static IEnumerable<Type> GetModules(CarterConfigurator carterConfigurator,
-        IReadOnlyCollection<Assembly> assemblies)
-    {
-        // IEnumerable<Type> modules;
-        // if (carterConfigurator.ExcludeModules || carterConfigurator.ModuleTypes.Any())
-        // {
-        //     modules = carterConfigurator.ModuleTypes;
-        // }
-        // else
-        //{
-        var modules = assemblies.SelectMany(x => x.GetTypes()
-            .Where(t =>
-                !t.IsAbstract &&
-                typeof(CarterModule).IsAssignableFrom(t) &&
-                t != typeof(CarterModule) &&
-                t.IsPublic
-            ));
-
-        //carterConfigurator.ModuleTypes.AddRange(modules);
-        //}
 
         return modules;
     }

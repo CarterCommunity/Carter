@@ -104,6 +104,7 @@ namespace Carter.Tests
 
             app.MapPost<TestModel>("/endpointfilter", (TestModel testModel,IDependency dependency) => "POST");
             app.MapPut<TestModel>("/endpointfilter", (IDependency dependency, TestModel testModel) => "PUT");
+            app.MapFormPost("/formpost", (TestModel model) => TypedResults.Ok(model)).DisableAntiforgery();
         }
     }
     public static class NestedTestModule
