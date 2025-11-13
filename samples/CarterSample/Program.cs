@@ -1,6 +1,6 @@
 ﻿using Carter.OpenApi;
 using CarterSample.Features.Directors;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 

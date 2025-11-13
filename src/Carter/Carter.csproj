@@ -26,8 +26,8 @@
         <ProjectReference Include="..\Carter.Analyzers\Carter.Analyzers.csproj" OutputItemType="Analyzer" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="11.11.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.0" />
+        <PackageReference Include="FluentValidation" Version="12.1.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.0" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
         <PackageReference Include="MinVer" Version="6.0.0">
             <PrivateAssets>all</PrivateAssets>
