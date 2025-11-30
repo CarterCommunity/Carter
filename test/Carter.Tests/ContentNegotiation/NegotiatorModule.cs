@@ -1,5 +1,6 @@
 namespace Carter.Tests.ContentNegotiation
 {
+    using Carter.Response;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Routing;

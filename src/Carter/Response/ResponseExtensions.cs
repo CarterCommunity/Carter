@@ -1,13 +1,13 @@
 namespace Carter.Response;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
-using Carter.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,10 +26,9 @@ public static class ResponseExtensions
     {
         var negotiators = response.HttpContext.RequestServices
             .GetServices<IResponseNegotiator>()
-            .Where(n => !NegotiationHelper.IsTestNegotiator(n))
             .ToList();
         
-        var chosenNegotiator = NegotiationHelper.SelectNegotiator(response.HttpContext, negotiators);
+        var chosenNegotiator = SelectNegotiator(response.HttpContext, negotiators);
 
         return chosenNegotiator.Handle(response.HttpContext.Request, response, model, cancellationToken);
     }
@@ -45,12 +44,45 @@ public static class ResponseExtensions
     {
         var negotiators = response.HttpContext.RequestServices
             .GetServices<IResponseNegotiator>()
-            .Where(n => !NegotiationHelper.IsTestNegotiator(n))
             .ToList();
 
         var negotiator = negotiators.First(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
 
         return negotiator.Handle(response.HttpContext.Request, response, model, cancellationToken);
+    }
+    
+    /// <summary>
+    /// Selects the most appropriate <see cref="IResponseNegotiator"/> for content negotiation based on the current <see cref="HttpContext"/>'s "Accept" headers, 
+    /// or defaults to <see cref="DefaultJsonResponseNegotiator"/> if none match.
+    /// </summary>
+    /// <param name="httpContext">Current <see cref="HttpContext"/></param>
+    /// <param name="negotiators">List of available <see cref="IResponseNegotiator"/> instances</param>
+    /// <returns>The selected <see cref="IResponseNegotiator"/> for the response.</returns>
+    private static IResponseNegotiator SelectNegotiator(HttpContext httpContext, List<IResponseNegotiator> negotiators)
+    {
+        IResponseNegotiator negotiator = null;
+
+        MediaTypeHeaderValue.TryParseList(httpContext.Request.Headers["Accept"], out var accept);
+        if (accept != null)
+        {
+            var ordered = accept.OrderByDescending(x => x.Quality ?? 1);
+
+            foreach (var acceptHeader in ordered)
+            {
+                negotiator = negotiators.FirstOrDefault(x => x.CanHandle(acceptHeader));
+                if (negotiator != null)
+                {
+                    break;
+                }
+            }
+        }
+
+        if (negotiator == null)
+        {
+            negotiator = negotiators.First(x => x.GetType() == typeof(DefaultJsonResponseNegotiator));
+        }
+
+        return negotiator;
     }
 
     /// <summary>
