@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
+using Carter.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,30 +24,14 @@ public static class ResponseExtensions
     /// <returns><see cref="Task"/></returns>
     public static Task Negotiate<T>(this HttpResponse response, T model, CancellationToken cancellationToken = default)
     {
-        var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>().ToList();
-        IResponseNegotiator negotiator = null;
+        var negotiators = response.HttpContext.RequestServices
+            .GetServices<IResponseNegotiator>()
+            .Where(n => !NegotiationHelper.IsTestNegotiator(n))
+            .ToList();
+        
+        var chosenNegotiator = NegotiationHelper.SelectNegotiator(response.HttpContext, negotiators);
 
-        MediaTypeHeaderValue.TryParseList(response.HttpContext.Request.Headers["Accept"], out var accept);
-        if (accept != null)
-        {
-            var ordered = accept.OrderByDescending(x => x.Quality ?? 1);
-
-            foreach (var acceptHeader in ordered)
-            {
-                negotiator = negotiators.FirstOrDefault(x => x.CanHandle(acceptHeader));
-                if (negotiator != null)
-                {
-                    break;
-                }
-            }
-        }
-
-        if (negotiator == null)
-        {
-            negotiator = negotiators.First(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
-        }
-
-        return negotiator.Handle(response.HttpContext.Request, response, model, cancellationToken);
+        return chosenNegotiator.Handle(response.HttpContext.Request, response, model, cancellationToken);
     }
 
     /// <summary>
@@ -58,7 +43,10 @@ public static class ResponseExtensions
     /// <returns><see cref="Task"/></returns>
     public static Task AsJson<T>(this HttpResponse response, T model, CancellationToken cancellationToken = default)
     {
-        var negotiators = response.HttpContext.RequestServices.GetServices<IResponseNegotiator>();
+        var negotiators = response.HttpContext.RequestServices
+            .GetServices<IResponseNegotiator>()
+            .Where(n => !NegotiationHelper.IsTestNegotiator(n))
+            .ToList();
 
         var negotiator = negotiators.First(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
 

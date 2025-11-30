@@ -89,6 +89,7 @@ namespace Carter.ResponseNegotiators.Newtonsoft.Tests
         }
     }
 
+    //TODO: Add [TestNegotiator] attribute when Carter supports it in this project
     internal class TestJsonResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept) => accept
