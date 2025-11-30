@@ -2,11 +2,13 @@ namespace Carter.Tests.InternalRooms;
 
 using System.Threading;
 using System.Threading.Tasks;
+using Carter.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
 
 internal static class NestedInternalResponseNegotiatorWrapper
 {
+    [TestNegotiator]
     internal class NestedInternalResponseNegotiator: IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept)

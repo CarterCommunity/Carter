@@ -5,6 +5,7 @@ namespace Carter.Tests.ContentNegotiation
     using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
+    using Carter.Attributes;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -125,6 +126,7 @@ namespace Carter.Tests.ContentNegotiation
         }
     }
 
+    [TestNegotiator]
     internal class TestResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept) =>
@@ -137,6 +139,7 @@ namespace Carter.Tests.ContentNegotiation
         }
     }
 
+    [TestNegotiator]
     internal class TestHtmlResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept) =>
@@ -149,6 +152,7 @@ namespace Carter.Tests.ContentNegotiation
         }
     }
 
+    [TestNegotiator]
     internal class TestXmlResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept) =>
@@ -161,6 +165,7 @@ namespace Carter.Tests.ContentNegotiation
         }
     }
 
+    [TestNegotiator]
     internal class TestJsonResponseNegotiator : IResponseNegotiator
     {
         public bool CanHandle(MediaTypeHeaderValue accept) => accept
