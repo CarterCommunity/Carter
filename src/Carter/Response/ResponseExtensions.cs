@@ -46,8 +46,8 @@ public static class ResponseExtensions
             .GetServices<IResponseNegotiator>()
             .ToList();
 
-        var negotiator = negotiators.First(x => x.CanHandle(new MediaTypeHeaderValue("application/json")));
-
+        var negotiator = negotiators.First(x => x.GetType() == typeof(DefaultJsonResponseNegotiator));
+        
         return negotiator.Handle(response.HttpContext.Request, response, model, cancellationToken);
     }
     
