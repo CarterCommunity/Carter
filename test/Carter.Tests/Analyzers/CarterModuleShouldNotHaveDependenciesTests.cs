@@ -21,11 +21,11 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                      {{type}} MyCarterModule : ICarterModule
                      {
                          internal {|#0:MyCarterModule|}(string s) {}
-                         
+
                          public void AddRoutes(IEndpointRouteBuilder app) {}
                      }
                      """;
-        
+
         var diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies)
             .WithLocation(0)
             .WithArguments("MyCarterModule");
@@ -47,14 +47,14 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                          public void AddRoutes(IEndpointRouteBuilder app) {}
                      }
                      """;
-        
+
         var diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies)
             .WithLocation(0)
             .WithArguments("MyCarterModule");
 
         return VerifyAsync(code, diagnosticResult);
     }
-    
+
     [Theory]
     [InlineData("class")]
     [InlineData("struct")]
@@ -65,11 +65,11 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         var code = $$"""
                      using Carter;
                      using Microsoft.AspNetCore.Routing;
-                     
+
                      {{type}} MyCarterModule : ICarterModule
                      {
                          internal {|#0:MyCarterModule|}(string s, int i) {}
-                         
+
                          public void AddRoutes(IEndpointRouteBuilder app) {}
                      }
                      """;
@@ -80,7 +80,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
 
         return VerifyAsync(code, diagnosticResult);
     }
-    
+
     [Theory]
     [InlineData("record")]
     [InlineData("record struct")]
@@ -89,7 +89,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         var code = $$"""
                      using Carter;
                      using Microsoft.AspNetCore.Routing;
-                     
+
                      {{type}} {|#0:MyCarterModule|}(string S, int I) : ICarterModule
                      {
                          public void AddRoutes(IEndpointRouteBuilder app) {}
@@ -102,7 +102,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
 
         return VerifyAsync(code, diagnosticResult);
     }
-    
+
     [Theory]
     [InlineData("class")]
     [InlineData("struct")]
@@ -113,11 +113,11 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         var code = $$"""
                      using Carter;
                      using Microsoft.AspNetCore.Routing;
-                     
+
                      {{type}} MyCarterModule : ICarterModule
                      {
                          internal {|#0:MyCarterModule|}(string s = "", char c = 'c') {}
-                         
+
                          public void AddRoutes(IEndpointRouteBuilder app) {}
                      }
                      """;
@@ -128,7 +128,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
 
         return VerifyAsync(code, diagnosticResult);
     }
-    
+
     [Theory]
     [InlineData("record")]
     [InlineData("record struct")]
@@ -137,7 +137,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         var code = $$"""
                      using Carter;
                      using Microsoft.AspNetCore.Routing;
-                     
+
                      {{type}} {|#0:MyCarterModule|}(string S = "", char C = 'c') : ICarterModule
                      {
                          public void AddRoutes(IEndpointRouteBuilder app) {}
@@ -150,7 +150,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
 
         return VerifyAsync(code, diagnosticResult);
     }
-    
+
     [Theory]
     [InlineData("class")]
     [InlineData("struct")]
@@ -161,18 +161,18 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         var code = $$"""
                      using Carter;
                      using Microsoft.AspNetCore.Routing;
-                     
+
                      {{type}} MyCarterModule : ICarterModule
                      {
                         private MyCarterModule(string s) {}
-                        
+
                         public void AddRoutes(IEndpointRouteBuilder app) {}
                      }
                      """;
-        
+
         return VerifyAsync(code);
     }
-    
+
     [Theory]
     [InlineData("class")]
     [InlineData("struct")]
@@ -183,18 +183,18 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         var code = $$"""
                      using Carter;
                      using Microsoft.AspNetCore.Routing;
-                     
+
                      {{type}} MyCarterModule : ICarterModule
                      {
                         MyCarterModule(string s) {}
-                        
+
                         public void AddRoutes(IEndpointRouteBuilder app) {}
                      }
                      """;
-        
+
         return VerifyAsync(code);
     }
-    
+
     [Theory]
     [InlineData("class")]
     [InlineData("struct")]
@@ -205,18 +205,18 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
         var code = $$"""
                      using Carter;
                      using Microsoft.AspNetCore.Routing;
-                     
+
                      {{type}} MyCarterModule : ICarterModule
                      {
                         void M() {}
-                        
+
                         public void AddRoutes(IEndpointRouteBuilder app) {}
                      }
                      """;
-        
+
         return VerifyAsync(code);
     }
-    
+
     [Theory]
     [InlineData("class")]
     [InlineData("struct")]
@@ -228,21 +228,21 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                      using Carter;
                      using Microsoft.AspNetCore.Routing;
                      using System;
-                     
+
                      {{type}} MyCarterModule : ICarterModule
                      {
                         public MyCarterModule()
                         {
                             Console.WriteLine("Hello World.");
                         }
-                        
+
                         public void AddRoutes(IEndpointRouteBuilder app) {}
                      }
                      """;
-        
+
         return VerifyAsync(code);
     }
-    
+
     [Theory]
     [InlineData("class")]
     [InlineData("struct")]
@@ -252,16 +252,16 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
     {
         var code = $$"""
                      using System;
-                     
+
                      {{type}} MyCarterModule
                      {
                         internal MyCarterModule(string s, int i) {}
                      }
                      """;
-        
+
         return VerifyAsync(code);
     }
-    
+
     [Theory]
     [InlineData("record")]
     [InlineData("record struct")]
@@ -269,35 +269,74 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
     {
         var code = $$"""
                      using System;
-                     
+
                      {{type}} MyCarterModule(string S, int I)
                      {
                      }
                      """;
-        
+
         return VerifyAsync(code);
     }
-    
+
+    [Fact]
+    public Task PrivateNestedTypeWithDependencies_NoDiagnostic()
+    {
+        var code = """
+                   using Carter;
+                   using Microsoft.AspNetCore.Routing;
+
+                   class Outer
+                   {
+                       private class MyCarterModule : ICarterModule
+                       {
+                           public MyCarterModule(string s) {}
+
+                           public void AddRoutes(IEndpointRouteBuilder app) {}
+                       }
+                   }
+                   """;
+
+        return VerifyAsync(code);
+    }
+
+    [Fact]
+    public Task ImplicitlyPrivateNestedTypeWithDependencies_NoDiagnostic()
+    {
+        var code = """
+                   using Carter;
+                   using Microsoft.AspNetCore.Routing;
+
+                   class Outer
+                   {
+                       class MyCarterModule : ICarterModule
+                       {
+                           public MyCarterModule(string s) {}
+
+                           public void AddRoutes(IEndpointRouteBuilder app) {}
+                       }
+                   }
+                   """;
+
+        return VerifyAsync(code);
+    }
+
     [Theory]
     [InlineData("class")]
     [InlineData("record")]
-    public Task CarterSubModuleWithConstructorDependencies_NoDiagnostic(string type)
+    public Task AbstractTypeWithDependencies_NoDiagnostic(string type)
     {
         var code = $$"""
                      using Carter;
                      using Microsoft.AspNetCore.Routing;
-                     
-                     {{type}} MyCarterModule : ICarterModule
+
+                     abstract {{type}} MyCarterModule : ICarterModule
                      {
+                         internal MyCarterModule(string s) {}
+
                          public void AddRoutes(IEndpointRouteBuilder app) {}
                      }
-                     
-                     {{type}} MySubCarterModule : MyCarterModule
-                     {
-                         public MySubCarterModule(string s) {}
-                     }
                      """;
-        
+
         return VerifyAsync(code);
     }
 
@@ -315,7 +354,7 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                          public void AddRoutes(IEndpointRouteBuilder app) {}
                      }
                      """;
-        
+
         return VerifyAsync(code);
     }
 
@@ -335,11 +374,111 @@ public sealed class CarterModuleShouldNotHaveDependenciesTests
                          public void AddRoutes(IEndpointRouteBuilder app) {}
                      }
                      """;
-        
+
         var diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies)
             .WithLocation(0)
             .WithArguments("MyCarterModule");
-        
+
+        return VerifyAsync(code, diagnosticResult);
+    }
+
+    [Fact]
+    public Task PublicNestedTypeWithDependencies_Diagnostic()
+    {
+        var code = """
+                   using Carter;
+                   using Microsoft.AspNetCore.Routing;
+
+                   class Outer
+                   {
+                       public class MyCarterModule : ICarterModule
+                       {
+                           public {|#0:MyCarterModule|}(string s) {}
+
+                           public void AddRoutes(IEndpointRouteBuilder app) {}
+                       }
+                   }
+                   """;
+
+        var diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies)
+            .WithLocation(0)
+            .WithArguments("MyCarterModule");
+
+        return VerifyAsync(code, diagnosticResult);
+    }
+
+    [Fact]
+    public Task InternalNestedTypeWithDependencies_Diagnostic()
+    {
+        var code = """
+                   using Carter;
+                   using Microsoft.AspNetCore.Routing;
+
+                   class Outer
+                   {
+                       internal class MyCarterModule : ICarterModule
+                       {
+                           public {|#0:MyCarterModule|}(string s) {}
+
+                           public void AddRoutes(IEndpointRouteBuilder app) {}
+                       }
+                   }
+                   """;
+
+        var diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies)
+            .WithLocation(0)
+            .WithArguments("MyCarterModule");
+
+        return VerifyAsync(code, diagnosticResult);
+    }
+
+    [Theory]
+    [InlineData("class")]
+    [InlineData("record")]
+    public Task ProtectedConstructorWithDependencies_Diagnostic(string type)
+    {
+        var code = $$"""
+                     using Carter;
+                     using Microsoft.AspNetCore.Routing;
+
+                     {{type}} MyCarterModule : ICarterModule
+                     {
+                         protected {|#0:MyCarterModule|}(string s) {}
+
+                         public void AddRoutes(IEndpointRouteBuilder app) {}
+                     }
+                     """;
+
+        var diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies)
+            .WithLocation(0)
+            .WithArguments("MyCarterModule");
+
+        return VerifyAsync(code, diagnosticResult);
+    }
+
+    [Theory]
+    [InlineData("class")]
+    [InlineData("struct")]
+    public Task TypeWithMixedConstructors_OnlyParameterizedFlagged(string type)
+    {
+        var code = $$"""
+                     using Carter;
+                     using Microsoft.AspNetCore.Routing;
+
+                     {{type}} MyCarterModule : ICarterModule
+                     {
+                         public MyCarterModule() {}
+
+                         public {|#0:MyCarterModule|}(string s) {}
+
+                         public void AddRoutes(IEndpointRouteBuilder app) {}
+                     }
+                     """;
+
+        var diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies)
+            .WithLocation(0)
+            .WithArguments("MyCarterModule");
+
         return VerifyAsync(code, diagnosticResult);
     }
 

@@ -29,10 +29,17 @@ internal sealed class CarterModuleShouldNotHaveDependenciesAnalyzer : Diagnostic
     private static void OnTypeAnalysis(SymbolAnalysisContext context, INamedTypeSymbol carterModuleType)
     {
         var typeSymbol = (INamedTypeSymbol)context.Symbol;
-        if (!typeSymbol.Interfaces.Contains(carterModuleType, SymbolEqualityComparer.Default))
+        if (typeSymbol.IsAbstract
+            || !typeSymbol.AllInterfaces.Contains(carterModuleType, SymbolEqualityComparer.Default)
+            || typeSymbol.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
         {
             return;
         }
+
+        var isDirectImplementation = typeSymbol.Interfaces.Contains(carterModuleType, SymbolEqualityComparer.Default);
+        var descriptor = isDirectImplementation
+            ? DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies
+            : DiagnosticDescriptors.CarterDerivedModuleShouldNotHaveDependencies;
 
         foreach (var constructor in typeSymbol.Constructors)
         {
@@ -58,7 +65,7 @@ internal sealed class CarterModuleShouldNotHaveDependenciesAnalyzer : Diagnostic
                 }
 
                 var diagnostic = Diagnostic.Create(
-                    DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies,
+                    descriptor,
                     identifier.Value.GetLocation(),
                     identifier.Value.Text
                 );
@@ -67,5 +74,9 @@ internal sealed class CarterModuleShouldNotHaveDependenciesAnalyzer : Diagnostic
         }
     }
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
+    [
+        DiagnosticDescriptors.CarterModuleShouldNotHaveDependencies,
+        DiagnosticDescriptors.CarterDerivedModuleShouldNotHaveDependencies,
+    ];
 }
