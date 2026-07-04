@@ -26,8 +26,8 @@ public static class ResponseExtensions
     {
         var negotiators = response.HttpContext.RequestServices
             .GetServices<IResponseNegotiator>()
-            .ToList();
-        
+            .ToArray();
+
         var chosenNegotiator = SelectNegotiator(response.HttpContext, negotiators);
 
         return chosenNegotiator.Handle(response.HttpContext.Request, response, model, cancellationToken);
@@ -44,10 +44,10 @@ public static class ResponseExtensions
     {
         var negotiators = response.HttpContext.RequestServices
             .GetServices<IResponseNegotiator>()
-            .ToList();
-
-        var negotiator = negotiators.First(x => x.GetType() == typeof(DefaultJsonResponseNegotiator));
+            .ToArray();
         
+        var negotiator = FindDefaultJsonNegotiator(negotiators);
+
         return negotiator.Handle(response.HttpContext.Request, response, model, cancellationToken);
     }
     
@@ -56,33 +56,67 @@ public static class ResponseExtensions
     /// or defaults to <see cref="DefaultJsonResponseNegotiator"/> if none match.
     /// </summary>
     /// <param name="httpContext">Current <see cref="HttpContext"/></param>
-    /// <param name="negotiators">List of available <see cref="IResponseNegotiator"/> instances</param>
+    /// <param name="negotiators">Array of available <see cref="IResponseNegotiator"/> instances</param>
     /// <returns>The selected <see cref="IResponseNegotiator"/> for the response.</returns>
-    private static IResponseNegotiator SelectNegotiator(HttpContext httpContext, List<IResponseNegotiator> negotiators)
+    private static IResponseNegotiator SelectNegotiator(HttpContext httpContext, IResponseNegotiator[] negotiators)
     {
-        IResponseNegotiator negotiator = null;
+        MediaTypeHeaderValue.TryParseList(httpContext.Request.Headers["Accept"], out var accepts);
 
-        MediaTypeHeaderValue.TryParseList(httpContext.Request.Headers["Accept"], out var accept);
-        if (accept != null)
+        if (accepts?.Count > 0)
         {
-            var ordered = accept.OrderByDescending(x => x.Quality ?? 1);
+            StableSortByQualityDescending(accepts);
 
-            foreach (var acceptHeader in ordered)
+            foreach (var acceptHeader in accepts)
             {
-                negotiator = negotiators.FirstOrDefault(x => x.CanHandle(acceptHeader));
-                if (negotiator != null)
+                foreach (var negotiator in negotiators)
                 {
-                    break;
+                    if (negotiator.CanHandle(acceptHeader))
+                    {
+                        return negotiator;
+                    }
                 }
             }
         }
 
-        if (negotiator == null)
+        return FindDefaultJsonNegotiator(negotiators);
+    }
+
+    /// <summary>
+    /// Finds the registered <see cref="DefaultJsonResponseNegotiator"/>.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when no <see cref="DefaultJsonResponseNegotiator"/> is registered.</exception>
+    private static IResponseNegotiator FindDefaultJsonNegotiator(IResponseNegotiator[] negotiators)
+    {
+        foreach (var negotiator in negotiators)
         {
-            negotiator = negotiators.First(x => x.GetType() == typeof(DefaultJsonResponseNegotiator));
+            if (negotiator is DefaultJsonResponseNegotiator)
+            {
+                return negotiator;
+            }
         }
 
-        return negotiator;
+        throw new InvalidOperationException("DefaultJsonResponseNegotiator is not registered.");
+    }
+
+    /// <summary>
+    /// Sorts media types by descending quality while preserving the order of equal-quality values.
+    /// </summary>
+    private static void StableSortByQualityDescending(IList<MediaTypeHeaderValue> accepts)
+    {
+        for (var i = 1; i < accepts.Count; i++)
+        {
+            var current = accepts[i];
+            var currentQuality = current.Quality ?? 1;
+
+            var j = i - 1;
+            while (j >= 0 && (accepts[j].Quality ?? 1) < currentQuality)
+            {
+                accepts[j + 1] = accepts[j];
+                j--;
+            }
+
+            accepts[j + 1] = current;
+        }
     }
 
     /// <summary>
