@@ -67,17 +67,29 @@ public class DependencyContextAssemblyCatalog
             {
                 results.Add(overriddenAssembly);
             }
+
+            return results;
         }
-        else
+
+        // DependencyContext is unavailable in single-file published apps.
+        // In that case, return the assemblies already loaded into the AppDomain.
+        if (this.dependencyContext is null)
         {
-            foreach (var library in this.dependencyContext.RuntimeLibraries)
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                if (IsReferencingCarter(library) || IsReferencingFluentValidation(library))
+                results.Add(assembly);
+            }
+
+            return results;
+        }
+
+        foreach (var library in this.dependencyContext.RuntimeLibraries)
+        {
+            if (IsReferencingCarter(library) || IsReferencingFluentValidation(library))
+            {
+                foreach (var assemblyName in library.GetDefaultAssemblyNames(this.dependencyContext))
                 {
-                    foreach (var assemblyName in library.GetDefaultAssemblyNames(this.dependencyContext))
-                    {
-                        results.Add(SafeLoadAssembly(assemblyName));
-                    }
+                    results.Add(SafeLoadAssembly(assemblyName));
                 }
             }
         }
