@@ -281,7 +281,9 @@ public static class CarterExtensions
         {
             validators = assemblies.SelectMany(ass => ass.GetTypes())
                 .Where(typeof(IValidator).IsAssignableFrom)
-                .Where(t => !t.GetTypeInfo().IsAbstract);
+                .Where(t =>
+                    !t.GetTypeInfo().IsAbstract &&
+                    !t.ContainsGenericParameters);  // skip open generic validators
 
             carterConfigurator.ValidatorTypes.AddRange(validators);
         }
