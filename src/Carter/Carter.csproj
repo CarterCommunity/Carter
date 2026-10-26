@@ -27,7 +27,7 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="FluentValidation" Version="12.1.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="11.0.0-rc.2.26504.105" />
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="11.0.0-rc.3.26522.148" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
         <PackageReference Include="MinVer" Version="6.0.0">
             <PrivateAssets>all</PrivateAssets>
