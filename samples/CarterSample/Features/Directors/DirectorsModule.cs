@@ -3,41 +3,35 @@ namespace CarterSample.Features.Directors;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-public class DirectorsModule : CarterModule
+public class DirectorsModule : ICarterModule
 {
-    public DirectorsModule() : base("/directors")
+    public void AddRoutes(IEndpointRouteBuilder routes)
     {
-        // this.RequireAuthorization()
-        //     .RequireHost("*:5000")
-        //     .RequireCors("myorigins")
-        //     .WithDescription("Directors API allows users to interact with the directors resources")
-        //     .WithMetadata(new SuppressLinkGenerationMetadata())
-        //     .WithName("Directors API")
-        //     .WithSummary("An API resource for Directors")
-        //     .WithTags("directors", "api")
-        //     .WithDisplayName("Directors")
-        //     .WithGroupName("directors-api")
-        //     .WithCacheOutput("cachepolicyoutputname")
-        //     //.DisableRateLimiting()
-        //     .RequireRateLimiting("rateLimitingPolicyName")
-        //     .IncludeInOpenApi();
+        var app = routes.MapGroup("/directors");
+        // .RequireAuthorization()
+        // .RequireHost("*:5000")
+        // .RequireCors("myorigins")
+        // .WithDescription("Directors API allows users to interact with the directors resources")
+        // .WithMetadata(new SuppressLinkGenerationMetadata())
+        // .WithName("Directors API")
+        // .WithSummary("An API resource for Directors")
+        // .WithTags("directors", "api")
+        // .WithDisplayName("Directors")
+        // .WithGroupName("directors-api")
+        // .CacheOutput("cachepolicyoutputname")
+        // //.DisableRateLimiting()
+        // .RequireRateLimiting("rateLimitingPolicyName")
+        // .IncludeInOpenApi();
 
-        this.Before = context =>
+        app.AddEndpointFilter(async (context, next) =>
         {
             var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<DirectorsModule>>();
             logger.LogDebug("Before");
-            return null;
-        };
-
-        this.After = context =>
-        {
-            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<DirectorsModule>>();
+            var result = await next(context);
             logger.LogDebug("After");
-        };
-    }
+            return result;
+        });
 
-    public override void AddRoutes(IEndpointRouteBuilder app)
-    {
         app.MapGet("/", (ILogger<DirectorsModule> logger) =>
         {
             logger.LogDebug("Route Hit");

@@ -71,9 +71,9 @@ public class CarterConfigurator
     }
 
     /// <summary>
-    /// Register specific <see cref="CarterModule"/>s
+    /// Register specific <see cref="ICarterModule"/>s
     /// </summary>
-    /// <param name="modules">An array of <see cref="CarterModule"/>s</param>
+    /// <param name="modules">An array of <see cref="ICarterModule"/>s</param>
     /// <returns><see cref="CarterConfigurator"/></returns>
     public CarterConfigurator WithModules(params Type[] modules)
     {
