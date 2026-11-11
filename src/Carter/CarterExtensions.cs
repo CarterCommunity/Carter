@@ -1,6 +1,5 @@
 namespace Carter;
 
-using Carter.OpenApi;
 using Carter.Response;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
@@ -28,112 +27,9 @@ public static class CarterExtensions
         var carterConfigurator = builder.ServiceProvider.GetRequiredService<CarterConfigurator>();
         carterConfigurator.LogDiscoveredCarterTypes(logger);
 
-        foreach (var carterModuleInterface in builder.ServiceProvider.GetServices<ICarterModule>())
+        foreach (var carterModule in builder.ServiceProvider.GetServices<ICarterModule>())
         {
-            if (carterModuleInterface is CarterModule carterModule)
-            {
-                var group = builder.MapGroup(carterModule.basePath);
-
-                if (carterModule.hosts.Any())
-                {
-                    group = group.RequireHost(carterModule.hosts);
-                }
-
-                if (carterModule.requiresAuthorization)
-                {
-                    group = group.RequireAuthorization(carterModule.authorizationPolicyNames);
-                }
-
-                if (!string.IsNullOrWhiteSpace(carterModule.corsPolicyName))
-                {
-                    group = group.RequireCors(carterModule.corsPolicyName);
-                }
-
-                if (carterModule.includeInOpenApi)
-                {
-                    group.IncludeInOpenApi();
-                }
-
-                if (!string.IsNullOrWhiteSpace(carterModule.openApiDescription))
-                {
-                    group = group.WithDescription(carterModule.openApiDescription);
-                }
-
-                if (carterModule.metaData.Any())
-                {
-                    group = group.WithMetadata(carterModule.metaData);
-                }
-
-                if (!string.IsNullOrWhiteSpace(carterModule.openApiName))
-                {
-                    group = group.WithName(carterModule.openApiName);
-                }
-
-                if (!string.IsNullOrWhiteSpace(carterModule.openApisummary))
-                {
-                    group = group.WithSummary(carterModule.openApisummary);
-                }
-
-                if (!string.IsNullOrWhiteSpace(carterModule.openApiDisplayName))
-                {
-                    group = group.WithDisplayName(carterModule.openApiDisplayName);
-                }
-
-                if (!string.IsNullOrWhiteSpace(carterModule.openApiGroupName))
-                {
-                    group = group.WithGroupName(carterModule.openApiGroupName);
-                }
-
-                if (carterModule.tags.Any())
-                {
-                    group = group.WithTags(carterModule.tags);
-                }
-
-                if (!string.IsNullOrWhiteSpace(carterModule.cacheOutputPolicyName))
-                {
-                    group = group.CacheOutput(carterModule.cacheOutputPolicyName);
-                }
-
-                if (carterModule.disableRateLimiting)
-                {
-                    group = group.DisableRateLimiting();
-                }
-
-                if (!string.IsNullOrWhiteSpace(carterModule.rateLimitingPolicyName))
-                {
-                    group = group.RequireRateLimiting(carterModule.rateLimitingPolicyName);
-                }
-
-                if (carterModule.Before != null)
-                {
-                    group.AddEndpointFilter(async (context, next) =>
-                    {
-                        var result = carterModule.Before.Invoke(context);
-                        if (result != null)
-                        {
-                            return result;
-                        }
-
-                        return await next(context);
-                    });
-                }
-
-                if (carterModule.After != null)
-                {
-                    group.AddEndpointFilter(async (context, next) =>
-                    {
-                        var result = await next(context);
-                        carterModule.After.Invoke(context);
-                        return result;
-                    });
-                }
-
-                carterModule.AddRoutes(group);
-            }
-            else
-            {
-                carterModuleInterface.AddRoutes(builder);
-            }
+            carterModule.AddRoutes(builder);
         }
 
         return builder;
