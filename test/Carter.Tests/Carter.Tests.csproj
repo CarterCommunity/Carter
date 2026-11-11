@@ -4,7 +4,8 @@
     <ProjectReference Include="..\..\src\Carter.Analyzers\Carter.Analyzers.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.7.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.2" />
+    <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.7.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 </Project>
