@@ -2,7 +2,7 @@
 
 
     <ItemGroup>
-        <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.7.0" />
+        <PackageReference Include="MartinCostello.Logging.XUnit" Version="0.7.1" />
     </ItemGroup>
 
 
