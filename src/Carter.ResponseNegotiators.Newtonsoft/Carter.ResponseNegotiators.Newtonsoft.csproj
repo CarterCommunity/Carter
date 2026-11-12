@@ -20,7 +20,7 @@
 
     <ItemGroup>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-        <PackageReference Include="Carter" Version="10.0.0" />
+        <PackageReference Include="Carter" Version="11.0.0" />
         <PackageReference Include="MinVer" Version="8.0.0">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
