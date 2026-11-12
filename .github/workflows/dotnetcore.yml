@@ -67,15 +67,23 @@ jobs:
       name: Push prelease and CarterTemplate Carter packages to feedz
       run: ./push.sh carter feedz ${{ secrets.FEEDZ_KEY }}
 
+    # Tag created, get a short-lived NuGet API key using the nuget.org trusted publishing policy
+    - if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !contains(github.ref, '-ci')
+      name: NuGet login
+      uses: NuGet/login@v1
+      id: nuget-login
+      with:
+        user: jchannon
+
     # Main tag created, push Carter and CarterTemplate packages to NuGet
     - if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !startsWith(github.ref, 'refs/tags/newtonsoft-') && !contains(github.ref, '-ci')
       name: Push Carter and CarterTemplate packages to NuGet
-      run: ./push.sh carter nuget ${{ secrets.NUGET_KEY }}
+      run: ./push.sh carter nuget ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
 
     # Newtonsoft tag created, push Newtonsoft package to NuGet
     - if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && startsWith(github.ref, 'refs/tags/newtonsoft-') && !contains(github.ref, '-ci')
       name: Push Newtonsoft package to NuGet
-      run: ./push.sh newtonsoft nuget ${{ secrets.NUGET_KEY }}
+      run: ./push.sh newtonsoft nuget ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
 
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
