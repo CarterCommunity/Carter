@@ -74,5 +74,20 @@ jobs:
       name: Push Newtonsoft package to NuGet
       run: ./push.sh newtonsoft nuget ${{ secrets.NUGET_KEY }}
 
+  single-file:
+
+    name: Single file publish smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 11.*
+
+    - name: Publish sample as a single file and check discovery
+      run: ./single-file-smoke-test.sh
+
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1

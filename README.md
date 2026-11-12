@@ -177,3 +177,19 @@ Carter will use a response negotiator based on `System.Text.Json`, though it pro
 ```
 
 If you wish to use `Newtonsoft.Json` Carter already ships a response negotiator in the package `Carter.ResponseNegotiators.Newtonsoft`. Once installed, it will automatically pick it up with no registration needed.
+
+### Single file publishing
+
+Carter normally finds your modules, validators and response negotiators by reading your app's `.deps.json` file. That file is not available to apps published with `PublishSingleFile`, so Carter instead walks the assembly references of your app, starting at the entry assembly, and scans the assemblies that reference Carter or FluentValidation. Assemblies whose names start with `System.` or `Microsoft.` are not walked.
+
+The compiler removes references to assemblies whose types are never used in your code, so a project that is only referenced for its modules or validators will not be found this way. In that case, or if you want full control over what is scanned, pass the assemblies in yourself:
+
+```csharp
+
+    builder.Services.AddCarter(new DependencyContextAssemblyCatalog(typeof(Program).Assembly, typeof(MyValidator).Assembly));
+
+```
+
+Pass at least two assemblies, or an `Assembly[]`. A single assembly is treated as the entry assembly to discover from, not as the complete list to scan.
+
+Trimmed and Native AOT publishing are not supported, as Carter discovers these types using reflection.
