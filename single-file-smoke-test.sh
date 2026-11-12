@@ -1,77 +1,103 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Publishes the CarterSample app as a single file, both framework-dependent and self-contained,
-# and checks that modules and validators are still discovered.
+# Publishes samples/SingleFileSample as a single file and checks that Carter
+# still finds its module and validators. Runs once as a framework-dependent
+# app and once as a self-contained app.
 
-PORT=5099
-BASE_URL="http://127.0.0.1:$PORT"
-OUTPUT_ROOT="$(mktemp -d)"
+PROJECT="./samples/SingleFileSample/SingleFileSample.csproj"
+URL="http://127.0.0.1:5099"
+PUBLISH_DIR="$(mktemp -d)"
 APP_PID=""
 
-cleanup() {
+publish_app() {
+  local self_contained=$1
+
+  dotnet publish "$PROJECT" \
+    --configuration Release \
+    --self-contained "$self_contained" \
+    --output "$PUBLISH_DIR" \
+    --nologo \
+    -p:GeneratePackageOnBuild=false # don't overwrite the NuGet packages created by the main build
+}
+
+start_app() {
+  "$PUBLISH_DIR/SingleFileSample" --urls "$URL" > "$PUBLISH_DIR/app.log" 2>&1 &
+  APP_PID=$!
+
+  # Wait up to 30 seconds for the app to accept requests
+  for _ in $(seq 1 30); do
+    if curl --silent --output /dev/null "$URL"; then
+      return
+    fi
+    sleep 1
+  done
+
+  fail "the app did not start"
+}
+
+stop_app() {
   if [ -n "$APP_PID" ]; then
     kill "$APP_PID" 2>/dev/null || true
     wait "$APP_PID" 2>/dev/null || true
+    APP_PID=""
   fi
-  rm -rf "$OUTPUT_ROOT"
 }
-trap cleanup EXIT
 
+fail() {
+  echo "FAILED: $1"
+  cat "$PUBLISH_DIR/app.log"
+  exit 1
+}
+
+# Usage: expect_status <expected status> <description> <curl arguments>
 expect_status() {
-  local description=$1
-  local expected=$2
+  local expected=$1
+  local description=$2
   shift 2
 
   local actual
   actual="$(curl --silent --output /dev/null --write-out "%{http_code}" "$@")"
 
   if [ "$actual" != "$expected" ]; then
-    echo "FAILED: $description returned $actual, expected $expected"
-    cat "$OUTPUT_DIR/app.log"
-    exit 1
+    fail "$description returned $actual, expected $expected"
   fi
 
   echo "OK: $description returned $actual"
 }
 
-for SELF_CONTAINED in false true; do
-  echo "Single file publish, self-contained=$SELF_CONTAINED"
-  OUTPUT_DIR="$OUTPUT_ROOT/self-contained-$SELF_CONTAINED"
+post_empty_name() {
+  local path=$1
 
-  dotnet publish ./samples/CarterSample/CarterSample.csproj \
-    --configuration Release \
-    --use-current-runtime \
-    --self-contained "$SELF_CONTAINED" \
-    -p:PublishSingleFile=true \
-    --output "$OUTPUT_DIR" \
-    --nologo
+  expect_status 422 "POST $path with an empty name" \
+    --request POST \
+    --header "Content-Type: application/json" \
+    --data '{"name":""}' \
+    "$URL$path"
+}
 
-  (cd "$OUTPUT_DIR" && exec ./CarterSample --urls "$BASE_URL" > app.log 2>&1) &
-  APP_PID=$!
+cleanup() {
+  stop_app
+  rm -rf "$PUBLISH_DIR"
+}
+trap cleanup EXIT
 
-  for _ in $(seq 1 30); do
-    if ! kill -0 "$APP_PID" 2>/dev/null; then
-      echo "FAILED: the app exited during startup"
-      cat "$OUTPUT_DIR/app.log"
-      exit 1
-    fi
-    if curl --silent --output /dev/null "$BASE_URL"; then
-      break
-    fi
-    sleep 1
-  done
+for self_contained in false true; do
+  echo "Single file publish, self-contained=$self_contained"
 
-  # A module in the entry assembly
-  expect_status "GET /actors" 200 "$BASE_URL/actors"
+  publish_app "$self_contained"
+  start_app
 
-  # A validator in a referenced assembly that is not loaded when AddCarter runs
-  expect_status "POST /castmembers with an invalid body" 422 \
-    --request POST --header "Content-Type: application/json" --data '{"name":""}' "$BASE_URL/castmembers"
+  # The module is found
+  expect_status 200 "GET /" "$URL/"
 
-  kill "$APP_PID"
-  wait "$APP_PID" 2>/dev/null || true
-  APP_PID=""
+  # The validator in the app's own assembly is found
+  post_empty_name "/greetings"
+
+  # The validator in the referenced ValidatorOnlyProject assembly is found
+  post_empty_name "/castmembers"
+
+  stop_app
 done
 
 echo "Single file smoke test passed"
