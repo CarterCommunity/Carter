@@ -15,6 +15,8 @@ public class DependencyContextAssemblyCatalog
 
     private readonly DependencyContext dependencyContext;
 
+    private readonly Assembly entryAssembly;
+
     private readonly Assembly[] overriddenAssemblies = Array.Empty<Assembly>();
 
     static DependencyContextAssemblyCatalog()
@@ -38,6 +40,7 @@ public class DependencyContextAssemblyCatalog
     /// </summary>
     public DependencyContextAssemblyCatalog(Assembly entryAssembly)
     {
+        this.entryAssembly = entryAssembly;
         this.dependencyContext = DependencyContext.Load(entryAssembly);
     }
 
@@ -71,30 +74,83 @@ public class DependencyContextAssemblyCatalog
             return results;
         }
 
-        // DependencyContext is unavailable in single-file published apps.
-        // In that case, return the assemblies already loaded into the AppDomain.
-        if (this.dependencyContext is null)
+        var foundInDependencyContext = false;
+
+        if (this.dependencyContext is not null)
         {
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (var library in this.dependencyContext.RuntimeLibraries)
+            {
+                if (IsReferencingCarter(library) || IsReferencingFluentValidation(library))
+                {
+                    foundInDependencyContext = true;
+
+                    foreach (var assemblyName in library.GetDefaultAssemblyNames(this.dependencyContext))
+                    {
+                        results.Add(SafeLoadAssembly(assemblyName));
+                    }
+                }
+            }
+        }
+
+        // In single-file published apps the DependencyContext is either null (self-contained)
+        // or only describes the shared framework (framework-dependent), so nothing is found above.
+        // In that case, walk the assembly references of the entry assembly instead.
+        if (!foundInDependencyContext && this.entryAssembly is not null)
+        {
+            foreach (var assembly in GetReferencedAssemblies(this.entryAssembly))
+            {
+                results.Add(assembly);
+            }
+        }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Walks the assembly references of <paramref name="rootAssembly"/> and returns the assemblies,
+    /// including <paramref name="rootAssembly"/>, that reference Carter or FluentValidation.
+    /// </summary>
+    /// <remarks>Framework assemblies are neither loaded nor walked.</remarks>
+    internal static IReadOnlyCollection<Assembly> GetReferencedAssemblies(Assembly rootAssembly)
+    {
+        var results = new List<Assembly>();
+        var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { rootAssembly.GetName().Name };
+        var queue = new Queue<Assembly>();
+        queue.Enqueue(rootAssembly);
+
+        while (queue.Count > 0)
+        {
+            var assembly = queue.Dequeue();
+            var references = assembly.GetReferencedAssemblies();
+
+            if (references.Any(reference => reference.Name == carterAssemblyName || reference.Name == fluentValidationAssemblyName))
             {
                 results.Add(assembly);
             }
 
-            return results;
-        }
-
-        foreach (var library in this.dependencyContext.RuntimeLibraries)
-        {
-            if (IsReferencingCarter(library) || IsReferencingFluentValidation(library))
+            foreach (var reference in references)
             {
-                foreach (var assemblyName in library.GetDefaultAssemblyNames(this.dependencyContext))
+                if (IsFrameworkAssembly(reference.Name) || !visited.Add(reference.Name))
                 {
-                    results.Add(SafeLoadAssembly(assemblyName));
+                    continue;
+                }
+
+                var referencedAssembly = SafeLoadAssembly(reference);
+                if (referencedAssembly is not null)
+                {
+                    queue.Enqueue(referencedAssembly);
                 }
             }
         }
 
         return results;
+    }
+
+    private static bool IsFrameworkAssembly(string assemblyName)
+    {
+        return assemblyName.StartsWith("System.", StringComparison.Ordinal)
+               || assemblyName.StartsWith("Microsoft.", StringComparison.Ordinal)
+               || assemblyName is "System" or "mscorlib" or "netstandard";
     }
 
     private static Assembly SafeLoadAssembly(AssemblyName assemblyName)
